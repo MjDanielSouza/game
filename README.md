@@ -59,7 +59,8 @@ Melhor de 3 rounds, 99 segundos cada. Tempo esgotado decide por percentual de vi
 | **ARAUCÁRIA** | **CHEFÃO** | CHUVA DE PINHÃO — 3 projéteis em arco | QUEDA DA COPA — onda nos dois sentidos |
 
 O chefão tem **armadura passiva**: absorve um golpe e leva ~2,5 s para
-recarregar. Golpe avulso não o interrompe — só combo. Abaixo de 40% de vida ele
+recarregar. Golpe avulso não o interrompe — só combo. Você continua ganhando
+barra de super nos golpes que ele absorve e nos que ele bloqueia. Abaixo de 40% de vida ele
 entra em **fase 2**: mais rápido e com cooldowns menores.
 
 ---

@@ -399,9 +399,14 @@ export const LUTADORES = {
       baixo: golpe({ nome: 'Raiz', startup: 11, ativo: 7, recovery: 24, dano: 14, altura: 'baixo', stamina: 10, pose: 'baixo', alcance: { x: 18, y: -22, w: 64, h: 22 } }),
       aereo: golpe({ nome: 'Tombo', startup: 8, ativo: 12, recovery: 12, dano: 18, stamina: 10, pose: 'aereo', alcance: { x: 10, y: -30, w: 68, h: 52 } }),
       habilidade: golpe({
+        // O projetil caiu de 8 para 5 de dano. A 8 ele punia os leves de forma
+        // desproporcional - era 39% de tudo que o RAFAEL levava do chefao e so
+        // 11% do que o JOAO levava. Mexer no cooldown nao mudou nada: medido,
+        // 190 e 300 dao a mesma taxa de vitoria. O peso do chefao tem que estar
+        // no corpo a corpo, que e onde ele pode ser punido.
         nome: 'CHUVA DE PINHAO', tipo: 'projetil', startup: 14, ativo: 22, recovery: 24,
         dano: 0, stamina: 14, cooldown: 190, ganhoSuper: 10, hits: 3, pose: 'projetil',
-        projetil: { vel: 7.5, dano: 8, vida: 170, raio: 20, cor: '#c9a227', altura: 'alto', hitstun: 20, arco: true },
+        projetil: { vel: 7.5, dano: 5, vida: 170, raio: 20, cor: '#c9a227', altura: 'alto', hitstun: 20, arco: true },
         som: 'projetil',
       }),
       especial: golpe({
@@ -423,14 +428,14 @@ export const LUTADORES = {
 // tem que subir de forma monotona. Zoner e armadilheiro vem DEPOIS do lutador
 // de mobilidade porque punem mais quem ainda nao aprendeu a defender.
 export const MAPA = [
-  { id: 'n1', lutador: 'lucas', palco: 'botanico', x: 24, y: 72, nome: 'Jardim Botanico', desc: 'O aquecimento. Um lutador sem truque, so fundamento.' },
-  { id: 'n2', lutador: 'joao', palco: 'largo', x: 42, y: 58, nome: 'Largo da Ordem', desc: 'Pedra molhada e briga suja. Ele agarra o que nao se move.' },
-  { id: 'n3', lutador: 'vinicius', palco: 'japao', x: 64, y: 68, nome: 'Praca do Japao', desc: 'Ele nao quer chegar perto. Ele quer que voce tente. Aprenda a bloquear aqui.' },
-  { id: 'n4', lutador: 'juliano', palco: 'barigui', x: 20, y: 46, nome: 'Parque Barigui', desc: 'Espaco aberto e o cara mais rapido do jogo. Boa sorte.' },
-  { id: 'n5', lutador: 'neumann', palco: 'niemeyer', x: 48, y: 34, nome: 'Museu Oscar Niemeyer', desc: 'Parede de carne. Nao adianta empurrar, tem que derrubar.' },
-  { id: 'n6', lutador: 'daniel', palco: 'torre', x: 84, y: 48, nome: 'Torre Panoramica', desc: 'Ele nao corre atras. Ele chega. E de perto voce nao bloqueia o que ele faz.' },
-  { id: 'n7', lutador: 'costela', palco: 'tubo', x: 72, y: 38, nome: 'Estacao Tubo', desc: 'Apertado. Cada passo pode ter uma armadilha embaixo.' },
-  { id: 'n8', lutador: 'rafael', palco: 'opera', x: 34, y: 18, nome: 'Opera de Arame', desc: 'Palco de verdade. Ele usa o espaco inteiro e some.' },
+  { id: 'n1', lutador: 'joao', palco: 'largo', x: 20, y: 78, nome: 'Largo da Ordem', desc: 'O aquecimento. Pedra molhada e briga suja - ele agarra o que nao se move.' },
+  { id: 'n2', lutador: 'lucas', palco: 'botanico', x: 50, y: 70, nome: 'Jardim Botanico', desc: 'Um lutador sem truque, so fundamento. Se ele te pega, foi limpo.' },
+  { id: 'n3', lutador: 'juliano', palco: 'barigui', x: 80, y: 64, nome: 'Parque Barigui', desc: 'Espaco aberto e o cara mais rapido do jogo. Boa sorte.' },
+  { id: 'n4', lutador: 'vinicius', palco: 'japao', x: 86, y: 56, nome: 'Praca do Japao', desc: 'Ele nao quer chegar perto. Ele quer que voce tente. Aprenda a bloquear aqui.' },
+  { id: 'n5', lutador: 'neumann', palco: 'niemeyer', x: 58, y: 50, nome: 'Museu Oscar Niemeyer', desc: 'Parede de carne. Nao adianta empurrar, tem que derrubar.' },
+  { id: 'n6', lutador: 'rafael', palco: 'opera', x: 32, y: 46, nome: 'Opera de Arame', desc: 'Palco de verdade. Ele usa o espaco inteiro e some.' },
+  { id: 'n7', lutador: 'daniel', palco: 'torre', x: 16, y: 26, nome: 'Torre Panoramica', desc: 'Ele nao corre atras. Ele chega. E de perto voce nao bloqueia o que ele faz.' },
+  { id: 'n8', lutador: 'costela', palco: 'tubo', x: 52, y: 22, nome: 'Estacao Tubo', desc: 'Apertado. Cada passo pode ter uma armadilha embaixo.' },
   { id: 'n9', lutador: 'araucaria', palco: 'pedreira', x: 58, y: 8, nome: 'Pedreira Paulo Leminski', chefao: true, desc: 'Trinta metros de rocha e algo muito velho no meio.' },
 ];
 
