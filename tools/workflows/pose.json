@@ -1,48 +1,89 @@
 {
   "1": {
     "class_type": "CheckpointLoaderSimple",
-    "_meta": { "title": "checkpoint" },
-    "inputs": { "ckpt_name": "v1-5-pruned-emaonly.safetensors" }
+    "_meta": {
+      "title": "checkpoint"
+    },
+    "inputs": {
+      "ckpt_name": "v1-5-pruned-emaonly.safetensors"
+    }
   },
   "2": {
     "class_type": "CLIPTextEncode",
-    "_meta": { "title": "positivo" },
+    "_meta": {
+      "title": "positivo"
+    },
     "inputs": {
-      "clip": ["1", 1],
+      "clip": [
+        "1",
+        1
+      ],
       "text": "pixel art sprite of a fighter, full body head to feet, side three-quarter view facing right, idle fighting stance, 16-bit arcade game, bold dark outline, flat cel shading, limited palette, plain flat background"
     }
   },
   "3": {
     "class_type": "CLIPTextEncode",
-    "_meta": { "title": "negativo" },
+    "_meta": {
+      "title": "negativo"
+    },
     "inputs": {
-      "clip": ["1", 1],
+      "clip": [
+        "1",
+        1
+      ],
       "text": "photo, realistic, 3d render, blurry, soft, gradient, anti-aliased, text, watermark, signature, frame, border, cropped, multiple characters, extra limbs, deformed hands"
     }
   },
   "4": {
     "class_type": "LoadImage",
-    "_meta": { "title": "referencia do personagem" },
-    "inputs": { "image": "lucas-ref.png", "upload": "image" }
+    "_meta": {
+      "title": "referencia do personagem"
+    },
+    "inputs": {
+      "image": "lucas-ref.png",
+      "upload": "image"
+    }
   },
   "5": {
     "class_type": "IPAdapterModelLoader",
-    "_meta": { "title": "ipadapter" },
-    "inputs": { "ipadapter_file": "ip-adapter-plus_sd15.safetensors" }
+    "_meta": {
+      "title": "ipadapter"
+    },
+    "inputs": {
+      "ipadapter_file": "ip-adapter-plus_sd15.safetensors"
+    }
   },
   "6": {
     "class_type": "CLIPVisionLoader",
-    "_meta": { "title": "clip vision" },
-    "inputs": { "clip_name": "CLIP-ViT-H-14.safetensors" }
+    "_meta": {
+      "title": "clip vision"
+    },
+    "inputs": {
+      "clip_name": "CLIP-ViT-H-14.safetensors"
+    }
   },
   "7": {
     "class_type": "IPAdapterAdvanced",
-    "_meta": { "title": "identidade do personagem" },
+    "_meta": {
+      "title": "identidade do personagem"
+    },
     "inputs": {
-      "model": ["1", 0],
-      "ipadapter": ["5", 0],
-      "image": ["4", 0],
-      "clip_vision": ["6", 0],
+      "model": [
+        "1",
+        0
+      ],
+      "ipadapter": [
+        "5",
+        0
+      ],
+      "image": [
+        "4",
+        0
+      ],
+      "clip_vision": [
+        "6",
+        0
+      ],
       "weight": 0.85,
       "weight_type": "linear",
       "combine_embeds": "concat",
@@ -53,17 +94,37 @@
   },
   "8": {
     "class_type": "EmptyLatentImage",
-    "_meta": { "title": "tela" },
-    "inputs": { "width": 512, "height": 768, "batch_size": 1 }
+    "_meta": {
+      "title": "tela"
+    },
+    "inputs": {
+      "width": 512,
+      "height": 768,
+      "batch_size": 1
+    }
   },
   "9": {
     "class_type": "KSampler",
-    "_meta": { "title": "sampler" },
+    "_meta": {
+      "title": "sampler"
+    },
     "inputs": {
-      "model": ["7", 0],
-      "positive": ["2", 0],
-      "negative": ["3", 0],
-      "latent_image": ["8", 0],
+      "model": [
+        "7",
+        0
+      ],
+      "positive": [
+        "14",
+        0
+      ],
+      "negative": [
+        "14",
+        1
+      ],
+      "latent_image": [
+        "8",
+        0
+      ],
       "seed": 1,
       "steps": 28,
       "cfg": 7.0,
@@ -74,12 +135,77 @@
   },
   "10": {
     "class_type": "VAEDecode",
-    "_meta": { "title": "decode" },
-    "inputs": { "samples": ["9", 0], "vae": ["1", 2] }
+    "_meta": {
+      "title": "decode"
+    },
+    "inputs": {
+      "samples": [
+        "9",
+        0
+      ],
+      "vae": [
+        "1",
+        2
+      ]
+    }
   },
   "11": {
     "class_type": "SaveImage",
-    "_meta": { "title": "saida" },
-    "inputs": { "images": ["10", 0], "filename_prefix": "kombat" }
+    "_meta": {
+      "title": "saida"
+    },
+    "inputs": {
+      "images": [
+        "10",
+        0
+      ],
+      "filename_prefix": "kombat"
+    }
+  },
+  "12": {
+    "class_type": "ControlNetLoader",
+    "_meta": {
+      "title": "controlnet openpose"
+    },
+    "inputs": {
+      "control_net_name": "control_v11p_sd15_openpose.safetensors"
+    }
+  },
+  "13": {
+    "class_type": "LoadImage",
+    "_meta": {
+      "title": "esqueleto da pose"
+    },
+    "inputs": {
+      "image": "pose-idle.png",
+      "upload": "image"
+    }
+  },
+  "14": {
+    "class_type": "ControlNetApplyAdvanced",
+    "_meta": {
+      "title": "aplica pose"
+    },
+    "inputs": {
+      "positive": [
+        "2",
+        0
+      ],
+      "negative": [
+        "3",
+        0
+      ],
+      "control_net": [
+        "12",
+        0
+      ],
+      "image": [
+        "13",
+        0
+      ],
+      "strength": 0.95,
+      "start_percent": 0.0,
+      "end_percent": 0.85
+    }
   }
 }

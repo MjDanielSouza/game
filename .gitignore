@@ -22,3 +22,7 @@ assets/poses/*/
 
 # Geracoes brutas (1024x1536): intermediario pesado, nao vai pro repo.
 assets/brutos/
+
+# bytecode do import entre os scripts de tools/
+__pycache__/
+*.pyc
