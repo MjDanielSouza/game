@@ -152,7 +152,7 @@ export const LUTADORES = {
     cor: { pele: '#b97a52', roupa: '#1a1a1e', detalhe: '#c62b2b', acento: '#e0533a' },
     cabeca: { tipo: 'gorro', cor: '#c62b2b' },
     fisico: { escala: 1.06, bulk: 1.2 },
-    stats: { vida: 115, velocidade: 2.7, pulo: 12.0, stamina: 90, regen: 0.32, peso: 1.25, defesa: 1.05 },
+    stats: { vida: 115, velocidade: 2.7, pulo: 12.0, stamina: 100, regen: 0.40, peso: 1.25, defesa: 1.05 },
     ia: { agressividade: 0.82, distancia: 55, reacao: 17, defesa: 0.38 },
     golpes: {
       soco: golpe({ nome: 'Direto', startup: 5, ativo: 3, recovery: 10, dano: 8, stamina: 7, cancela: ['chute', 'habilidade', 'especial'] }),
@@ -161,7 +161,7 @@ export const LUTADORES = {
       aereo: golpe({ nome: 'Bomba', startup: 6, ativo: 10, recovery: 8, dano: 13, stamina: 10, pose: 'aereo', alcance: { x: 12, y: -28, w: 46, h: 40 } }),
       habilidade: golpe({
         nome: 'AGARRAO', tipo: 'agarrao', startup: 7, ativo: 4, recovery: 26,
-        dano: 22, hitstun: 44, empurrao: 12, stamina: 25, cooldown: 170, ganhoSuper: 24,
+        dano: 22, hitstun: 44, empurrao: 12, stamina: 17, cooldown: 170, ganhoSuper: 24,
         pose: 'agarrao', alcance: { x: 16, y: -54, w: 40, h: 46 }, som: 'pesado',
       }),
       especial: golpe({
@@ -388,7 +388,10 @@ export const LUTADORES = {
     cor: { pele: '#6b4a2f', roupa: '#3b2a1c', detalhe: '#2f5233', acento: '#c9a227' },
     cabeca: { tipo: 'copa', cor: '#4a8a4f' },
     fisico: { escala: 1.42, bulk: 1.85 },
-    stats: { vida: 125, velocidade: 2.15, pulo: 9.5, stamina: 200, regen: 0.6, peso: 2.2, defesa: 1.0 },
+    // 125 dava 138 de vida efetiva na dificuldade do no final, e o elenco
+    // entrega entre 88 e 125 de dano por luta: cinco dos oito ficavam abaixo
+    // do limiar e travavam em 0-8% por mais que jogassem bem.
+    stats: { vida: 118, velocidade: 2.15, pulo: 9.5, stamina: 200, regen: 0.6, peso: 2.2, defesa: 1.0 },
     // recarga longa de proposito: e a janela em que ele pode ser combado
     passiva: { armadura: 1, recarga: 145 },
     fase2: { limiteVida: 0.4, velocidade: 1.35, cooldown: 0.55, dano: 1.12 },
@@ -432,14 +435,14 @@ export const LUTADORES = {
 // tem que subir de forma monotona. Zoner e armadilheiro vem DEPOIS do lutador
 // de mobilidade porque punem mais quem ainda nao aprendeu a defender.
 export const MAPA = [
-  { id: 'n1', lutador: 'joao', palco: 'largo', x: 17, y: 80, nome: 'Largo da Ordem', desc: 'O aquecimento. Pedra molhada e briga suja - ele agarra o que nao se move.' },
-  { id: 'n2', lutador: 'lucas', palco: 'botanico', x: 50, y: 80, nome: 'Jardim Botanico', desc: 'Um lutador sem truque, so fundamento. Se ele te pega, foi limpo.' },
-  { id: 'n3', lutador: 'juliano', palco: 'barigui', x: 83, y: 80, nome: 'Parque Barigui', desc: 'Espaco aberto e o cara mais rapido do jogo. Boa sorte.' },
-  { id: 'n4', lutador: 'neumann', palco: 'niemeyer', x: 83, y: 50, nome: 'Museu Oscar Niemeyer', desc: 'Parede de carne. Nao adianta empurrar, tem que derrubar.' },
+  { id: 'n1', lutador: 'lucas', palco: 'botanico', x: 17, y: 80, nome: 'Jardim Botanico', desc: 'Um lutador sem truque, so fundamento. Se ele te pega, foi limpo.' },
+  { id: 'n2', lutador: 'joao', palco: 'largo', x: 50, y: 80, nome: 'Largo da Ordem', desc: 'O aquecimento. Pedra molhada e briga suja - ele agarra o que nao se move.' },
+  { id: 'n3', lutador: 'neumann', palco: 'niemeyer', x: 83, y: 80, nome: 'Museu Oscar Niemeyer', desc: 'Parede de carne. Nao adianta empurrar, tem que derrubar.' },
+  { id: 'n4', lutador: 'juliano', palco: 'barigui', x: 83, y: 50, nome: 'Parque Barigui', desc: 'Espaco aberto e o cara mais rapido do jogo. Boa sorte.' },
   { id: 'n5', lutador: 'vinicius', palco: 'japao', x: 50, y: 50, nome: 'Praca do Japao', desc: 'Ele nao quer chegar perto. Ele quer que voce tente. Aprenda a bloquear aqui.' },
   { id: 'n6', lutador: 'daniel', palco: 'torre', x: 17, y: 50, nome: 'Torre Panoramica', desc: 'Ele nao corre atras. Ele chega. E de perto voce nao bloqueia o que ele faz.' },
-  { id: 'n7', lutador: 'costela', palco: 'tubo', x: 17, y: 20, nome: 'Estacao Tubo', desc: 'Apertado. Cada passo pode ter uma armadilha embaixo.' },
-  { id: 'n8', lutador: 'rafael', palco: 'opera', x: 50, y: 20, nome: 'Opera de Arame', desc: 'Palco de verdade. Ele usa o espaco inteiro e some.' },
+  { id: 'n7', lutador: 'rafael', palco: 'opera', x: 17, y: 20, nome: 'Opera de Arame', desc: 'Palco de verdade. Ele usa o espaco inteiro e some.' },
+  { id: 'n8', lutador: 'costela', palco: 'tubo', x: 50, y: 20, nome: 'Estacao Tubo', desc: 'Apertado. Cada passo pode ter uma armadilha embaixo.' },
   { id: 'n9', lutador: 'araucaria', palco: 'pedreira', x: 83, y: 20, nome: 'Pedreira Paulo Leminski', chefao: true, desc: 'Trinta metros de rocha e algo muito velho no meio.' },
 ];
 
