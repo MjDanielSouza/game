@@ -52,7 +52,7 @@ Melhor de 3 rounds, 99 segundos cada. Tempo esgotado decide por percentual de vi
 | **JOÃO** | brawler | AGARRÃO — não pode ser bloqueado | BORDOADA — dano alto, curto alcance |
 | **JULIANO** | rushdown | INVESTIDA — avanço com acerto | MARÉ ALTA — 6 acertos avançando |
 | **NEUMANN** | tanque | MURALHA — 3 de armadura por 2,5 s | FIM DE EXPEDIENTE — onda rasteira |
-| **RAFAEL LATA** | mobilidade | LADEIRA — dash invencível que atravessa | CAPACETE DE AÇO — investida de tela cheia |
+| **RAFAEL LATA** | mobilidade | LADEIRA — dash invencível que atravessa, sem dano: rende super | CAPACETE DE AÇO — investida de tela cheia, 3 acertos |
 | **VINICIUS** | zoner | GEADA — projétil que deixa lento | NEVASCA — 5 projéteis |
 | **COSTELA** | técnico | ARMADILHA — planta no chão (até 2) | XEQUE-MATE — detona todas de uma vez |
 | **DANIEL** | grappler | REUNIÃO — agarrão que avança e não pode ser bloqueado | ÚLTIMA PALAVRA — investida com 2 de armadura |
