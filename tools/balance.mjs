@@ -15,13 +15,13 @@
 // ============================================================================
 
 import { Mundo, vazio } from '../js/engine.js';
-import { JOGAVEIS, MAPA, LUTADORES } from '../js/data.js';
+import { JOGAVEIS, MAPA, LUTADORES, dificuldadeDoNo } from '../js/data.js';
 
 const RODADAS = Number(process.argv[2] || 6);
 
 // Bot de habilidade media: bloqueia, mistura alto/baixo, pune recovery,
 // pula projetil e usa o especial. Nao e um humano bom - e o piso.
-function botMedio(m, i) {
+export function botMedio(m, i) {
   const e = vazio();
   const eu = m.p1, op = m.p2;
   const d = op.x - eu.x;
@@ -68,7 +68,7 @@ console.log('-'.repeat(74));
 const linhas = [];
 for (let i = 0; i < MAPA.length; i++) {
   const n = MAPA[i];
-  const dif = 0.85 + i * 0.055;
+  const dif = dificuldadeDoNo(i);
   let v = 0, tot = 0;
   for (const pj of JOGAVEIS)
     for (let k = 0; k < RODADAS; k++) { if (partida(pj, n.lutador, n.palco, dif) === 'p1') v++; tot++; }

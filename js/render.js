@@ -527,6 +527,38 @@ function silhueta(ctx, P, id, tick) {
       ctx.globalAlpha = 1;
       break;
     }
+    case 'torre': {          // torre panoramica: fuste + anel de observacao
+      // cidade baixa primeiro, para a torre se destacar contra ela
+      for (let i = 0; i < 10; i++) {
+        const x = 40 + i * 132, h = 70 + ((i * 37) % 5) * 26;
+        ctx.fillRect(x, base - h, 108, h + 20);
+      }
+      ctx.fillStyle = P.luz; ctx.globalAlpha = 0.55;
+      for (let i = 0; i < 10; i++) {
+        const x = 40 + i * 132, h = 70 + ((i * 37) % 5) * 26;
+        for (let j = 14; j < h - 8; j += 22)
+          for (let k = 12; k < 96; k += 26)
+            if ((i + j + k) % 3) ctx.fillRect(x + k, base - h + j, 9, 11);
+      }
+      ctx.globalAlpha = 1;
+
+      const bx = 980;
+      ctx.fillStyle = P.frente;
+      ctx.fillRect(bx - 26, base - 430, 52, 430);            // fuste
+      ctx.fillRect(bx - 74, base - 396, 148, 40);            // anel de observacao
+      ctx.beginPath();                                        // antena
+      ctx.moveTo(bx - 5, base - 430); ctx.lineTo(bx, base - 492);
+      ctx.lineTo(bx + 5, base - 430); ctx.closePath(); ctx.fill();
+      ctx.fillStyle = P.luz; ctx.globalAlpha = 0.75;
+      for (let i = -60; i < 66; i += 21) ctx.fillRect(bx + i, base - 388, 13, 22);
+      ctx.globalAlpha = 1;
+      // luz de topo piscando: a unica coisa viva no quadro
+      ctx.fillStyle = '#ff5544';
+      ctx.globalAlpha = 0.45 + Math.sin(tick * 0.06) * 0.4;
+      ctx.beginPath(); ctx.arc(bx, base - 494, 5, 0, TAU); ctx.fill();
+      ctx.globalAlpha = 1;
+      break;
+    }
     case 'torii': case 'japao': {
       const bx = 930;
       ctx.fillStyle = '#8c2f3d';

@@ -83,6 +83,13 @@ export const PALCOS = {
     chao: '#6d6963', chaoLinha: '#8b867e', nevoa: 'rgba(255,190,140,0.16)',
     luz: '#ffc07a', silhueta: 'olho',
   },
+  torre: {
+    nome: 'Torre Panoramica', hora: 'madrugada',
+    ceu: ['#080b14', '#121a2c', '#2b2438'],
+    fundo: '#232c40', meio: '#151b28', frente: '#080b12',
+    chao: '#2a2f3a', chaoLinha: '#404757', nevoa: 'rgba(150,180,255,0.09)',
+    luz: '#8fc5ff', silhueta: 'torre',
+  },
   pedreira: {
     nome: 'Pedreira Paulo Leminski', hora: 'tempestade',
     ceu: ['#0b0a0f', '#2a1418', '#5e1f1c'],
@@ -201,6 +208,13 @@ export const LUTADORES = {
     cor: { pele: '#b8845e', roupa: '#33373d', detalhe: '#9aa3ad', acento: '#5d8fc4' },
     cabeca: { tipo: 'careca', cor: '#b0b0aa' },
     fisico: { escala: 1.16, bulk: 1.45 },
+    sprite: {
+      frames: {
+        idle: 0, andar: [1, 2], soco: 3, chute: 4,
+        baixo: 5, agachar: 5, bloqueio: 6, hitstun: 7, ko: 7,
+        pulo: 8, aereo: 9, habilidade: 10, especial: 11,
+      },
+    },
     stats: { vida: 145, velocidade: 2.2, pulo: 10.2, stamina: 120, regen: 0.35, peso: 1.6, defesa: 1.12 },
     ia: { agressividade: 0.6, distancia: 70, reacao: 20, defesa: 0.42 },
     golpes: {
@@ -231,6 +245,13 @@ export const LUTADORES = {
     cor: { pele: '#c08a5f', roupa: '#2d3e50', detalhe: '#f2f2f2', acento: '#ffd23f' },
     cabeca: { tipo: 'capacete', cor: '#ffd23f' },
     fisico: { escala: 0.99, bulk: 0.94 },
+    sprite: {
+      frames: {
+        idle: 0, andar: [1, 2], soco: 3, chute: 4,
+        baixo: 5, agachar: 5, bloqueio: 6, hitstun: 7, ko: 7,
+        pulo: 8, aereo: 9, habilidade: 10, especial: 11,
+      },
+    },
     stats: { vida: 92, velocidade: 3.9, pulo: 16.0, stamina: 105, regen: 0.5, peso: 0.9, defesa: 0.95 },
     ia: { agressividade: 0.7, distancia: 110, reacao: 12, defesa: 0.52 },
     golpes: {
@@ -259,6 +280,13 @@ export const LUTADORES = {
     cor: { pele: '#c68f66', roupa: '#1f2933', detalhe: '#7fb7d9', acento: '#bfe6f5' },
     cabeca: { tipo: 'gorro', cor: '#1f2933' },
     fisico: { escala: 1.02, bulk: 0.98 },
+    sprite: {
+      frames: {
+        idle: 0, andar: [1, 2], soco: 3, chute: 4,
+        baixo: 5, agachar: 5, bloqueio: 6, hitstun: 7, ko: 7,
+        pulo: 8, aereo: 9, habilidade: 10, especial: 11,
+      },
+    },
     stats: { vida: 88, velocidade: 2.9, pulo: 12.4, stamina: 100, regen: 0.45, peso: 1.0, defesa: 0.95 },
     ia: { agressividade: 0.35, distancia: 250, reacao: 13, defesa: 0.62 },
     golpes: {
@@ -311,6 +339,43 @@ export const LUTADORES = {
   },
 
   // ======================== CHEFAO ========================================
+  // -------------------------------------------------------------- DANIEL ----
+  daniel: {
+    id: 'daniel', nome: 'DANIEL', titulo: 'O DIRETOR', arquetipo: 'Grappler',
+    bio: 'Anda devagar e atravessa o seu poke. Quando ele encosta, a conversa acabou.',
+    dica: 'A REUNIAO nao e bloqueavel. Quem trava na defesa contra ele perde a barra inteira.',
+    cor: { pele: '#8a5a3e', roupa: '#1c1c20', detalhe: '#3a3a42', acento: '#d4a24a' },
+    cabeca: { tipo: 'cabelo', cor: '#6a6a68' },
+    fisico: { escala: 1.08, bulk: 1.18 },
+    sprite: {
+      frames: {
+        idle: 0, andar: [1, 2], soco: 3, chute: 4,
+        baixo: 5, agachar: 5, bloqueio: 6, hitstun: 7, ko: 7,
+        pulo: 8, aereo: 9, habilidade: 10, especial: 11,
+      },
+    },
+    stats: { vida: 108, velocidade: 2.75, pulo: 11.8, stamina: 110, regen: 0.55, peso: 1.3, defesa: 1.05 },
+    ia: { agressividade: 0.86, distancia: 44, reacao: 15, defesa: 0.34 },
+    golpes: {
+      // Alcance curto de proposito: ele tem que atravessar o poke dos outros
+      // para existir. A armadura da cotovelada e o pedagio que ele paga.
+      soco: golpe({ nome: 'Gancho Curto', startup: 6, ativo: 3, recovery: 11, dano: 9, stamina: 7, alcance: { x: 18, y: -54, w: 42, h: 22 }, cancela: ['chute', 'habilidade', 'especial'] }),
+      chute: golpe({ nome: 'Joelhada', startup: 11, ativo: 4, recovery: 18, dano: 16, hitstun: 22, empurrao: 6, stamina: 15, pose: 'chute', alcance: { x: 16, y: -48, w: 40, h: 28 }, armadura: 1, cancela: ['especial'], som: 'pesado' }),
+      baixo: golpe({ nome: 'Rasteira Pesada', startup: 9, ativo: 4, recovery: 17, dano: 11, altura: 'baixo', stamina: 12, pose: 'baixo', alcance: { x: 20, y: -18, w: 48, h: 18 } }),
+      aereo: golpe({ nome: 'Martelo', startup: 6, ativo: 9, recovery: 8, dano: 13, stamina: 9, pose: 'aereo', alcance: { x: 14, y: -26, w: 44, h: 42 } }),
+      habilidade: golpe({
+        nome: 'REUNIAO', tipo: 'agarrao', startup: 7, ativo: 4, recovery: 26,
+        dano: 26, hitstun: 46, empurrao: 10, stamina: 16, cooldown: 150, ganhoSuper: 26,
+        avanco: 2.8, pose: 'agarrao', alcance: { x: 14, y: -56, w: 48, h: 48 }, som: 'pesado',
+      }),
+      especial: golpe({
+        nome: 'ULTIMA PALAVRA', startup: 13, ativo: 7, recovery: 30,
+        dano: 40, hitstun: 42, empurrao: 15, custoSuper: 100, stamina: 0,
+        avanco: 3.4, armadura: 2, pose: 'especial', alcance: { x: 16, y: -56, w: 58, h: 50 }, som: 'super',
+      }),
+    },
+  },
+
   araucaria: {
     id: 'araucaria', nome: 'ARAUCARIA', titulo: 'O COLOSSO DA PEDREIRA', arquetipo: 'CHEFAO',
     chefao: true,
@@ -363,10 +428,16 @@ export const MAPA = [
   { id: 'n3', lutador: 'vinicius', palco: 'japao', x: 64, y: 68, nome: 'Praca do Japao', desc: 'Ele nao quer chegar perto. Ele quer que voce tente. Aprenda a bloquear aqui.' },
   { id: 'n4', lutador: 'juliano', palco: 'barigui', x: 20, y: 46, nome: 'Parque Barigui', desc: 'Espaco aberto e o cara mais rapido do jogo. Boa sorte.' },
   { id: 'n5', lutador: 'neumann', palco: 'niemeyer', x: 48, y: 34, nome: 'Museu Oscar Niemeyer', desc: 'Parede de carne. Nao adianta empurrar, tem que derrubar.' },
-  { id: 'n6', lutador: 'costela', palco: 'tubo', x: 72, y: 38, nome: 'Estacao Tubo', desc: 'Apertado. Cada passo pode ter uma armadilha embaixo.' },
-  { id: 'n7', lutador: 'rafael', palco: 'opera', x: 34, y: 18, nome: 'Opera de Arame', desc: 'Palco de verdade. Ele usa o espaco inteiro e some.' },
-  { id: 'n8', lutador: 'araucaria', palco: 'pedreira', x: 58, y: 8, nome: 'Pedreira Paulo Leminski', chefao: true, desc: 'Trinta metros de rocha e algo muito velho no meio.' },
+  { id: 'n6', lutador: 'daniel', palco: 'torre', x: 84, y: 48, nome: 'Torre Panoramica', desc: 'Ele nao corre atras. Ele chega. E de perto voce nao bloqueia o que ele faz.' },
+  { id: 'n7', lutador: 'costela', palco: 'tubo', x: 72, y: 38, nome: 'Estacao Tubo', desc: 'Apertado. Cada passo pode ter uma armadilha embaixo.' },
+  { id: 'n8', lutador: 'rafael', palco: 'opera', x: 34, y: 18, nome: 'Opera de Arame', desc: 'Palco de verdade. Ele usa o espaco inteiro e some.' },
+  { id: 'n9', lutador: 'araucaria', palco: 'pedreira', x: 58, y: 8, nome: 'Pedreira Paulo Leminski', chefao: true, desc: 'Trinta metros de rocha e algo muito velho no meio.' },
 ];
 
 // jogaveis = todos menos o chefao
+// A rampa de dificuldade vai de 0.85 ao 1.23 e distribui os nos por igual.
+// Contar o indice direto (0.85 + i * 0.055) fazia acrescentar um lutador ao
+// mapa empurrar o chefao para cima sem ninguem pedir.
+export const dificuldadeDoNo = (i) => 0.85 + (0.38 * i) / (MAPA.length - 1);
+
 export const JOGAVEIS = Object.keys(LUTADORES).filter((k) => !LUTADORES[k].chefao);

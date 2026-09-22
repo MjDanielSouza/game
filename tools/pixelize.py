@@ -20,6 +20,7 @@ import sys
 
 import numpy as np
 from PIL import Image
+from scipy import ndimage
 
 RAIZ = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 BRUTOS = os.path.join(RAIZ, 'assets', 'brutos')
@@ -59,6 +60,25 @@ def chroma(im, limiar=235):
     return Image.fromarray(a, 'RGBA')
 
 
+def so_o_corpo(im):
+    """Mantem so a maior mancha conectada e joga o resto fora.
+
+    Os modelos deixam cacos: um borrao de nuvem sobre a cabeca, pontinhos de
+    fundo que o chroma nao fechou. Sao dezenas de pixels soltos por pose - o
+    aereo do NEUMANN veio com uma mancha de 361px flutuando. Em cena isso
+    vira sujeira, e pior: entra no bounding box e desloca o sprite inteiro.
+    O lutador e sempre uma silhueta unica, entao a maior mancha e ele.
+    """
+    a = np.array(im)
+    solido = a[:, :, 3] >= LIMIAR
+    marcas, n = ndimage.label(solido)
+    if n <= 1:
+        return im
+    maior = 1 + int(np.argmax(ndimage.sum(solido, marcas, range(1, n + 1))))
+    a[:, :, 3] = np.where(marcas == maior, a[:, :, 3], 0)
+    return Image.fromarray(a, 'RGBA')
+
+
 def recortar(im):
     a = np.array(im)[:, :, 3]
     ys = np.where(a.max(axis=1) >= LIMIAR)[0]
@@ -89,7 +109,14 @@ def contornar(im, cor=(20, 14, 12)):
     s = arr[:, :, 3] >= 128
     viz = np.zeros_like(s)
     for dy, dx in ((1, 0), (-1, 0), (0, 1), (0, -1)):
-        viz |= np.roll(np.roll(s, dy, 0), dx, 1)
+        v = np.roll(np.roll(s, dy, 0), dx, 1)
+        # np.roll e circular: quem encosta no topo do quadro reaparece
+        # embaixo e pinta uma tira de contorno solta na borda oposta.
+        if dy:
+            v[0 if dy > 0 else -1, :] = False
+        if dx:
+            v[:, 0 if dx > 0 else -1] = False
+        viz |= v
     borda = viz & ~s
     arr[borda] = (*cor, 255)
     return Image.fromarray(arr, 'RGBA')
@@ -113,7 +140,7 @@ def processar(ident, altura, cores, outline, usar_chroma=False):
         im0 = Image.open(os.path.join(origem, nome)).convert('RGBA')
         if usar_chroma:
             im0 = chroma(im0)
-        c = recortar(im0)
+        c = recortar(so_o_corpo(im0))
         alturas.append(c.height if c else 0)
     if not max(alturas):
         sys.exit('todas as imagens sairam vazias')
@@ -123,7 +150,7 @@ def processar(ident, altura, cores, outline, usar_chroma=False):
         im = Image.open(os.path.join(origem, nome)).convert('RGBA')
         if usar_chroma:
             im = chroma(im)
-        c = recortar(im)
+        c = recortar(so_o_corpo(im))
         if c is None:
             print(f'  ! {nome}: vazia, pulada')
             continue

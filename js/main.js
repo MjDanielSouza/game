@@ -2,7 +2,7 @@
 //  CURITIBA KOMBAT - cola: loop, input, telas, progresso
 // ============================================================================
 
-import { LARGURA, ALTURA, CHAO, ARENA, FPS, MAPA, LUTADORES, PALCOS } from './data.js';
+import { LARGURA, ALTURA, CHAO, ARENA, FPS, MAPA, LUTADORES, PALCOS, dificuldadeDoNo } from './data.js';
 import { Mundo, vazio } from './engine.js';
 import { desenharLutador, desenharPalco, desenharProjetil, desenharArmadilha, desenharEfeito } from './render.js';
 import { desenharHUD, montarSelecao, montarMapa, montarBriefing, retrato } from './ui.js';
@@ -149,7 +149,7 @@ function comecarLuta() {
 
 function novoRound() {
   const n = MAPA[S.no];
-  const dif = 0.85 + S.no * 0.055;
+  const dif = dificuldadeDoNo(S.no);
   S.mundo = new Mundo(S.personagem, n.lutador, n.palco, dif, {
     round: S.round, placar: S.placar.slice(), onSom: tocar,
   });
