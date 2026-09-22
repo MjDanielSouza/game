@@ -255,18 +255,22 @@ export const LUTADORES = {
     stats: { vida: 92, velocidade: 3.9, pulo: 16.0, stamina: 105, regen: 0.5, peso: 0.9, defesa: 0.95 },
     ia: { agressividade: 0.7, distancia: 110, reacao: 12, defesa: 0.52 },
     golpes: {
-      soco: golpe({ nome: 'Cutucada', startup: 4, ativo: 3, recovery: 9, dano: 6, stamina: 5, cancela: ['chute', 'baixo', 'habilidade', 'especial'] }),
-      chute: golpe({ nome: 'Voadora', startup: 10, ativo: 5, recovery: 17, dano: 14, hitstun: 20, empurrao: 8, stamina: 14, avanco: 5, pose: 'chute', alcance: { x: 28, y: -46, w: 56, h: 26 }, cancela: ['especial'], som: 'pesado' }),
-      baixo: golpe({ nome: 'Corta-Pe', startup: 7, ativo: 4, recovery: 15, dano: 9, altura: 'baixo', stamina: 10, pose: 'baixo', alcance: { x: 22, y: -16, w: 50, h: 16 } }),
+      soco: golpe({ nome: 'Cutucada', startup: 3, ativo: 3, recovery: 6, dano: 6, stamina: 5, cancela: ['chute', 'baixo', 'habilidade', 'especial'] }),
+      chute: golpe({ nome: 'Voadora', startup: 8, ativo: 5, recovery: 13, dano: 14, hitstun: 20, empurrao: 8, stamina: 14, avanco: 5, pose: 'chute', alcance: { x: 28, y: -46, w: 56, h: 26 }, cancela: ['especial'], som: 'pesado' }),
+      baixo: golpe({ nome: 'Corta-Pe', startup: 6, ativo: 4, recovery: 11, dano: 9, altura: 'baixo', stamina: 10, pose: 'baixo', alcance: { x: 22, y: -16, w: 50, h: 16 } }),
       aereo: golpe({ nome: 'Mergulho', startup: 4, ativo: 10, recovery: 7, dano: 12, stamina: 9, pose: 'aereo', alcance: { x: 20, y: -30, w: 46, h: 38 } }),
       habilidade: golpe({
         nome: 'LADEIRA', tipo: 'dash', startup: 4, ativo: 12, recovery: 14,
-        dano: 0, stamina: 14, cooldown: 110, ganhoSuper: 8, invencivel: 16,
+        dano: 0, stamina: 14, cooldown: 85, ganhoSuper: 20, invencivel: 16,
         avanco: 15.0, atravessa: true, pose: 'dash', som: 'dash',
       }),
       especial: golpe({
+        // Multi-acerto: era o unico especial do elenco que batia uma vez so,
+        // enquanto o LUCAS bate 4, o JULIANO 6 e o VINICIUS joga 5 projeteis.
+        // Isso sozinho explicava os 8,1 acertos por luta dele contra os 14,2
+        // do LUCAS. Uma investida que atravessa a tela tem que atropelar.
         nome: 'CAPACETE DE ACO', startup: 12, ativo: 20, recovery: 28,
-        dano: 32, hitstun: 36, empurrao: 15, custoSuper: 100, stamina: 0,
+        dano: 15, hits: 3, hitstun: 36, empurrao: 15, custoSuper: 100, stamina: 0,
         avanco: 13.0, armadura: 2, pose: 'especial', alcance: { x: 20, y: -52, w: 54, h: 44 }, som: 'super',
       }),
     },
@@ -428,15 +432,15 @@ export const LUTADORES = {
 // tem que subir de forma monotona. Zoner e armadilheiro vem DEPOIS do lutador
 // de mobilidade porque punem mais quem ainda nao aprendeu a defender.
 export const MAPA = [
-  { id: 'n1', lutador: 'joao', palco: 'largo', x: 20, y: 78, nome: 'Largo da Ordem', desc: 'O aquecimento. Pedra molhada e briga suja - ele agarra o que nao se move.' },
-  { id: 'n2', lutador: 'lucas', palco: 'botanico', x: 50, y: 70, nome: 'Jardim Botanico', desc: 'Um lutador sem truque, so fundamento. Se ele te pega, foi limpo.' },
-  { id: 'n3', lutador: 'juliano', palco: 'barigui', x: 80, y: 64, nome: 'Parque Barigui', desc: 'Espaco aberto e o cara mais rapido do jogo. Boa sorte.' },
-  { id: 'n4', lutador: 'vinicius', palco: 'japao', x: 86, y: 56, nome: 'Praca do Japao', desc: 'Ele nao quer chegar perto. Ele quer que voce tente. Aprenda a bloquear aqui.' },
-  { id: 'n5', lutador: 'neumann', palco: 'niemeyer', x: 58, y: 50, nome: 'Museu Oscar Niemeyer', desc: 'Parede de carne. Nao adianta empurrar, tem que derrubar.' },
-  { id: 'n6', lutador: 'rafael', palco: 'opera', x: 32, y: 46, nome: 'Opera de Arame', desc: 'Palco de verdade. Ele usa o espaco inteiro e some.' },
-  { id: 'n7', lutador: 'daniel', palco: 'torre', x: 16, y: 26, nome: 'Torre Panoramica', desc: 'Ele nao corre atras. Ele chega. E de perto voce nao bloqueia o que ele faz.' },
-  { id: 'n8', lutador: 'costela', palco: 'tubo', x: 52, y: 22, nome: 'Estacao Tubo', desc: 'Apertado. Cada passo pode ter uma armadilha embaixo.' },
-  { id: 'n9', lutador: 'araucaria', palco: 'pedreira', x: 58, y: 8, nome: 'Pedreira Paulo Leminski', chefao: true, desc: 'Trinta metros de rocha e algo muito velho no meio.' },
+  { id: 'n1', lutador: 'joao', palco: 'largo', x: 17, y: 80, nome: 'Largo da Ordem', desc: 'O aquecimento. Pedra molhada e briga suja - ele agarra o que nao se move.' },
+  { id: 'n2', lutador: 'lucas', palco: 'botanico', x: 50, y: 80, nome: 'Jardim Botanico', desc: 'Um lutador sem truque, so fundamento. Se ele te pega, foi limpo.' },
+  { id: 'n3', lutador: 'juliano', palco: 'barigui', x: 83, y: 80, nome: 'Parque Barigui', desc: 'Espaco aberto e o cara mais rapido do jogo. Boa sorte.' },
+  { id: 'n4', lutador: 'neumann', palco: 'niemeyer', x: 83, y: 50, nome: 'Museu Oscar Niemeyer', desc: 'Parede de carne. Nao adianta empurrar, tem que derrubar.' },
+  { id: 'n5', lutador: 'vinicius', palco: 'japao', x: 50, y: 50, nome: 'Praca do Japao', desc: 'Ele nao quer chegar perto. Ele quer que voce tente. Aprenda a bloquear aqui.' },
+  { id: 'n6', lutador: 'daniel', palco: 'torre', x: 17, y: 50, nome: 'Torre Panoramica', desc: 'Ele nao corre atras. Ele chega. E de perto voce nao bloqueia o que ele faz.' },
+  { id: 'n7', lutador: 'costela', palco: 'tubo', x: 17, y: 20, nome: 'Estacao Tubo', desc: 'Apertado. Cada passo pode ter uma armadilha embaixo.' },
+  { id: 'n8', lutador: 'rafael', palco: 'opera', x: 50, y: 20, nome: 'Opera de Arame', desc: 'Palco de verdade. Ele usa o espaco inteiro e some.' },
+  { id: 'n9', lutador: 'araucaria', palco: 'pedreira', x: 83, y: 20, nome: 'Pedreira Paulo Leminski', chefao: true, desc: 'Trinta metros de rocha e algo muito velho no meio.' },
 ];
 
 // jogaveis = todos menos o chefao
