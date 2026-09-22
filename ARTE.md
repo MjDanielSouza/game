@@ -58,12 +58,34 @@ Precisamos de ~8 poses por lutador, e **não** de uma animação completa:
 05-baixo  06-bloqueio  07-hitstun
 ```
 
+**Gere o idle primeiro e use o idle aprovado como referência das outras sete.**
+Gerar cada pose direto da foto dá sete personagens parecidos em vez de sete
+poses do mesmo personagem — a camisa muda de tom, a proporção muda, o cabelo
+muda. O idle é a âncora.
+
 Duas rotas, dependendo do que você quiser gastar:
 
-**Rota A — nuvem (recomendada).** Use as skills que já existem aqui
-(`human-image`, Higgsfield CLI / Magnific MCP) com a foto como referência de
-rosto e um prompt de pixel art. Depois só pós-processamento local. Sem
-download de modelo, sem limite de VRAM. Custa crédito por imagem.
+**Rota A — nuvem (validada no LUCAS).** Modelo **GPT 2.5** (`gpt-2-mini`) no
+Magnific: é dos poucos que aceitam `transparentBackground` **e** referência por
+imagem, e é o recomendado para arte não-fotorealista. Receita que funcionou:
+
+- `aspectRatio: 2:3`, `quality: high`, `transparentBackground: true`
+- a foto do colega como `references: [{type: 'image', ...}]`
+- prompt em três blocos: **pose** (corpo inteiro, de perfil 3/4, virado para a
+  direita) → **personagem** (cabelo, roupa peça por peça, "mantenha a
+  semelhança facial da referência") → **estilo** (16-bit tipo Street Fighter
+  Alpha, contorno escuro, dois tons por cor, ~20 cores, sem gradiente, sem
+  anti-aliasing, sem dithering) → **fundo transparente, sem chão, sem sombra,
+  sem texto**
+
+Saiu com alpha limpo: 68% totalmente transparente, 32% totalmente opaco, só
+0,5% de franja — e a franja que sobra é justamente o que a máscara RLE resolve.
+
+> **Custo real: 325 créditos por imagem** nessa qualidade. Oito poses por
+> lutador × sete lutadores ≈ **18 mil créditos**. Meça o saldo antes
+> (`account_balance`) e considere o modelo barato (`imagen-nano-banana-2-lite`)
+> para as poses secundárias, deixando o GPT 2.5 só para o idle, que é o frame
+> que serve de referência para todos os outros.
 
 **Rota B — local.** ComfyUI + SDXL + IPAdapter FaceID em 768px, que cabe nos
 8 GB da 3070. Grátis depois de baixar, mas são ~10 GB de modelo, cinco pacotes
@@ -75,12 +97,27 @@ de custom node, e a semelhança facial em 768px é pior.
 
 ### 3. Pós-processar para pixel art
 
-Recorte de fundo → pixelização → redução de paleta → contorno de 1px.
-O `comfyui-pixel-art-workflow` faz exatamente essa sequência e a metade local
-dele (BiRefNet + Pixelate + paleta) funciona com imagem vinda de qualquer
-gerador — inclusive da Rota A.
+**Este passo não é opcional.** Os modelos entregam uma *ilustração com cara de
+pixel art*: o LUCAS veio em 1024×1536 com **59 mil cores** e sem grade de pixel
+nenhuma. Bonito ampliado, vira papa numa tela de 1280.
 
-Salve os PNGs com fundo transparente em `assets/poses/<id>/`.
+```bash
+python tools/pixelize.py lucas
+```
+
+Lê `assets/brutos/<id>/*.png` e escreve `assets/poses/<id>/*.png`: recorta pelo
+alpha, reduz para a altura de jogo (176px), corta a paleta para 24 cores e põe
+contorno de 1px. O LUCAS saiu em **98×176 com 25 cores**.
+
+Duas coisas que o script faz e que importam:
+
+- **A escala sai da pose mais alta do lote**, não de cada pose. Normalizar pose
+  a pose faz o lutador crescer e encolher entre frames.
+- **Redimensiona com BOX (média de área), não NEAREST.** NEAREST joga pixel
+  fora e quebra linha fina; a média preserva a forma antes do corte de paleta.
+
+O `comfyui-pixel-art-workflow` faz a mesma sequência dentro do ComfyUI, se
+preferir ficar lá.
 
 ### 4. Montar o atlas
 
