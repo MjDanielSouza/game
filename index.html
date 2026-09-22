@@ -1,0 +1,90 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Curitiba Kombat</title>
+<meta name="description" content="Jogo de luta 2D. Oito locais de Curitiba, sete lutadores e um colosso na Pedreira.">
+<link rel="stylesheet" href="css/style.css">
+<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'><text y='26' font-size='26'>&#129354;</text></svg>">
+</head>
+<body>
+
+<!-- ------------------------------------------------------------- TITULO -->
+<section id="tela-titulo" class="tela ativa">
+  <div class="titulo-wrap">
+    <p class="titulo-eyebrow">ARCADE IA</p>
+    <h1 class="titulo-logo">CURITIBA<span>KOMBAT</span></h1>
+    <p id="titulo-sub" class="titulo-sub"></p>
+    <div class="titulo-btns">
+      <button class="btn grande" id="btn-comecar">COMEÇAR</button>
+      <button class="btn secundario" id="btn-trocar">TROCAR LUTADOR</button>
+      <button class="btn secundario" id="btn-som">SOM: LIGADO</button>
+      <button class="btn fantasma" id="btn-zerar">ZERAR PROGRESSO</button>
+    </div>
+    <div class="controles">
+      <h4>CONTROLES</h4>
+      <div class="ctrl-grade">
+        <div><kbd>A</kbd><kbd>D</kbd> <span>andar</span></div>
+        <div><kbd>W</kbd> <span>pular</span></div>
+        <div><kbd>S</kbd> <span>agachar</span></div>
+        <div><kbd>Shift</kbd> <span>defender</span></div>
+        <div><kbd>J</kbd> <span>soco</span></div>
+        <div><kbd>K</kbd> <span>chute</span></div>
+        <div><kbd>S</kbd>+<kbd>J</kbd> <span>golpe baixo</span></div>
+        <div><kbd>L</kbd> <span>habilidade</span></div>
+        <div><kbd>Espaço</kbd> <span>especial (barra cheia)</span></div>
+        <div><kbd>Esc</kbd> <span>abandonar luta</span></div>
+      </div>
+      <p class="ctrl-nota">Golpe alto só é bloqueado em pé. Golpe baixo só é bloqueado agachado. Agarrão não é bloqueado.</p>
+    </div>
+  </div>
+</section>
+
+<!-- ------------------------------------------------------------ SELECAO -->
+<section id="tela-selecao" class="tela">
+  <header class="topo">
+    <h2>ESCOLHA SEU LUTADOR</h2>
+    <button class="btn secundario" data-volta-mapa>MAPA</button>
+  </header>
+  <div id="grade-personagens" class="grade"></div>
+</section>
+
+<!-- --------------------------------------------------------------- MAPA -->
+<section id="tela-mapa" class="tela">
+  <header class="topo">
+    <h2>CURITIBA</h2>
+    <div id="mapa-heroi" class="mapa-heroi"></div>
+    <div class="topo-dir">
+      <span id="mapa-progresso" class="progresso"></span>
+      <button class="btn secundario" id="btn-mapa-trocar" onclick="document.getElementById('btn-trocar').click()">TROCAR</button>
+    </div>
+  </header>
+  <div class="mapa-caixa">
+    <div id="mapa-painel" class="mapa-painel"></div>
+  </div>
+  <p class="mapa-rodape">Clique num local liberado para lutar. O caminho segue a linha até a Pedreira.</p>
+</section>
+
+<!-- ----------------------------------------------------------- BRIEFING -->
+<section id="tela-briefing" class="tela">
+  <div id="brief" class="brief"></div>
+  <button class="btn fantasma volta" data-volta-mapa>← MAPA</button>
+</section>
+
+<!-- ------------------------------------------------------------- LUTA -->
+<canvas id="jogo" width="1280" height="720"></canvas>
+
+<!-- --------------------------------------------------------- RESULTADO -->
+<section id="tela-resultado" class="tela">
+  <div id="resultado-caixa" class="caixa"></div>
+</section>
+
+<!-- ------------------------------------------------------------- FINAL -->
+<section id="tela-final" class="tela">
+  <div id="final-caixa" class="caixa final"></div>
+</section>
+
+<script type="module" src="js/main.js"></script>
+</body>
+</html>

@@ -1,0 +1,15 @@
+# Fotos de pessoas reais — referência local, nunca vai pro repositório público
+IMAGEM DE REFERENCIA PERSINAGENS/
+referencias/
+*.jpg
+*.jpeg
+*.png
+!assets/**
+
+node_modules/
+.DS_Store
+Thumbs.db
+
+# Triagem das fotos: comentarios sobre o rosto de pessoas reais.
+# O elenco e os arquetipos ja estao no README e em js/data.js.
+PERSONAGENS.md
