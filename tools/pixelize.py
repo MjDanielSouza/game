@@ -28,6 +28,37 @@ POSES = os.path.join(RAIZ, 'assets', 'poses')
 LIMIAR = 40          # alpha abaixo disto vira buraco (igual ao atlas.py)
 
 
+def chroma(im, limiar=235):
+    """Tira fundo chapado claro, abrindo alpha.
+
+    Necessario porque a maioria dos modelos nao emite canal alpha - so o
+    GPT 2.5 emitiu. A varredura parte das bordas para dentro: apagar todo
+    pixel claro furaria a camisa creme do LUCAS, que e quase branca.
+    """
+    a = np.array(im.convert('RGBA'))
+    claro = (a[:, :, 0] > limiar) & (a[:, :, 1] > limiar) & (a[:, :, 2] > limiar)
+    h, w = claro.shape
+
+    # flood fill a partir da moldura, iterativo (recursao estoura em 2500px)
+    fundo = np.zeros_like(claro)
+    pilha = [(0, x) for x in range(w) if claro[0, x]]
+    pilha += [(h - 1, x) for x in range(w) if claro[h - 1, x]]
+    pilha += [(y, 0) for y in range(h) if claro[y, 0]]
+    pilha += [(y, w - 1) for y in range(h) if claro[y, w - 1]]
+    for y, x in pilha:
+        fundo[y, x] = True
+    while pilha:
+        y, x = pilha.pop()
+        for dy, dx in ((1, 0), (-1, 0), (0, 1), (0, -1)):
+            ny, nx = y + dy, x + dx
+            if 0 <= ny < h and 0 <= nx < w and claro[ny, nx] and not fundo[ny, nx]:
+                fundo[ny, nx] = True
+                pilha.append((ny, nx))
+
+    a[:, :, 3] = np.where(fundo, 0, 255)
+    return Image.fromarray(a, 'RGBA')
+
+
 def recortar(im):
     a = np.array(im)[:, :, 3]
     ys = np.where(a.max(axis=1) >= LIMIAR)[0]
@@ -64,7 +95,7 @@ def contornar(im, cor=(20, 14, 12)):
     return Image.fromarray(arr, 'RGBA')
 
 
-def processar(ident, altura, cores, outline):
+def processar(ident, altura, cores, outline, usar_chroma=False):
     origem = os.path.join(BRUTOS, ident)
     destino = os.path.join(POSES, ident)
     if not os.path.isdir(origem):
@@ -79,7 +110,10 @@ def processar(ident, altura, cores, outline):
     # encolhe entre frames. A referencia e a pose mais alta do lote.
     alturas = []
     for nome in arquivos:
-        c = recortar(Image.open(os.path.join(origem, nome)).convert('RGBA'))
+        im0 = Image.open(os.path.join(origem, nome)).convert('RGBA')
+        if usar_chroma:
+            im0 = chroma(im0)
+        c = recortar(im0)
         alturas.append(c.height if c else 0)
     if not max(alturas):
         sys.exit('todas as imagens sairam vazias')
@@ -87,6 +121,8 @@ def processar(ident, altura, cores, outline):
 
     for nome, h0 in zip(arquivos, alturas):
         im = Image.open(os.path.join(origem, nome)).convert('RGBA')
+        if usar_chroma:
+            im = chroma(im)
         c = recortar(im)
         if c is None:
             print(f'  ! {nome}: vazia, pulada')
@@ -115,5 +151,7 @@ if __name__ == '__main__':
     ap.add_argument('--cores', type=int, default=24,
                     help='tamanho da paleta (padrao 24)')
     ap.add_argument('--sem-contorno', action='store_true')
+    ap.add_argument('--chroma', action='store_true',
+                    help='abre alpha tirando fundo chapado claro (modelos sem canal alpha)')
     a = ap.parse_args()
-    processar(a.ident, a.altura, a.cores, not a.sem_contorno)
+    processar(a.ident, a.altura, a.cores, not a.sem_contorno, a.chroma)
