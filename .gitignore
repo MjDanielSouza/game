@@ -19,3 +19,6 @@ PERSONAGENS.md
 assets/poses/*/
 !assets/*.png
 !assets/*.json
+
+# Geracoes brutas (1024x1536): intermediario pesado, nao vai pro repo.
+assets/brutos/

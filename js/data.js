@@ -107,6 +107,9 @@ export const LUTADORES = {
     cor: { pele: '#c98d63', roupa: '#8c5a3c', detalhe: '#e8dcc8', acento: '#f0a04b' },
     cabeca: { tipo: 'cabelo', cor: '#2b1d16' },
     fisico: { escala: 1.0, bulk: 1.0 },
+    // Tem arte: js/sprites.js carrega assets/lucas.png. Toda pose que faltar
+    // cai em `idle`, entao da para ir subindo frame por frame.
+    sprite: { frames: { idle: 0 } },
     stats: { vida: 100, velocidade: 3.0, pulo: 13.2, stamina: 100, regen: 0.45, peso: 1.0, defesa: 1.0 },
     ia: { agressividade: 0.55, distancia: 90, reacao: 14, defesa: 0.50 },
     golpes: {
