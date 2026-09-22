@@ -113,12 +113,21 @@ pixel art*: o LUCAS veio em 1024×1536 com **59 mil cores** e sem grade de pixel
 nenhuma. Bonito ampliado, vira papa numa tela de 1280.
 
 ```bash
-python tools/pixelize.py lucas
+pip install pillow numpy scipy
+python tools/pixelize.py lucas --chroma
 ```
 
-Lê `assets/brutos/<id>/*.png` e escreve `assets/poses/<id>/*.png`: recorta pelo
-alpha, reduz para a altura de jogo (176px), corta a paleta para 24 cores e põe
-contorno de 1px. O LUCAS saiu em **98×176 com 25 cores**.
+`--chroma` abre o alpha a partir das bordas, para os modelos que devolvem
+fundo branco chapado em vez de canal alpha. Quase todos devolvem.
+
+Lê `assets/brutos/<id>/*.png` e escreve `assets/poses/<id>/*.png`: abre o alpha,
+joga fora tudo que não faz parte da maior mancha conectada, recorta pelo alpha,
+reduz para a altura de jogo (176px), corta a paleta para 24 cores e põe contorno
+de 1px.
+
+O descarte de manchas soltas existe porque os modelos deixam cacos: o aéreo do
+NEUMANN veio com um borrão de 361px flutuando acima da cabeça. Em cena vira
+sujeira, e pior, entra no bounding box e desloca o sprite inteiro. O LUCAS saiu em **98×176 com 25 cores**.
 
 Duas coisas que o script faz e que importam:
 

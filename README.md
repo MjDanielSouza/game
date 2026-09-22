@@ -1,6 +1,6 @@
 # Curitiba Kombat
 
-Jogo de luta 2D que roda direto no navegador. Sete lutadores, oito locais de
+Jogo de luta 2D que roda direto no navegador. Oito lutadores, nove locais de
 Curitiba e um chefão na Pedreira Paulo Leminski.
 
 Sem build, sem framework, sem dependência. É HTML + CSS + JavaScript de módulo
@@ -55,6 +55,7 @@ Melhor de 3 rounds, 99 segundos cada. Tempo esgotado decide por percentual de vi
 | **RAFAEL LATA** | mobilidade | LADEIRA — dash invencível que atravessa | CAPACETE DE AÇO — investida de tela cheia |
 | **VINICIUS** | zoner | GEADA — projétil que deixa lento | NEVASCA — 5 projéteis |
 | **COSTELA** | técnico | ARMADILHA — planta no chão (até 2) | XEQUE-MATE — detona todas de uma vez |
+| **DANIEL** | grappler | REUNIÃO — agarrão que avança e não pode ser bloqueado | ÚLTIMA PALAVRA — investida com 2 de armadura |
 | **ARAUCÁRIA** | **CHEFÃO** | CHUVA DE PINHÃO — 3 projéteis em arco | QUEDA DA COPA — onda nos dois sentidos |
 
 O chefão tem **armadura passiva**: absorve um golpe e leva ~2,5 s para
