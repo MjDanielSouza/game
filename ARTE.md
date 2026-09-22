@@ -51,12 +51,23 @@ E peça autorização. São sete pessoas reais e o repositório é público.
 
 ### 2. Gerar as poses
 
-Precisamos de ~8 poses por lutador, e **não** de uma animação completa:
+Precisamos de ~12 poses por lutador, e **não** de uma animação completa:
 
 ```
 00-idle  01-andar-a  02-andar-b  03-soco  04-chute
 05-baixo  06-bloqueio  07-hitstun
+08-pulo  09-aereo  10-parry  11-especial
 ```
+
+As oito primeiras já dão um lutador jogável; as quatro últimas tiram os
+fallbacks (sem elas o pulo usa o `idle` parado e todo golpe especial usa o
+`soco`). O LUCAS tem as doze.
+
+**Quando a pose sair errada, descreva o que *não* fazer.** Repetir a descrição
+da pose certa não conserta — o modelo já leu e ignorou. O bloqueio do LUCAS
+saiu como um soco duas vezes seguidas; só mudou quando o prompt passou a dizer
+"absolutely NOT a punch, do NOT extend any arm forward, the silhouette must be
+closed and compact, not reaching". O mesmo vale para o parry e para o aéreo.
 
 **Gere o idle primeiro e use o idle aprovado como referência das outras sete.**
 Gerar cada pose direto da foto dá sete personagens parecidos em vez de sete
