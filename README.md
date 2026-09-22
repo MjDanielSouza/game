@@ -72,9 +72,11 @@ js/data.js        lutadores, golpes, palcos e mapa   <- é aqui que se mexe
 js/engine.js      loop, state machine, hitbox/hurtbox, projéteis, IA
 js/render.js      rig de ossos dos lutadores e desenho dos palcos
 js/ui.js          HUD no canvas e montagem das telas em DOM
+js/sprites.js     carrega e desenha sprite, quando o lutador tem arte
 js/main.js        cola: teclado, telas, progresso
 test.js           checagem do motor, sem navegador
 tools/balance.mjs sondagem de dificuldade
+tools/atlas.py    poses PNG -> folha de sprite + máscara alpha
 ```
 
 O motor não conhece nenhum golpe pelo nome. Tudo — alcance, frames, dano,
@@ -148,6 +150,12 @@ usar. Trocar o desenho de um osso não encosta no motor. Os ângulos em
 `render.js` seguem uma convenção só: **0° é o osso apontando para baixo,
 positivo é para a frente**, então 90° é horizontal na direção que o lutador
 encara e 180° é para cima.
+
+O jogo também já aceita **sprite**: se um lutador declara `sprite` em
+`js/data.js`, `js/sprites.js` carrega `assets/<id>.png` + `assets/<id>.json` e
+desenha o frame; quem não declara continua no rig. A troca é por personagem.
+**[ARTE.md](ARTE.md)** tem o pipeline completo da foto até o sprite, e os
+repositórios que ajudam.
 
 Os palcos seguem a especificação de `CENARIOS.md`: horizonte a ~58% da altura,
 terço inferior livre para os pés, monumento fora do centro, uma cor dominante

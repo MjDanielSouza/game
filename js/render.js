@@ -6,6 +6,7 @@
 // ============================================================================
 
 import { LARGURA, ALTURA, CHAO, ARENA, PALCOS } from './data.js';
+import * as Sprites from './sprites.js';
 
 const TAU = Math.PI * 2;
 const clamp = (v, a, b) => (v < a ? a : v > b ? b : v);
@@ -199,6 +200,18 @@ export function desenharLutador(ctx, f, tick) {
   ctx.fill();
   ctx.restore();
 
+  // Tem arte? Desenha o sprite. Nao tem? Cai no rig procedural abaixo.
+  // A troca e por personagem: dar arte ao LUCAS nao encosta nos outros seis.
+  if (Sprites.tem(f.id)) {
+    const mapa = f.def.sprite && f.def.sprite.frames;
+    ctx.save();
+    if (f.piscar > 0 && f.piscar % 4 < 2) ctx.globalAlpha = 0.72;
+    Sprites.desenhar(ctx, f.id, Sprites.frameDe(f, mapa, tick), f.x, f.y, f.dir);
+    ctx.restore();
+    auras(ctx, f);
+    return;
+  }
+
   ctx.save();
   ctx.translate(f.x, f.y);
   ctx.scale(f.dir, 1);
@@ -265,22 +278,32 @@ export function desenharLutador(ctx, f, tick) {
   const hy = chestY + Math.cos(cabAng) * 20 * s;
   desenharCabeca(ctx, hx, hy, s * (0.95 + bulk * 0.06), f.def, c);
 
-  // brilho de armadura ativa
+  ctx.restore();
+  auras(ctx, f);
+}
+
+// Armadura e lentidao em coordenadas de mundo, para valerem igual no rig
+// procedural e no sprite.
+function auras(ctx, f) {
+  if (f.armadura <= 0 && f.lentidao <= 0) return;
+  const cx = f.x;
+  const cy = f.y - f.altura * 0.5;
+  const rx = f.largura * 0.78;
+  const ry = f.altura * 0.54;
+  ctx.save();
   if (f.armadura > 0) {
     ctx.strokeStyle = f.def.chefao ? 'rgba(201,162,39,0.75)' : 'rgba(93,143,196,0.8)';
     ctx.lineWidth = 2.5;
     ctx.beginPath();
-    ctx.ellipse(chestX * 0.5, hipY - 16 * s, 34 * s * bulk, 56 * s, 0, 0, TAU);
+    ctx.ellipse(cx, cy, rx, ry, 0, 0, TAU);
     ctx.stroke();
   }
-  // congelado
   if (f.lentidao > 0) {
     ctx.fillStyle = 'rgba(191,230,245,0.30)';
     ctx.beginPath();
-    ctx.ellipse(chestX * 0.5, hipY - 14 * s, 32 * s * bulk, 60 * s, 0, 0, TAU);
+    ctx.ellipse(cx, cy, rx * 0.96, ry * 1.04, 0, 0, TAU);
     ctx.fill();
   }
-
   ctx.restore();
 }
 

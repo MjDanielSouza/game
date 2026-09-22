@@ -6,6 +6,7 @@ import { LARGURA, ALTURA, CHAO, ARENA, FPS, MAPA, LUTADORES, PALCOS } from './da
 import { Mundo, vazio } from './engine.js';
 import { desenharLutador, desenharPalco, desenharProjetil, desenharArmadilha, desenharEfeito } from './render.js';
 import { desenharHUD, montarSelecao, montarMapa, montarBriefing, retrato } from './ui.js';
+import * as Sprites from './sprites.js';
 
 const $ = (s) => document.querySelector(s);
 const clamp = (v, a, b) => (v < a ? a : v > b ? b : v);
@@ -152,6 +153,11 @@ function novoRound() {
   S.mundo = new Mundo(S.personagem, n.lutador, n.palco, dif, {
     round: S.round, placar: S.placar.slice(), onSom: tocar,
   });
+  // So busca arte de quem declarou `sprite` em data.js. Quem nao declarou
+  // continua no rig procedural e nao gera requisicao nenhuma. Nao esperamos
+  // o carregamento: o sprite entra assim que ficar pronto.
+  for (const l of [S.mundo.p1, S.mundo.p2])
+    if (l.def.sprite) Sprites.carregar(l.id, l.altura);
 }
 
 function fimDeRound() {

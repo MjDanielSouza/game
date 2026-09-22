@@ -13,3 +13,9 @@ Thumbs.db
 # Triagem das fotos: comentarios sobre o rosto de pessoas reais.
 # O elenco e os arquetipos ja estao no README e em js/data.js.
 PERSONAGENS.md
+
+# Poses soltas sao intermediario. O que vai pro repo e a folha montada
+# (assets/<id>.png) e o manifesto (assets/<id>.json), liberados abaixo.
+assets/poses/*/
+!assets/*.png
+!assets/*.json
