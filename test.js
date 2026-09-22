@@ -3,6 +3,7 @@
 //  Nao e suite: e a checagem minima que quebra se o combate quebrar.
 // ============================================================================
 import assert from 'node:assert/strict';
+import { readFileSync } from 'node:fs';
 import { Mundo, Lutador, vazio } from './js/engine.js';
 import { LUTADORES, MAPA, PALCOS, JOGAVEIS, CHAO, FPS } from './js/data.js';
 
@@ -237,6 +238,23 @@ teste('pulo sobe e volta ao chao', () => {
   rodar(m, 120);
   assert.equal(m.p1.y, CHAO, 'nao voltou ao chao');
   assert.equal(m.p1.noChao, true);
+});
+
+teste('todo indice de sprite existe na folha do lutador', () => {
+  // Erra-se isto em silencio: um indice fora da folha nao quebra o jogo,
+  // so desenha nada. Aqui ele vira falha.
+  for (const d of Object.values(LUTADORES)) {
+    if (!d.sprite) continue;
+    const manifesto = JSON.parse(
+      readFileSync(new URL(`./assets/${d.id}.json`, import.meta.url), 'utf8'));
+    const n = manifesto.frames.length;
+    for (const [chave, v] of Object.entries(d.sprite.frames)) {
+      for (const i of [].concat(v)) {
+        assert.ok(Number.isInteger(i) && i >= 0 && i < n,
+          `${d.id}.${chave} aponta para o frame ${i}, a folha tem ${n}`);
+      }
+    }
+  }
 });
 
 console.log('\n-- IA --');
