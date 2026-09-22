@@ -190,6 +190,8 @@ export class Lutador {
       this.vida = Math.max(0, this.vida - chip);
       this.stamina -= dano * 0.9;
       this.super += dano * 0.35;
+      if (atacante) atacante.super = Math.min(atacante.superMax,
+        atacante.super + (golpe.ganhoSuper || dano) * 0.35);
       this.vx += this.dir * -1 * golpe.empurrao * 0.5;
       this.trocar('blockstun');
       this.travaAte = golpe.blockstun;
@@ -213,6 +215,11 @@ export class Lutador {
       if (this.def.passiva && this.armadura <= 0) this.passivaT = this.def.passiva.recarga;
       this.vida = Math.max(0, this.vida - dano * 0.7);
       this.super += dano * 0.5;
+      // O atacante tambem ganha barra aqui. Sem isto, quem enfrenta o chefao
+      // era o unico a ser privado de super de forma sistematica: a passiva dele
+      // recarrega sozinha e come um golpe a cada 2,4s, para sempre.
+      if (atacante) atacante.super = Math.min(atacante.superMax,
+        atacante.super + (golpe.ganhoSuper || dano) * 0.7);
       mundo.efeito('armadura', this.x, this.y - this.altura * 0.6);
       mundo.hitstop = Math.max(mundo.hitstop, 4);
       if (this.vida <= 0) this.morrer(mundo);

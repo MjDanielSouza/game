@@ -33,6 +33,12 @@ export function botMedio(m, i) {
   // (a versao anterior pulava de tudo, inclusive de pinhao caindo do ceu, e
   //  media o chefao como bem mais dificil do que ele e)
   if (vindo.length) {
+    // Quem tem golpe com frames de invencibilidade atravessa o projetil - e o
+    // que um humano faz e a razao de a LADEIRA existir. Sem isto o RAFAEL era
+    // medido como se nao tivesse resposta nenhuma a distancia: 68% do dano que
+    // ele levava do chefao vinha dos dois golpes de longe.
+    const h = eu.def.golpes.habilidade;
+    if (h.invencivel > 0 && eu.podeUsar('habilidade')) { eu.bufferar('habilidade'); return e; }
     const rasteiro = vindo.some((p) => p.rasteiro);
     if (rasteiro && eu.noChao) { e.cima = true; return e; }
     e.bloq = true;
@@ -40,6 +46,8 @@ export function botMedio(m, i) {
     return e;
   }
   if (opAtacando && dist < 140) {
+    const h = eu.def.golpes.habilidade;
+    if (h.tipo === 'parry' && eu.podeUsar('habilidade')) { eu.bufferar('habilidade'); return e; }
     e.bloq = true;
     e.baixo = !!(op.golpe && op.golpe.altura === 'baixo');
     return e;
@@ -50,7 +58,20 @@ export function botMedio(m, i) {
   if (eu.super >= 100 && dist < 170) { eu.bufferar('especial'); return e; }
   if (opPunivel && dist < 130) { eu.bufferar('chute'); return e; }
   if (dist < 120 && i % 9 === 0) eu.bufferar(i % 27 === 0 ? 'baixo' : i % 18 === 0 ? 'chute' : 'soco');
-  if (dist > 190 && i % 55 === 0) eu.bufferar('habilidade');
+  // A habilidade depende do tipo. A versao anterior so a usava a dist > 190,
+  // que e exatamente quando um agarrao nao serve para nada: media o JOAO e o
+  // RAFAEL como se o golpe que os define nao existisse.
+  if (i % 24 === 0 && eu.podeUsar('habilidade')) {
+    const h = eu.def.golpes.habilidade;
+    const serve =
+      h.tipo === 'projetil' || h.tipo === 'armadilha' ? dist > 150 :
+      h.tipo === 'agarrao' ? dist < 120 :
+      h.tipo === 'parry' ? opAtacando && dist < 150 :
+      h.tipo === 'buff' ? eu.armadura <= 0 :
+      h.tipo === 'dash' ? dist > 200 || opAtacando :
+      dist > 110 && dist < 320;
+    if (serve) { eu.bufferar('habilidade'); return e; }
+  }
   return e;
 }
 
@@ -61,6 +82,8 @@ function partida(pj, pi, palco, dif) {
   return m.vencedor;
 }
 
+// so roda a campanha quando chamado direto; quem importa daqui quer o botMedio
+if (import.meta.main !== false) {
 console.log(`\nBalanceamento - ${RODADAS} rounds por lutador, ${JOGAVEIS.length} lutadores\n`);
 console.log('no  local                      oponente      dif    vitorias');
 console.log('-'.repeat(74));
@@ -95,3 +118,5 @@ if (linhas[linhas.length - 1] < 5) quebras.push('o chefao esta perto de impossiv
 if (quebras.length) { console.log('\nPROBLEMAS:'); for (const q of quebras) console.log('  - ' + q); }
 else console.log('\nCurva de dificuldade ok.');
 console.log();
+
+}
