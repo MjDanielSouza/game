@@ -132,7 +132,9 @@ export const LUTADORES = {
       baixo: golpe({ nome: 'Rasteira', startup: 7, ativo: 4, recovery: 15, dano: 9, altura: 'baixo', stamina: 10, pose: 'baixo', alcance: { x: 22, y: -18, w: 52, h: 18 }, cancela: ['especial'] }),
       aereo: golpe({ nome: 'Joelhada Aerea', startup: 5, ativo: 8, recovery: 6, dano: 10, stamina: 8, pose: 'aereo', alcance: { x: 18, y: -34, w: 44, h: 36 } }),
       habilidade: golpe({
-        nome: 'CONTRA-GOLPE', tipo: 'parry', startup: 3, ativo: 18, recovery: 14,
+        // ativo 18 sao 0,3s de janela: vira rede de seguranca em vez de
+        // leitura. Contra um chefao que ataca sem parar, era quase automatico.
+        nome: 'CONTRA-GOLPE', tipo: 'parry', startup: 3, ativo: 10, recovery: 16,
         dano: 20, hitstun: 34, stamina: 18, cooldown: 140, ganhoSuper: 26,
         alcance: { x: 20, y: -56, w: 50, h: 40 }, pose: 'parry', som: 'pesado',
       }),
@@ -436,9 +438,9 @@ export const LUTADORES = {
 // de mobilidade porque punem mais quem ainda nao aprendeu a defender.
 export const MAPA = [
   { id: 'n1', lutador: 'lucas', palco: 'botanico', x: 17, y: 80, nome: 'Jardim Botanico', desc: 'Um lutador sem truque, so fundamento. Se ele te pega, foi limpo.' },
-  { id: 'n2', lutador: 'joao', palco: 'largo', x: 50, y: 80, nome: 'Largo da Ordem', desc: 'O aquecimento. Pedra molhada e briga suja - ele agarra o que nao se move.' },
-  { id: 'n3', lutador: 'neumann', palco: 'niemeyer', x: 83, y: 80, nome: 'Museu Oscar Niemeyer', desc: 'Parede de carne. Nao adianta empurrar, tem que derrubar.' },
-  { id: 'n4', lutador: 'juliano', palco: 'barigui', x: 83, y: 50, nome: 'Parque Barigui', desc: 'Espaco aberto e o cara mais rapido do jogo. Boa sorte.' },
+  { id: 'n2', lutador: 'neumann', palco: 'niemeyer', x: 50, y: 80, nome: 'Museu Oscar Niemeyer', desc: 'Parede de carne. Nao adianta empurrar, tem que derrubar.' },
+  { id: 'n3', lutador: 'juliano', palco: 'barigui', x: 83, y: 80, nome: 'Parque Barigui', desc: 'Espaco aberto e o cara mais rapido do jogo. Boa sorte.' },
+  { id: 'n4', lutador: 'joao', palco: 'largo', x: 83, y: 50, nome: 'Largo da Ordem', desc: 'O aquecimento. Pedra molhada e briga suja - ele agarra o que nao se move.' },
   { id: 'n5', lutador: 'vinicius', palco: 'japao', x: 50, y: 50, nome: 'Praca do Japao', desc: 'Ele nao quer chegar perto. Ele quer que voce tente. Aprenda a bloquear aqui.' },
   { id: 'n6', lutador: 'daniel', palco: 'torre', x: 17, y: 50, nome: 'Torre Panoramica', desc: 'Ele nao corre atras. Ele chega. E de perto voce nao bloqueia o que ele faz.' },
   { id: 'n7', lutador: 'rafael', palco: 'opera', x: 17, y: 20, nome: 'Opera de Arame', desc: 'Palco de verdade. Ele usa o espaco inteiro e some.' },

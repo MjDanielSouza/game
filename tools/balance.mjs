@@ -47,7 +47,17 @@ export function botMedio(m, i) {
   }
   if (opAtacando && dist < 140) {
     const h = eu.def.golpes.habilidade;
-    if (h.tipo === 'parry' && eu.podeUsar('habilidade')) { eu.bufferar('habilidade'); return e; }
+    // Parry no lugar do bloqueio, mas so em metade dos golpes do outro.
+    // Acertar parry e leitura, e este bot e o piso, nao um humano bom.
+    // Trocar SEMPRE bloqueio por parry fazia ele jogar de LUCAS num nivel
+    // melhor do que joga com os outros sete: 57% contra o chefao, contra 38%
+    // sem a regra. Era vies do instrumento, nao forca do personagem.
+    // (i - op.t) e constante durante um golpe, entao a decisao vale para o
+    // golpe inteiro. Um gate por frame nao serve: a funcao roda a cada frame
+    // e ele acabava parriando dentro da mesma janela de qualquer jeito.
+    if (h.tipo === 'parry' && eu.podeUsar('habilidade') && (i - op.t) % 2 === 0) {
+      eu.bufferar('habilidade'); return e;
+    }
     e.bloq = true;
     e.baixo = !!(op.golpe && op.golpe.altura === 'baixo');
     return e;
