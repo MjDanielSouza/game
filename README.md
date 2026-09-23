@@ -48,7 +48,7 @@ Melhor de 3 rounds, 99 segundos cada. Tempo esgotado decide por percentual de vi
 
 | Lutador | Arquétipo | Habilidade (`L`) | Especial (`Espaço`) |
 |---|---|---|---|
-| **LUCAS** | all-rounder | CONTRA-GOLPE — janela de parry que devolve o golpe | SEQUÊNCIA COMPLETA — 4 acertos |
+| **LUCAS** | all-rounder | CONTRA-GOLPE — 10 frames de parry que devolvem o golpe | SEQUÊNCIA COMPLETA — 4 acertos |
 | **JOÃO** | brawler | AGARRÃO — não pode ser bloqueado | BORDOADA — dano alto, curto alcance |
 | **JULIANO** | rushdown | INVESTIDA — avanço com acerto | MARÉ ALTA — 6 acertos avançando |
 | **NEUMANN** | tanque | MURALHA — 3 de armadura por 2,5 s | FIM DE EXPEDIENTE — onda rasteira |
