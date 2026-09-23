@@ -154,6 +154,13 @@ export const LUTADORES = {
     cor: { pele: '#b97a52', roupa: '#1a1a1e', detalhe: '#c62b2b', acento: '#e0533a' },
     cabeca: { tipo: 'gorro', cor: '#c62b2b' },
     fisico: { escala: 1.06, bulk: 1.2 },
+    sprite: {
+      frames: {
+        idle: 0, andar: [1, 2], soco: 3, chute: 4,
+        baixo: 5, agachar: 5, bloqueio: 6, hitstun: 7, ko: 7,
+        pulo: 8, aereo: 9, habilidade: 10, especial: 11,
+      },
+    },
     stats: { vida: 115, velocidade: 2.7, pulo: 12.0, stamina: 100, regen: 0.40, peso: 1.25, defesa: 1.05 },
     ia: { agressividade: 0.82, distancia: 55, reacao: 17, defesa: 0.38 },
     golpes: {
@@ -182,6 +189,13 @@ export const LUTADORES = {
     cor: { pele: '#c98559', roupa: '#f2e8d5', detalhe: '#2aa6a0', acento: '#f4c95d' },
     cabeca: { tipo: 'bucket', cor: '#f2e8d5' },
     fisico: { escala: 0.96, bulk: 0.88 },
+    sprite: {
+      frames: {
+        idle: 0, andar: [1, 2], soco: 3, chute: 4,
+        baixo: 5, agachar: 5, bloqueio: 6, hitstun: 7, ko: 7,
+        pulo: 8, aereo: 9, habilidade: 10, especial: 11,
+      },
+    },
     stats: { vida: 82, velocidade: 4.2, pulo: 15.0, stamina: 110, regen: 0.55, peso: 0.85, defesa: 0.9 },
     ia: { agressividade: 0.95, distancia: 60, reacao: 11, defesa: 0.32 },
     golpes: {
