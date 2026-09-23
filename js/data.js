@@ -90,17 +90,6 @@ export const PALCOS = {
     chao: '#2a2f3a', chaoLinha: '#404757', nevoa: 'rgba(150,180,255,0.09)',
     luz: '#8fc5ff', silhueta: 'torre',
   },
-  // Araucária (a cidade, não o chefão): igreja matriz, a cachoeira do Parque
-  // Cachoeira e as chaminés da refinaria ao fundo. Tem placa, então a
-  // silhueta procedural nunca desenha - as cores abaixo são amostradas da
-  // placa para o chão e a névoa combinarem com ela.
-  araucaria: {
-    nome: 'Araucária', hora: 'fim de tarde',
-    ceu: ['#54626d', '#847d78', '#64553e'],
-    fundo: '#2a3320', meio: '#13170e', frente: '#0b0e07',
-    chao: '#2c2a1c', chaoLinha: '#43402c', nevoa: 'rgba(255,196,120,0.12)',
-    luz: '#ffc478', silhueta: 'refinaria',
-  },
   pedreira: {
     nome: 'Pedreira Paulo Leminski', hora: 'tempestade',
     ceu: ['#0b0a0f', '#2a1418', '#5e1f1c'],
