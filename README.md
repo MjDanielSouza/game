@@ -30,6 +30,10 @@ Depois abra <http://localhost:8123>. Abrir o `index.html` direto pelo disco
 | `Espaço` | especial (precisa da barra roxa cheia) |
 | `Esc` | abandonar a luta |
 
+**No celular**, os botões aparecem na tela durante a luta — direção à esquerda,
+golpes à direita. Deite o aparelho: em pé o canvas de 16:9 vira uma tarja e o
+jogo pede para girar.
+
 As três regras que decidem a partida:
 
 - **Golpe alto** só é bloqueado **em pé**. **Golpe baixo** só é bloqueado

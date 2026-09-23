@@ -88,22 +88,67 @@ addEventListener('keydown', (e) => {
   if (teclas[e.code]) return;
   teclas[e.code] = true;
 
-  if (S.tela === 'luta' && S.mundo && S.mundo.fase === 'luta') {
-    const a = ACOES[e.code];
-    if (a) {
-      // Baixo + soco = golpe baixo
-      if (a === 'soco' && (teclas.ArrowDown || teclas.KeyS)) S.mundo.p1.bufferar('baixo');
-      else S.mundo.p1.bufferar(a);
-    }
-  }
+  const a = ACOES[e.code];
+  if (a) acao(a);
   if (e.code === 'Escape' && S.tela === 'luta') irPara('mapa');
 });
 addEventListener('keyup', (e) => { teclas[e.code] = false; });
+
+// Unico caminho de golpe: teclado e toque chamam os dois aqui.
+function acao(a) {
+  if (S.tela !== 'luta' || !S.mundo || S.mundo.fase !== 'luta') return;
+  // Baixo + soco = golpe baixo
+  if (a === 'soco' && (teclas.ArrowDown || teclas.KeyS)) S.mundo.p1.bufferar('baixo');
+  else S.mundo.p1.bufferar(a);
+}
 
 function entrada() {
   const e = vazio();
   for (const k in MAPA_TECLAS) if (teclas[k]) e[MAPA_TECLAS[k]] = true;
   return e;
+}
+
+// ------------------------------------------------------------------ toque --
+// Celular nao tem teclado. Os botoes de direcao escrevem no mesmo `teclas` que
+// o keydown, entao `entrada()` nao sabe de onde veio o input e o combo
+// baixo+soco continua funcionando sem nenhuma linha a mais.
+const painelToque = $('#toque');
+let ehToque = matchMedia('(pointer: coarse)').matches;
+
+function atualizarToque() {
+  painelToque.classList.toggle('ativa', ehToque && S.tela === 'luta');
+}
+
+// Notebook com tela de toque responde `pointer: fine`. Entao tambem liga no
+// primeiro dedo que encostar, e ai vale para o resto da sessao.
+addEventListener('touchstart', () => {
+  if (ehToque) return;
+  ehToque = true;
+  atualizarToque();
+}, { passive: true });
+
+for (const b of painelToque.querySelectorAll('.tq')) {
+  const tecla = b.dataset.tecla;
+  const golpe = b.dataset.acao;
+
+  b.addEventListener('pointerdown', (e) => {
+    e.preventDefault();
+    // Captura no proprio botao. Sem isso, arrastar o polegar para fora entrega
+    // o pointerup a outro elemento e a direcao fica presa para sempre - o
+    // lutador anda sozinho ate a parede.
+    try { b.setPointerCapture(e.pointerId); } catch (err) {}
+    b.classList.add('presso');
+    if (tecla) teclas[tecla] = true;
+    else if (golpe) acao(golpe);
+    else irPara('mapa');
+  });
+
+  const soltar = () => {
+    b.classList.remove('presso');
+    if (tecla) teclas[tecla] = false;
+  };
+  b.addEventListener('pointerup', soltar);
+  b.addEventListener('pointercancel', soltar);
 }
 
 // ------------------------------------------------------------------ telas --
@@ -115,6 +160,7 @@ function irPara(t) {
     if (el) el.classList.toggle('ativa', id === t);
   }
   cv.classList.toggle('ativa', t === 'luta');
+  atualizarToque();
   tocar('ui');
 
   if (t === 'selecao') montarSelecao($('#grade-personagens'), escolherPersonagem);
