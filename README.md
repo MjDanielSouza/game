@@ -71,15 +71,20 @@ por cima. A janela vai de 18 frames (NEUMANN, o mais pesado) a 45 (RAFAEL).
 
 | Lutador | Arquétipo | Habilidade (`L`) | Especial (`Espaço`) |
 |---|---|---|---|
-| **LUCAS** | all-rounder | CONTRA-GOLPE — 10 frames de parry que devolvem o golpe | SEQUÊNCIA COMPLETA — 4 acertos |
-| **JOÃO** | brawler | AGARRÃO — não pode ser bloqueado | BORDOADA — dano alto, curto alcance |
-| **JULIANO** | rushdown | INVESTIDA — avanço com acerto | MARÉ ALTA — 6 acertos avançando |
-| **NEUMANN** | tanque | MURALHA — 3 de armadura por 2,5 s | FIM DE EXPEDIENTE — onda rasteira |
-| **RAFAEL LATA** | mobilidade | LADEIRA — dash invencível que atravessa, sem dano: rende super | CAPACETE DE AÇO — investida de tela cheia, 3 acertos |
-| **VINICIUS** | zoner | GEADA — projétil que deixa lento | NEVASCA — 5 projéteis |
-| **COSTELA** | técnico | ARMADILHA — planta no chão (até 2, 17 de dano cada) | XEQUE-MATE — detona todas de uma vez |
-| **DANIEL** | grappler | REUNIÃO — agarrão que avança e não pode ser bloqueado | ÚLTIMA PALAVRA — investida com 2 de armadura |
+| **LUCAS** | all-rounder | PERFUME TÓXICO — nuvem que fica 2 s no ar e **inverte os controles** de quem encostar | SEQUÊNCIA COMPLETA — 4 acertos |
+| **JOÃO** | brawler | TOCA SERRILHADA — bumerangue: **bate na ida e na volta** | BORDOADA — dano alto, curto alcance |
+| **JULIANO** | rushdown | TRANCO — anti-aéreo com hitbox alta, **dobra o dano em quem está no ar** | MARÉ ALTA — 6 acertos avançando |
+| **NEUMANN** | tanque | HORA DO CAFÉ — agarrão imbloqueável de dois tempos: joga para cima e **lança para o outro lado** | FIM DE EXPEDIENTE — onda rasteira |
+| **RAFAEL LATA** | zoner | CAPACETE VOADOR — bumerangue de longo alcance, **dois acertos por arremesso** | CAPACETE DE AÇO — investida de tela cheia, 3 acertos |
+| **VINICIUS** | zoner | GEADA — quase não tira vida, mas **congela por 1,5 s** | NEVASCA — 5 projéteis |
+| **COSTELA** | técnico | COSTELA NA BRASA — arco com gravidade própria, **queima por 2 s** | CHURRASCO COMPLETO — 3 costelas, todas queimando |
+| **DANIEL** | sabotador | INVASÃO — **rouba barra de super e tranca o especial** dele por 4 s | ÚLTIMA PALAVRA — investida com 2 de armadura |
 | **ARAUCÁRIA** | **CHEFÃO** | CHUVA DE PINHÃO — 3 projéteis em arco | QUEDA DA COPA — onda nos dois sentidos |
+
+**Estados** que um golpe pode aplicar: congelado (não age), controles
+invertidos, especial trancado e queimadura. Queimadura **nunca mata** — leva a
+vida a 1 e para. Morrer de dano residual sem ninguém ter encostado é
+frustrante.
 
 O chefão tem **armadura passiva**: absorve um golpe e leva ~2,5 s para
 recarregar. Golpe avulso não o interrompe — só combo. Você continua ganhando
@@ -150,6 +155,26 @@ Estado atual, 200 rounds por nó (bot médio — um humano vai bem melhor):
 
 | nó | local | oponente | vitórias do bot |
 |---|---|---|---|
+| 1 | Jardim Botânico | LUCAS | 98% |
+| 2 | Praça do Japão | VINICIUS | 91% |
+| 3 | Parque Barigui | JULIANO | 82% |
+| 4 | Torre Panorâmica | DANIEL | 80% |
+| 5 | Largo da Ordem | JOÃO | 63% |
+| 6 | Museu Oscar Niemeyer | NEUMANN | 50% |
+| 7 | Estação Tubo | COSTELA | 49% |
+| 8 | Ópera de Arame | RAFAEL LATA | 33% |
+| 9 | Pedreira Paulo Leminski | **ARAUCÁRIA** | 25% |
+
+A 200 rounds o erro padrão fica em ~3 pontos, então os nós 6 e 7 estão
+empatados.
+
+**A ordem do mapa é definida por essa medição, não pelo conceito dos
+personagens** — e por isso ela muda quando o jogo muda. Trocar as oito
+habilidades reordenou metade da campanha: o VINICIUS subiu para o nó 2 (a
+GEADA congela mas quase não tira vida) e o RAFAEL desceu para o 8 (o capacete
+bate duas vezes por arremesso).
+
+---|---|---|---|
 | 1 | Jardim Botânico | LUCAS | 90% |
 | 2 | Parque Barigui | JULIANO | 85% |
 | 3 | Museu Oscar Niemeyer | NEUMANN | 79% |

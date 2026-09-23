@@ -98,7 +98,8 @@ teste('agarrao ignora defesa', () => {
   const m = novo();
   const a = new Lutador('lucas', 400, -1, false);
   a.bloqueando = true; a.noChao = true;
-  assert.equal(a.receber(LUTADORES.joao.golpes.habilidade, m.p1, m), 'acerto');
+  // O agarrao mudou de dono na Sprint 5: era do JOAO, virou do NEUMANN.
+  assert.equal(a.receber(LUTADORES.neumann.golpes.habilidade, m.p1, m), 'acerto');
 });
 
 teste('armadura absorve o hitstun mas nao o dano', () => {
@@ -159,27 +160,131 @@ teste('projetil do VINICIUS viaja, acerta e deixa lento', () => {
   assert.ok(m.p2.lentidao > 0 || m.p2.vida < m.p2.vidaMax, 'projetil nao conectou');
 });
 
-teste('armadilha do COSTELA dispara quando o oponente pisa', () => {
-  const m = lutando(new Mundo('costela', 'lucas', 'tubo', 1));
-  m.p1.bufferar('habilidade');
-  rodar(m, 16);
-  assert.equal(m.armadilhas.length, 1, 'armadilha nao foi posta');
-  const a = m.armadilhas[0];
+// --- habilidades da Sprint 5 -------------------------------------------------
+// Cada uma testa o que DISTINGUE a habilidade, nao que ela da dano.
+
+// roda ate o projetil acertar, com teto para nao travar o teste
+const ateAcertar = (m, limite = 120) => {
   const v = m.p2.vida;
-  m.p2.x = a.x;                        // pisou
-  rodar(m, 40);
-  assert.ok(m.p2.vida < v, 'armadilha nao disparou');
+  for (let i = 0; i < limite; i++) {
+    m.atualizar(vazio(), vazio());
+    if (m.p2.vida < v) return i;
+  }
+  return -1;
+};
+
+teste('GEADA congela: o alvo para de responder ao comando', () => {
+  const m = lutando(new Mundo('vinicius', 'lucas', 'japao', 1, { duplo: true }));
+  m.p2.x = m.p1.x + 300;
+  m.p1.bufferar('habilidade');
+  assert.ok(ateAcertar(m) >= 0, 'a GEADA nao acertou');
+  assert.ok(m.p2.congelado > 0, 'nao congelou');
+  const x = m.p2.x;
+  for (let i = 0; i < 20; i++) m.atualizar(vazio(), { ...vazio(), esq: true });
+  assert.ok(Math.abs(m.p2.x - x) < 12, 'congelado nao pode andar');
+  // e volta a andar quando passa
+  for (let i = 0; i < 100; i++) m.atualizar(vazio(), vazio());
+  assert.equal(m.p2.congelado, 0);
+  const y = m.p2.x;
+  for (let i = 0; i < 20; i++) m.atualizar(vazio(), { ...vazio(), esq: true });
+  assert.ok(m.p2.x < y - 20, 'depois de descongelar tem que voltar a andar');
 });
 
-teste('CONTRA-GOLPE do LUCAS pune ataque na janela', () => {
-  const m = novo('lucas', 'joao');
-  m.p2.x = m.p1.x + 80;
-  const v = m.p2.vida;
+teste('PERFUME inverte os controles de quem encosta', () => {
+  const m = lutando(new Mundo('lucas', 'joao', 'opera', 1, { duplo: true }));
+  m.p2.x = m.p1.x + 240;
   m.p1.bufferar('habilidade');
-  rodar(m, 4);
-  m.p2.bufferar('soco');               // o inimigo ataca durante o parry
-  rodar(m, 16);
-  assert.ok(m.p2.vida < v, 'contra-golpe nao puniu');
+  for (let i = 0; i < 20; i++) m.atualizar(vazio(), vazio());
+  assert.equal(m.nuvens.length, 1, 'a nuvem nao foi posta');
+  // anda para dentro da nuvem
+  for (let i = 0; i < 90 && !m.p2.invertido; i++) m.atualizar(vazio(), { ...vazio(), esq: true });
+  assert.ok(m.p2.invertido > 0, 'encostar na nuvem tem que inverter');
+  // pedindo 'dir' o lutador vai para a ESQUERDA
+  const x = m.p2.x;
+  for (let i = 0; i < 20; i++) m.atualizar(vazio(), { ...vazio(), dir: true });
+  assert.ok(m.p2.x < x, 'com controle invertido, dir tem que andar para a esquerda');
+});
+
+teste('COSTELA NA BRASA queima com o tempo e nunca mata', () => {
+  const m = lutando(new Mundo('costela', 'lucas', 'tubo', 1, { duplo: true }));
+  m.p2.x = m.p1.x + 220;
+  m.p1.bufferar('habilidade');
+  assert.ok(ateAcertar(m, 160) >= 0, 'a costela nao acertou');
+  assert.ok(m.p2.queimando > 0, 'nao pegou fogo');
+  const depoisDoAcerto = m.p2.vida;
+  for (let i = 0; i < 90; i++) m.atualizar(vazio(), vazio());
+  assert.ok(m.p2.vida < depoisDoAcerto, 'a queimadura tem que tirar vida sozinha');
+
+  // com 1 de vida a queimadura nao pode matar
+  const m2 = lutando(new Mundo('costela', 'lucas', 'tubo', 1, { duplo: true }));
+  m2.p2.vida = 1;
+  m2.p2.queimando = 120; m2.p2.queimaDano = 5;
+  for (let i = 0; i < 150; i++) m2.atualizar(vazio(), vazio());
+  assert.equal(m2.p2.vida, 1, 'queimadura nao pode matar');
+  assert.equal(m2.fase, 'luta');
+});
+
+teste('INVASAO rouba barra e tranca o especial do outro', () => {
+  const m = lutando(new Mundo('daniel', 'lucas', 'torre', 1, { duplo: true }));
+  m.p2.x = m.p1.x + 70;
+  m.p2.super = 100;
+  m.p1.super = 0;
+  m.p1.bufferar('habilidade');
+  for (let i = 0; i < 30; i++) m.atualizar(vazio(), vazio());
+  assert.ok(m.p2.super <= 70, `deveria ter roubado barra, ficou com ${m.p2.super}`);
+  assert.ok(m.p1.super > 0, 'quem roubou tem que receber');
+  assert.ok(m.p2.semEspecial > 0, 'o especial do outro tem que travar');
+  m.p2.super = 100;
+  assert.equal(m.p2.podeUsar('especial'), false, 'especial travado nao pode sair');
+  for (let i = 0; i < 260; i++) m.atualizar(vazio(), vazio());
+  assert.equal(m.p2.semEspecial, 0, 'a trava tem que acabar');
+});
+
+teste('bumerangue volta e pode acertar de novo na volta', () => {
+  const m = lutando(new Mundo('rafael', 'lucas', 'opera', 1, { duplo: true }));
+  m.p2.x = m.p1.x + 420;
+  m.p1.bufferar('habilidade');
+  let voltou = false, acertos = 0;
+  let v = m.p2.vida;
+  for (let i = 0; i < 200; i++) {
+    m.atualizar(vazio(), vazio());
+    if (m.projeteis[0] && m.projeteis[0].voltando) voltou = true;
+    if (m.p2.vida < v) { acertos++; v = m.p2.vida; }
+  }
+  assert.ok(voltou, 'o capacete tem que inverter e voltar');
+  assert.equal(acertos, 2, `tem que bater na ida e na volta, bateu ${acertos}`);
+});
+
+teste('TRANCO dobra o dano em quem esta no ar', () => {
+  const dano = (noAr) => {
+    const m = lutando(new Mundo('juliano', 'lucas', 'barigui', 1, { duplo: true }));
+    m.p2.x = m.p1.x + 60;
+    const a = m.p2;
+    if (noAr) { a.noChao = false; a.y = CHAO - 120; a.vy = -2; }
+    const v = a.vida;
+    m.p1.bufferar('habilidade');
+    for (let i = 0; i < 24; i++) m.atualizar(vazio(), vazio());
+    return v - a.vida;
+  };
+  const chao = dano(false);
+  const ar = dano(true);
+  assert.ok(chao > 0 && ar > 0, `os dois tem que acertar (chao ${chao}, ar ${ar})`);
+  assert.ok(ar > chao * 1.5, `no ar tem que doer bem mais: chao ${chao}, ar ${ar}`);
+});
+
+teste('HORA DO CAFE joga para cima e depois lanca para longe', () => {
+  const m = lutando(new Mundo('neumann', 'lucas', 'niemeyer', 1, { duplo: true }));
+  m.p2.x = m.p1.x + 70;
+  m.p2.bloqueando = true;              // agarrao ignora defesa
+  m.p1.bufferar('habilidade');
+  let subiu = false;
+  const x0 = m.p2.x;
+  for (let i = 0; i < 70; i++) {
+    m.atualizar(vazio(), vazio());
+    if (m.p2.y < CHAO - 60) subiu = true;
+  }
+  assert.ok(subiu, 'o primeiro tempo tem que jogar para cima');
+  assert.ok(Math.abs(m.p2.x - x0) > 90, 'o segundo tempo tem que mandar para longe');
 });
 
 teste('chefao tem armadura passiva que recarrega', () => {
@@ -237,11 +342,13 @@ teste('lutador nao sai da arena nem atravessa o chao', () => {
 });
 
 teste('pulo sobe e volta ao chao', () => {
-  const m = novo();
-  m.atualizar({ ...vazio(), cima: true });
-  rodar(m, 4);
+  // Sem IA: com ela ligada o oponente acertava o p1 no ar, e todo acerto no ar
+  // refaz o `vy` para cima. O teste falhava em ~1 de 5 execucoes por isso.
+  const m = lutando(new Mundo('lucas', 'lucas', 'botanico', 1, { duplo: true }));
+  m.atualizar({ ...vazio(), cima: true }, vazio());
+  for (let i = 0; i < 4; i++) m.atualizar(vazio(), vazio());
   assert.ok(m.p1.y < CHAO, 'nao saiu do chao');
-  rodar(m, 120);
+  for (let i = 0; i < 120; i++) m.atualizar(vazio(), vazio());
   assert.equal(m.p1.y, CHAO, 'nao voltou ao chao');
   assert.equal(m.p1.noChao, true);
 });

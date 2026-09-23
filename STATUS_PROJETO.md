@@ -163,6 +163,31 @@ agência nenhuma não é diversão.
 cai no `especial` enquanto ele não existe. Entrar com a pose depois é dado, não
 código.
 
+### Estados aplicados por golpe (Sprint 5)
+
+`golpe.efeitos` é lido por `aplicarEfeitos()` — o motor não sabe que existe
+"gelo" nem "perfume", só aplica contadores de frame:
+
+| chave | efeito |
+|---|---|
+| `congelar` | não age, não anda, continua levando dano |
+| `inverter` | esquerda e direita trocadas **na porta da entrada** |
+| `bloquearEspecial` | `podeUsar('especial')` recusa |
+| `queimar` | dano a cada 12 frames; **nunca mata**, leva a vida a 1 |
+| `roubarSuper` | tira do alvo e dá ao atacante, limitado ao que o alvo tem |
+
+Outras chaves de golpe: `danoAereo` (multiplica em quem está no ar),
+`projetil.retorno` + `projetil.atravessa` (bumerangue: inverte a velocidade e
+pode bater de novo na volta), `arremesso` (agarrão de dois tempos),
+`tipo: 'nuvem'` + `nuvemDados` (área parada no ar que aplica efeito ao toque).
+
+**Pegadinha:** os efeitos de um projétil moram em `projetil.efeitos`, e quem os
+aplica é `receber(golpe, ...)`. `disparar()` precisa copiá-los para o golpe
+sintético — sem isso a GEADA não congela e a costela não queima, em silêncio.
+
+**O parry ficou sem dono.** Era o CONTRA-GOLPE do LUCAS. O `tipo: 'parry'`
+continua implementado no motor, sem ninguém usando.
+
 ### Chefão
 
 Armadura passiva que absorve um golpe e recarrega em ~2,4 s: golpe avulso não
@@ -230,7 +255,7 @@ Pipeline completo em [ARTE.md](ARTE.md) e [CENARIOS.md](CENARIOS.md).
 | 2 | Sistema de finalização (FINALIZE!) | **pronta** — falta só o frame de arte |
 | 3 | Ranking, loading e nova seleção | **pronta** |
 | 4 | Visual de console portátil + tela cheia no toque | a fazer — **o sistema já existe** |
-| 5 | Habilidades novas dos 8 do elenco | a fazer |
+| 5 | Habilidades novas dos 8 do elenco | **pronta** |
 
 ### Notas que mudam o plano
 
@@ -244,9 +269,9 @@ Falta só o **visual** — opacidade 0.5, sombreamento, afundar no `:active`.
 Não trocar Pointer Events por `touchstart` puro: a captura de ponteiro é o que
 impede a direção de ficar presa quando o polegar escorrega.
 
-**Sprint 5 vai derrubar o balanceamento.** A curva publicada no README foi
-medida com as habilidades atuais. Trocar as oito exige remedir com
-`node tools/balance.mjs 200` e atualizar a tabela no mesmo PR.
+**Só a Sprint 4 fica pendente:** visual de console portátil no overlay de
+toque (opacidade, sombreamento, afundar no `:active`) e botão de tela cheia.
+O sistema de toque em si já funciona desde o PR #12.
 
 ---
 

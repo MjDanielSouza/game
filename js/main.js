@@ -4,7 +4,7 @@
 
 import { LARGURA, ALTURA, CHAO, ARENA, FPS, MAPA, LUTADORES, PALCOS, DICAS, dificuldadeDoNo, alturaDe } from './data.js';
 import { Mundo, vazio, SEQUENCIA_GAP } from './engine.js';
-import { desenharLutador, desenharPalco, desenharProjetil, desenharArmadilha, desenharEfeito, carregarPlaca } from './render.js';
+import { desenharLutador, desenharPalco, desenharProjetil, desenharArmadilha, desenharNuvem, desenharEfeito, carregarPlaca } from './render.js';
 import { desenharHUD, montarSelecao, montarMapa, montarBriefing, montarPalcos, montarRecordes, retrato } from './ui.js';
 import { pontosDoRound, salvarRecorde, lerRecordes, ehRecorde } from './pontos.js';
 import * as Sprites from './sprites.js';
@@ -503,6 +503,7 @@ function desenhar() {
   ctx.save();
   ctx.translate(-(camX - LARGURA / 2), 0);
   for (const a of m.armadilhas) desenharArmadilha(ctx, a, S.tick);
+  for (const n of m.nuvens) desenharNuvem(ctx, n, S.tick);
   const ordem = m.p1.y >= m.p2.y ? [m.p2, m.p1] : [m.p1, m.p2];
   for (const f of ordem) desenharLutador(ctx, f, S.tick);
   for (const p of m.projeteis) desenharProjetil(ctx, p, S.tick);
