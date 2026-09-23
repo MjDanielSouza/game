@@ -353,7 +353,9 @@ function desenhar() {
   ctx.clearRect(0, 0, LARGURA, ALTURA);
 
   ctx.save();
-  ctx.translate(tremX, tremY);
+  // A camera vertical move o palco e o mundo JUNTOS - se so o mundo descesse,
+  // o lutador sairia do chao desenhado.
+  ctx.translate(tremX, tremY + m.cameraY);
   desenharPalco(ctx, m.palco, camX, S.tick);
 
   // mundo

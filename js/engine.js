@@ -4,7 +4,7 @@
 //  Nada aqui conhece um golpe pelo nome: tudo vem de data.js.
 // ============================================================================
 
-import { LUTADORES, GRAVIDADE, ATRITO, CHAO, ARENA, FPS, alturaDe } from './data.js';
+import { LUTADORES, GRAVIDADE, ATRITO, CHAO, ARENA, FPS, alturaDe, ESCALA_ARCADE, ESC, impulsoDe } from './data.js';
 
 const clamp = (v, a, b) => (v < a ? a : v > b ? b : v);
 const colide = (a, b) =>
@@ -12,6 +12,11 @@ const colide = (a, b) =>
 
 // Ordem em que a IA e o input consideram golpes
 export const BOTOES = ['soco', 'chute', 'baixo', 'aereo', 'habilidade', 'especial'];
+
+// Camera vertical: o quanto ela pode descer, e a folga que a cabeca precisa
+// ter do topo da tela (o HUD ocupa ate ~90).
+const CAMERA_Y_MAX = 150;
+const MARGEM_TOPO = 96;
 
 // ============================================================================
 //  LUTADOR
@@ -30,7 +35,7 @@ export class Lutador {
     this.vy = 0;
     this.dir = dir;               // 1 = olhando para a direita
 
-    this.escala = d.fisico.escala * 1.3;   // proporcao de arcade: ~1/4 da tela
+    this.escala = d.fisico.escala * ESCALA_ARCADE;
     this.altura = alturaDe(d);
     // bulk entra amortecido: escala e bulk multiplicando direto davam um corpo
     // de 157px no chefao, e o empurra-corpos separava mais do que o alcance do
@@ -192,7 +197,7 @@ export class Lutador {
       this.super += dano * 0.35;
       if (atacante) atacante.super = Math.min(atacante.superMax,
         atacante.super + (golpe.ganhoSuper || dano) * 0.35);
-      this.vx += this.dir * -1 * golpe.empurrao * 0.5;
+      this.vx += this.dir * -1 * golpe.empurrao * ESC * 0.5;
       this.trocar('blockstun');
       this.travaAte = golpe.blockstun;
       mundo.efeito('bloqueio', this.x + this.dir * -18, this.y - this.altura * 0.6);
@@ -235,7 +240,7 @@ export class Lutador {
     const pesoInv = 1 / this.def.stats.peso;
     // empurrado para longe de quem bateu
     const sentido = atacante ? atacante.dir : -this.dir;
-    this.vx += sentido * golpe.empurrao * pesoInv;
+    this.vx += sentido * golpe.empurrao * ESC * pesoInv;
     if (!this.noChao) this.vy = Math.min(this.vy, -4);
 
     this.trocar('hitstun');
@@ -262,7 +267,7 @@ export class Lutador {
     this.vida = 0;
     this.trocar('ko');
     this.vy = -9;
-    this.vx = -this.dir * 5;
+    this.vx = -this.dir * 5 * ESC;
     mundo.tremor = 22;
     mundo.som('ko');
   }
@@ -303,7 +308,7 @@ export class Lutador {
 
     if (this.estado === 'ko') { this.fisica(); return; }
 
-    const vel = this.def.stats.velocidade * (this.lentidao > 0 ? 0.45 : 1) * (this.fase2 ? this.def.fase2.velocidade : 1);
+    const vel = this.def.stats.velocidade * ESC * (this.lentidao > 0 ? 0.45 : 1) * (this.fase2 ? this.def.fase2.velocidade : 1);
 
     // ---- estados travados ----
     if (this.estado === 'hitstun' || this.estado === 'blockstun') {
@@ -350,15 +355,15 @@ export class Lutador {
       else if (ent.dir) { this.vx = vel; this.estado = 'andar'; }
       else { this.vx *= ATRITO; this.estado = 'idle'; }
       if (ent.cima) {
-        this.vy = -this.def.stats.pulo;
+        this.vy = -impulsoDe(this.def);
         this.noChao = false;
         this.estado = 'pulo';
         mundo.som('pulo');
       }
     } else {
       this.estado = 'pulo';
-      if (ent.esq) this.vx = Math.max(this.vx - 0.35, -vel);
-      if (ent.dir) this.vx = Math.min(this.vx + 0.35, vel);
+      if (ent.esq) this.vx = Math.max(this.vx - 0.35 * ESC, -vel);
+      if (ent.dir) this.vx = Math.min(this.vx + 0.35 * ESC, vel);
     }
 
     // regen de stamina fora de acao
@@ -390,7 +395,10 @@ export class Lutador {
         if (this.estado === 'pulo') this.trocar('idle');
       }
     }
-    this.x = clamp(this.x, 60, ARENA - 60);
+    // A parede considera a largura do corpo. Com 60 fixo, o lutador grande
+    // atravessava metade de si mesmo para fora da arena.
+    const meio = this.largura / 2;
+    this.x = clamp(this.x, meio, ARENA - meio);
     if (Math.abs(this.vx) < 0.05) this.vx = 0;
   }
 
@@ -403,7 +411,7 @@ export class Lutador {
     const fimAtivo = g.startup + g.ativo;
     const fim = fimAtivo + g.recovery;
 
-    if (g.avanco && t <= fimAtivo) this.vx = this.dir * g.avanco * (g.tipo === 'dash' ? 1 : 0.9);
+    if (g.avanco && t <= fimAtivo) this.vx = this.dir * g.avanco * ESC * (g.tipo === 'dash' ? 1 : 0.9);
     else this.vx *= ATRITO;
 
     // disparo no primeiro frame ativo
@@ -454,7 +462,7 @@ export class Lutador {
               this.hitsDados++;
               this.acertou = true;
               if (g.tipo === 'agarrao' && r === 'acerto') {
-                op.vx = this.dir * g.empurrao * 1.4;
+                op.vx = this.dir * g.empurrao * ESC * 1.4;
                 op.vy = -7;
                 op.noChao = false;
               }
@@ -491,6 +499,11 @@ export class Mundo {
     this.hitstop = 0;
     this.tremor = 0;
     this.camera = ARENA / 2;
+    // Camera vertical. Em escala de fliperama o pulo maximo leva a cabeca de
+    // um lutador de 400px para fora da tela: os pes ficam em 325 e a cabeca
+    // em -73. Em vez de baixar o pulo - que e o que torna o projetil
+    // pulavel - a camera desce junto, como em qualquer fighter de arcade.
+    this.cameraY = 0;
     this.frame = 0;
     this.round = opcoes.round || 1;
     this.placar = opcoes.placar || [0, 0];
@@ -523,13 +536,17 @@ export class Mundo {
 
   disparar(dono, golpe, p, indice, forcaDir) {
     const dir = forcaDir != null ? forcaDir : dono.dir;
-    const y = p.rasteiro ? CHAO - 22 : dono.y - dono.altura * 0.55;
+    // 0.47 e nao 0.55: o projetil sai na cintura, nao no peito. Com 0.55 ele
+    // voava a 193px do chao e os dois lutadores mais pesados nao conseguiam
+    // passar por cima nem no pulo maximo - "pule o projetil" so valia para
+    // metade do elenco, que e o mesmo que nao valer.
+    const y = p.rasteiro ? CHAO - 22 * ESC : dono.y - dono.altura * 0.47;
     const espalha = p.espalha ? (indice - 2) * 0.09 : 0;
     this.projeteis.push({
-      x: dono.x + dir * 40, y,
-      vx: dir * p.vel, vy: p.arco ? -3.2 - indice * 0.8 : espalha * -9,
+      x: dono.x + dir * 40 * ESC, y,
+      vx: dir * p.vel * ESC, vy: (p.arco ? -3.2 - indice * 0.8 : espalha * -9) * ESC,
       arco: !!p.arco, rasteiro: !!p.rasteiro,
-      raio: p.raio, cor: p.cor, dano: p.dano, altura: p.altura || 'alto',
+      raio: p.raio * ESC, cor: p.cor, dano: p.dano, altura: p.altura || 'alto',
       hitstun: p.hitstun || 18, lentidao: p.lentidao || 0,
       vida: p.vida, t: 0, dono, dir,
       golpe: { ...golpe, dano: p.dano, hitstun: p.hitstun || 18, altura: p.altura || 'alto', empurrao: 6, tipo: 'projetil', som: golpe.som },
@@ -540,8 +557,8 @@ export class Mundo {
   porArmadilha(dono, d) {
     const minhas = this.armadilhas.filter((a) => a.dono === dono);
     if (minhas.length >= d.max) this.armadilhas.splice(this.armadilhas.indexOf(minhas[0]), 1);
-    this.armadilhas.push({ x: dono.x + dono.dir * 70, y: CHAO, raio: d.raio, dano: d.dano, hitstun: d.hitstun, vida: d.vida, t: 0, dono, armada: 30 });
-    this.efeito('buff', dono.x + dono.dir * 70, CHAO - 10);
+    this.armadilhas.push({ x: dono.x + dono.dir * 70 * ESC, y: CHAO, raio: d.raio * ESC, dano: d.dano, hitstun: d.hitstun, vida: d.vida, t: 0, dono, armada: 30 });
+    this.efeito('buff', dono.x + dono.dir * 70 * ESC, CHAO - 10);
   }
 
   detonarArmadilhas(dono, dano) {
@@ -549,7 +566,7 @@ export class Mundo {
     let n = 0;
     for (const a of this.armadilhas.filter((a) => a.dono === dono)) {
       this.efeito('acerto', a.x, CHAO - 30, 1.4);
-      if (Math.abs(alvo.x - a.x) < 140) {
+      if (Math.abs(alvo.x - a.x) < 140 * ESC) {
         alvo.receber({ dano, hitstun: 30, blockstun: 10, empurrao: 8, altura: 'medio', tipo: 'melee', som: 'super', ganhoSuper: 10 }, dono, this);
         n++;
       }
@@ -616,8 +633,8 @@ export class Mundo {
       // rasteiro e atravessava a arena inteira: a CHUVA DE PINHAO do chefao
       // sozinha era metade de todo o dano da luta e nunca deixava aproximar.
       if (p.arco) {
-        p.vy += 0.16;
-        if (p.y > CHAO - 14) { p.morto = true; this.efeito('acerto', p.x, CHAO - 14, 0.7); }
+        p.vy += 0.16 * ESC;
+        if (p.y > CHAO - 14 * ESC) { p.morto = true; this.efeito('acerto', p.x, CHAO - 14 * ESC, 0.7); }
       }
       const alvo = p.dono === this.p1 ? this.p2 : this.p1;
       const cx = { x: p.x - p.raio, y: p.y - p.raio, w: p.raio * 2, h: p.raio * 2 };
@@ -649,6 +666,13 @@ export class Mundo {
   atualizarCamera() {
     const meio = (this.p1.x + this.p2.x) / 2;
     this.camera += (meio - this.camera) * 0.09;
+
+    // Quanto a cabeca mais alta invade o topo, contando a margem do HUD.
+    const teto = Math.min(this.p1.y - this.p1.altura, this.p2.y - this.p2.altura);
+    const alvo = clamp(MARGEM_TOPO - teto, 0, CAMERA_Y_MAX);
+    // Sobe rapido e desce devagar: a descida acompanhando a queda frame a
+    // frame dava enjoo, e o que importa e nao cortar a cabeca na subida.
+    this.cameraY += (alvo - this.cameraY) * (alvo > this.cameraY ? 0.22 : 0.06);
   }
 
   decairEfeitos() {
@@ -680,7 +704,7 @@ export class Mundo {
     const cfg = eu.def.ia;
     const dist = Math.abs(op.x - eu.x);
     const perto = dist < 95 * eu.escala;
-    const medio = dist < 190;
+    const medio = dist < 190 * ESC;
     const agr = cfg.agressividade * (0.72 + this.dificuldade * 0.28);
     const reacao = Math.max(5, Math.round(cfg.reacao / Math.max(0.7, this.dificuldade)));
 
@@ -691,7 +715,7 @@ export class Mundo {
     if (!eu.vivo || this.fase !== 'luta') { this.iaPlano = e; return e; }
 
     const opAtacando = op.estado === 'ataque' && op.fase !== 'recovery';
-    const ameaca = this.projeteis.some((p) => p.dono === op && Math.abs(p.x - eu.x) < 260);
+    const ameaca = this.projeteis.some((p) => p.dono === op && Math.abs(p.x - eu.x) < 260 * ESC);
 
     // 1. defender - quanto cada arquetipo confia na defesa. O chefao tem valor
     // baixo de proposito: ele aguenta na armadura, nao na guarda. Um chefao que
@@ -715,13 +739,13 @@ export class Mundo {
     const hab = eu.def.golpes.habilidade;
     if (eu.podeUsar('habilidade') && Math.random() < 0.5 + agr * 0.3) {
       const bom =
-        hab.tipo === 'projetil' ? dist > 150 :
+        hab.tipo === 'projetil' ? dist > 150 * ESC :
         hab.tipo === 'agarrao' ? perto && op.bloqueando :
         hab.tipo === 'parry' ? opAtacando && medio :
         hab.tipo === 'buff' ? eu.armadura <= 0 :
-        hab.tipo === 'armadilha' ? dist > 120 :
-        hab.tipo === 'dash' ? dist > 200 || opAtacando :
-        dist > 120 && dist < 330;
+        hab.tipo === 'armadilha' ? dist > 120 * ESC :
+        hab.tipo === 'dash' ? dist > 200 * ESC || opAtacando :
+        dist > 120 * ESC && dist < 330 * ESC;
       if (bom) { eu.bufferar('habilidade'); this.iaPlano = e; return e; }
     }
 
@@ -733,9 +757,9 @@ export class Mundo {
     }
 
     // 5. posicionar
-    const alvo = cfg.distancia;
-    if (dist > alvo + 30) { if (op.x > eu.x) e.dir = true; else e.esq = true; }
-    else if (dist < alvo - 40) { if (op.x > eu.x) e.esq = true; else e.dir = true; }
+    const alvo = cfg.distancia * ESC;
+    if (dist > alvo + 30 * ESC) { if (op.x > eu.x) e.dir = true; else e.esq = true; }
+    else if (dist < alvo - 40 * ESC) { if (op.x > eu.x) e.esq = true; else e.dir = true; }
     else if (Math.random() < 0.06) e.cima = true;
 
     this.iaPlano = e;
