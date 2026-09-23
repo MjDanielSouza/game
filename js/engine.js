@@ -4,7 +4,7 @@
 //  Nada aqui conhece um golpe pelo nome: tudo vem de data.js.
 // ============================================================================
 
-import { LUTADORES, GRAVIDADE, ATRITO, CHAO, ARENA, FPS } from './data.js';
+import { LUTADORES, GRAVIDADE, ATRITO, CHAO, ARENA, FPS, alturaDe } from './data.js';
 
 const clamp = (v, a, b) => (v < a ? a : v > b ? b : v);
 const colide = (a, b) =>
@@ -31,7 +31,7 @@ export class Lutador {
     this.dir = dir;               // 1 = olhando para a direita
 
     this.escala = d.fisico.escala * 1.3;   // proporcao de arcade: ~1/4 da tela
-    this.altura = 132 * this.escala;
+    this.altura = alturaDe(d);
     // bulk entra amortecido: escala e bulk multiplicando direto davam um corpo
     // de 157px no chefao, e o empurra-corpos separava mais do que o alcance do
     // soco do jogador - dava para lutar a luta inteira sem nunca encostar nele.
