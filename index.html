@@ -2,7 +2,7 @@
 <html lang="pt-BR">
 <head>
 <meta charset="utf-8">
-<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover">
 <title>Curitiba Kombat</title>
 <meta name="description" content="Jogo de luta 2D. Oito locais de Curitiba, sete lutadores e um colosso na Pedreira.">
 <link rel="stylesheet" href="css/style.css">
@@ -36,6 +36,7 @@
         <div><kbd>Espaço</kbd> <span>especial (barra cheia)</span></div>
         <div><kbd>Esc</kbd> <span>abandonar luta</span></div>
       </div>
+      <p class="ctrl-nota">No celular os botões aparecem na tela — deite o aparelho.</p>
       <p class="ctrl-nota">Golpe alto só é bloqueado em pé. Golpe baixo só é bloqueado agachado. Agarrão não é bloqueado.</p>
     </div>
   </div>
@@ -84,6 +85,28 @@
 <section id="tela-final" class="tela">
   <div id="final-caixa" class="caixa final"></div>
 </section>
+
+<!-- ------------------------------------------------------ TOQUE (celular) -->
+<!-- Os botoes de direcao escrevem no mesmo mapa de teclas que o teclado, entao
+     nao existe um segundo caminho de input: `data-tecla` e o `e.code` real.
+     Os de golpe sao de borda, disparam no toque. -->
+<div id="toque" class="toque" aria-hidden="true">
+  <div class="tq-setas">
+    <button class="tq tq-cima"  data-tecla="KeyW" aria-label="pular">▲</button>
+    <button class="tq tq-esq"   data-tecla="KeyA" aria-label="esquerda">◀</button>
+    <button class="tq tq-dir"   data-tecla="KeyD" aria-label="direita">▶</button>
+    <button class="tq tq-baixo" data-tecla="KeyS" aria-label="agachar">▼</button>
+  </div>
+  <div class="tq-golpes">
+    <button class="tq tq-def" data-tecla="ShiftLeft" aria-label="defender">DEF</button>
+    <button class="tq tq-soco"  data-acao="soco">SOCO</button>
+    <button class="tq tq-chute" data-acao="chute">CHUTE</button>
+    <button class="tq tq-hab"   data-acao="habilidade">HAB</button>
+    <button class="tq tq-esp"   data-acao="especial">ESP</button>
+  </div>
+  <button class="tq tq-sair" data-sair aria-label="abandonar a luta">✕</button>
+  <div class="tq-gire"><span>Deite o aparelho</span></div>
+</div>
 
 <script type="module" src="js/main.js"></script>
 </body>

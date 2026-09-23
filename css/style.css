@@ -256,3 +256,82 @@ kbd {
   .no-info b { font-size: 9px; }
   .no-info i { font-size: 8px; }
 }
+
+/* No celular o 16/9 do mapa vira um painel de 210px de altura, e as tres
+   fileiras de nos ficam a 60px uma da outra - o nome do no invade a fileira
+   de baixo. Altura fixa em vez de proporcao resolve; o painel nao precisa
+   ter a forma da tela. */
+@media (max-width: 560px) {
+  .mapa-painel { aspect-ratio: auto; height: 430px; }
+}
+
+/* --- toque (celular) ------------------------------------------------------
+   Fica por cima do canvas, nos cantos de baixo, que e onde nao acontece nada
+   numa luta: os lutadores ficam no meio e o HUD fica em cima. So aparece em
+   aparelho de toque e so durante a luta.                                    */
+.toque { display: none; }
+.toque.ativa {
+  display: block;
+  position: fixed; inset: 0; z-index: 50;
+  pointer-events: none;                 /* so os botoes pegam toque */
+  touch-action: none;
+  -webkit-user-select: none; user-select: none;
+  -webkit-tap-highlight-color: transparent;
+}
+.tq {
+  position: absolute;
+  pointer-events: auto;
+  display: grid; place-items: center;
+  font-family: var(--display);
+  font-size: 15px; letter-spacing: .04em;
+  color: var(--ouro);
+  border: 2px solid rgba(255, 210, 63, .5);
+  background: rgba(12, 14, 20, .42);
+  border-radius: 50%;
+  width: 58px; height: 58px;
+  touch-action: none;
+  -webkit-user-select: none; user-select: none;
+}
+.tq.presso { background: rgba(255, 210, 63, .34); transform: scale(.94); }
+
+/* Cruz de direcao no canto esquerdo. As medidas sao em `vmin` porque o que
+   limita o polegar e o lado curto da tela, nao a largura. */
+.tq-setas, .tq-golpes { position: absolute; bottom: 5vmin; }
+.tq-setas  { left: 4vmin;  width: 168px; height: 168px; }
+.tq-golpes { right: 4vmin; width: 200px; height: 176px; }
+
+.tq-cima  { left: 56px; top: 0; }
+.tq-baixo { left: 56px; top: 112px; }
+.tq-esq   { left: 0;    top: 56px; }
+.tq-dir   { left: 112px; top: 56px; }
+
+/* Soco e chute maiores e no canto, que e onde o polegar cai sozinho: sao os
+   dois que se usa o tempo todo. Especial fica no alto, longe, porque apertar
+   sem querer queima a barra roxa inteira. DEF fica separado dos quatro por um
+   vao de propria - defender por engano no meio de um combo custa a luta. */
+.tq-soco  { right: 80px; bottom: 0;   width: 72px; height: 72px; }
+.tq-chute { right: 4px;  bottom: 44px; width: 72px; height: 72px; }
+.tq-hab   { right: 86px; bottom: 80px; }
+.tq-esp   { right: 16px; bottom: 122px; border-color: rgba(157, 108, 255, .7); color: #c9a6ff; }
+.tq-def   { right: 186px; bottom: 4px; width: 66px; height: 66px;
+            border-color: rgba(93, 143, 196, .7); color: var(--azul); }
+
+.tq-sair {
+  top: 10px; right: 10px; width: 42px; height: 42px;
+  font-size: 18px; border-color: rgba(154, 160, 173, .5); color: var(--apagado);
+}
+
+/* Em pe o canvas de 16:9 vira uma tarja de 200px de altura. Nao da pra jogar,
+   entao cobre e pede pra deitar. */
+.tq-gire { display: none; }
+@media (orientation: portrait) {
+  .toque.ativa .tq-gire {
+    display: grid; place-items: center;
+    position: absolute; inset: 0;
+    pointer-events: auto;
+    background: rgba(7, 8, 16, .93);
+    font-family: var(--display); font-size: 24px; letter-spacing: .08em;
+    color: var(--ouro); text-align: center;
+  }
+  .toque.ativa .tq-gire span::before { content: "⟳"; display: block; font-size: 52px; margin-bottom: 12px; }
+}
