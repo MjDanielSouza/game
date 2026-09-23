@@ -3,7 +3,7 @@
 // ============================================================================
 
 import { LARGURA, ALTURA, LUTADORES, MAPA, JOGAVEIS, PALCOS, FPS } from './data.js';
-import { FINALIZE_FRAMES } from './engine.js';
+import { FINALIZE_FRAMES, COR_FINALIZACAO } from './engine.js';
 import * as Sprites from './sprites.js';
 
 const clamp = (v, a, b) => (v < a ? a : v > b ? b : v);
@@ -39,11 +39,17 @@ export function desenharHUD(ctx, m, tick) {
   for (const t of m.textos) {
     const k = t.t / t.vida;
     ctx.globalAlpha = k < 0.12 ? k / 0.12 : k > 0.8 ? (1 - k) / 0.2 : 1;
-    const esc = t.pequeno ? 1 : 1 + (1 - Math.min(1, t.t / 8)) * 0.6;
+    const esc = (t.pequeno || t.alto) ? 1 : 1 + (1 - Math.min(1, t.t / 8)) * 0.6;
     ctx.save();
-    ctx.translate(LARGURA / 2, t.pequeno ? 210 : 300);
+    // Em escala de fliperama a cabeca do lutador chega a ~250, entao a faixa
+    // de texto inteira subiu: a 300 o LUTEM!, o K.O. e o nome da finalizacao
+    // ficavam todos na frente da cena. `alto` sobe mais ainda, para o nome da
+    // finalizacao nao competir com a propria finalizacao.
+    ctx.translate(LARGURA / 2, t.alto ? 150 : t.pequeno ? 200 : 225);
     ctx.scale(esc, esc);
-    ctx.font = t.pequeno ? '800 42px Impact, "Arial Black", sans-serif' : '800 84px Impact, "Arial Black", sans-serif';
+    ctx.font = t.alto ? '800 40px Impact, "Arial Black", sans-serif'
+      : t.pequeno ? '800 42px Impact, "Arial Black", sans-serif'
+      : '800 84px Impact, "Arial Black", sans-serif';
     ctx.lineWidth = 8; ctx.strokeStyle = 'rgba(0,0,0,0.85)';
     ctx.strokeText(t.txt, 0, 0);
     ctx.fillStyle = t.cor;
@@ -79,63 +85,36 @@ export function desenharHUD(ctx, m, tick) {
   if (m.fase === 'finalize') finalize(ctx, m, tick);
 }
 
-const SIMBOLO = {
+export const SIMBOLO = {
   esq: '\u2190', dir: '\u2192', cima: '\u2191', baixo: '\u2193',
   soco: 'SOCO', chute: 'CHUTE', habilidade: 'HAB', especial: 'ESP', bloq: 'DEF',
 };
 
-// A janela de finalizacao. A sequencia fica na tela de proposito: sao oito
-// colegas jogando no celular de alguem, e combo secreto que ninguem descobre
-// e combo que nao existe.
+// A janela de finalizacao. So o aviso e o relogio, pequenos e la em cima: a
+// sequencia NAO fica aqui. Ela mora na ficha do personagem, na tela de
+// selecao e no briefing, para o jogador decorar antes - tutorial no meio da
+// luta tapa a cena, que e a unica coisa que essa tela tem para mostrar.
 function finalize(ctx, m, tick) {
   const venc = m.vencedor === 'p1' ? m.p1 : m.p2;
-  const f = venc.def.finalizacao;
-  if (!f) return;
-  const restante = 1 - m.faseT / FINALIZE_FRAMES;
-  const pulso = 1 + Math.sin(tick * 0.22) * 0.05;
+  if (!venc.def.finalizacao) return;
+  const restante = Math.max(0, 1 - m.faseT / FINALIZE_FRAMES);
 
   ctx.save();
   ctx.textAlign = 'center';
-
-  // FINALIZE!
-  ctx.save();
-  ctx.translate(LARGURA / 2, 214);
-  ctx.scale(pulso, pulso);
-  ctx.font = '800 68px Impact, "Arial Black", sans-serif';
-  ctx.lineWidth = 8; ctx.strokeStyle = '#1a0000';
-  ctx.strokeText('FINALIZE!', 0, 0);
-  ctx.fillStyle = tick % 16 < 8 ? '#ff4a32' : '#ffd23f';
-  ctx.fillText('FINALIZE!', 0, 0);
-  ctx.restore();
-
-  // a sequencia, em caixas
   const cx = LARGURA / 2;
-  const cw = 108, gap = 12;
-  const total = f.sequencia.length * cw + (f.sequencia.length - 1) * gap;
-  let x = cx - total / 2;
-  for (const tok of f.sequencia) {
-    ctx.fillStyle = 'rgba(10,12,16,0.82)';
-    ctx.fillRect(x, 246, cw, 44);
-    ctx.strokeStyle = f.cor || '#ffd23f';
-    ctx.lineWidth = 2;
-    ctx.strokeRect(x, 246, cw, 44);
-    ctx.fillStyle = f.cor || '#ffd23f';
-    const s = SIMBOLO[tok] || tok;
-    ctx.font = s.length > 2 ? '700 18px system-ui, sans-serif' : '700 30px system-ui, sans-serif';
-    ctx.fillText(s, x + cw / 2, 276);
-    x += cw + gap;
-  }
 
-  // nome da finalizacao e o relogio dos 5 segundos
-  ctx.fillStyle = 'rgba(245,238,224,0.7)';
-  ctx.font = '700 13px system-ui, sans-serif';
-  ctx.fillText(f.nome, cx, 310);
+  ctx.font = '800 40px Impact, "Arial Black", sans-serif';
+  ctx.lineWidth = 6;
+  ctx.strokeStyle = 'rgba(0,0,0,0.8)';
+  ctx.strokeText('FINALIZE!', cx, 150);
+  ctx.fillStyle = tick % 18 < 9 ? COR_FINALIZACAO : '#6d130c';
+  ctx.fillText('FINALIZE!', cx, 150);
 
-  const bw = total;
-  ctx.fillStyle = 'rgba(0,0,0,0.5)';
-  ctx.fillRect(cx - bw / 2, 320, bw, 6);
-  ctx.fillStyle = restante < 0.3 ? '#ff4a32' : (f.cor || '#ffd23f');
-  ctx.fillRect(cx - bw / 2, 320, bw * Math.max(0, restante), 6);
+  const bw = 240;
+  ctx.fillStyle = 'rgba(0,0,0,0.55)';
+  ctx.fillRect(cx - bw / 2, 162, bw, 5);
+  ctx.fillStyle = COR_FINALIZACAO;
+  ctx.fillRect(cx - bw / 2, 162, bw * restante, 5);
 
   ctx.restore();
 }
@@ -348,10 +327,26 @@ export function montarSelecao(el, onEscolher) {
       <div class="card-bio">${d.bio}</div>
       <div class="card-golpes">
         <b>${d.golpes.habilidade.nome}</b> · <b>${d.golpes.especial.nome}</b>
-      </div>`;
+      </div>
+      ${fichaFinalizacao(d)}`;
     card.onclick = () => onEscolher(id);
     el.appendChild(card);
   }
+}
+
+// Bloco de finalizacao da ficha. E aqui que o jogador decora a sequencia,
+// antes da luta - na luta ela nao aparece.
+export function fichaFinalizacao(d) {
+  const f = d.finalizacao;
+  if (!f) return '';
+  const seq = f.sequencia
+    .map((k) => `<i>${SIMBOLO[k] || k}</i>`)
+    .join('<u>+</u>');
+  return `<div class="ficha-fatality">
+      <span class="ff-tag">FINALIZACAO</span>
+      <b class="ff-nome">${f.nome}</b>
+      <span class="ff-seq">${seq}</span>
+    </div>`;
 }
 
 function stat(nome, v) {
@@ -407,6 +402,7 @@ export function montarBriefing(el, indice, idJogador) {
     <div class="brief-lado">
       <img src="${retrato(idJogador, 190, 240)}" alt="">
       <h3>${j.nome}</h3><p>${j.titulo}</p>
+      ${fichaFinalizacao(j)}
     </div>
     <div class="brief-meio">
       <div class="brief-vs">VS</div>

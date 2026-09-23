@@ -42,9 +42,12 @@ golpes à direita. Deite o aparelho: em pé o canvas de 16:9 vira uma tarja e o
 jogo pede para girar. O 2 jogadores é só no teclado.
 
 **FINALIZE!** Quando você vence o round decisivo por nocaute, o oponente fica
-5 segundos de pé, atordoado, e a sua sequência de finalização aparece na tela.
-Acertou, a arena escurece e sai a finalização. Errou ou demorou, é nocaute
-normal. Cada lutador tem a sua — `↓ ↓ SOCO` do LUCAS, `← ↓ HAB` do COSTELA.
+5 segundos de pé, atordoado. Acertou a sua sequência nesse tempo, a arena
+escurece e sai a finalização. Errou ou demorou, é nocaute normal.
+
+**A sequência não aparece durante a luta** — ela está na ficha do personagem,
+na tela de seleção e no briefing. Decore antes: `↓ ↓ SOCO` do LUCAS,
+`← ↓ HAB` do COSTELA.
 
 As três regras que decidem a partida:
 

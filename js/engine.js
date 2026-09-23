@@ -20,6 +20,9 @@ const MARGEM_TOPO = 96;
 
 // Janela de finalizacao: 5 segundos com o perdedor atordoado de pe.
 export const FINALIZE_FRAMES = 5 * FPS;
+// Vermelho escuro. O nome da finalizacao e o aviso ficam em cima e apagados:
+// a cena e o que tem que ser vista, nao a legenda dela.
+export const COR_FINALIZACAO = '#9c1c12';
 // Quanto tempo um input da sequencia espera pelo proximo antes de zerar.
 export const SEQUENCIA_GAP = 60;
 // Duracao da finalizacao em si, por etapa: escurece, golpe, queda.
@@ -550,7 +553,9 @@ export class Mundo {
     this.efeitos.push({ tipo, x, y, t: 0, vida: tipo === 'acerto' ? 14 : 20, escala, ang: Math.random() * 6.28 });
   }
 
-  texto(txt, cor) { this.textos.push({ txt, cor, t: 0, vida: 70 }); }
+  // `opts.alto` desenha em cima, pequeno, acima da cabeca dos lutadores - e
+  // onde vai o nome da finalizacao, que nao pode tapar a cena.
+  texto(txt, cor, opts) { this.textos.push({ txt, cor, t: 0, vida: 70, ...opts }); }
 
   combo(quem, n) {
     const ja = this.textos.find((t) => t.combo);
@@ -808,7 +813,7 @@ export class Mundo {
       this.hitstop = 14;
       this.tremor = 30;
       this.efeito('acerto', perd.x, perd.y - perd.altura * 0.55, 2.6);
-      this.texto(this.finalizacao.nome, this.finalizacao.cor || '#ff4a32');
+      this.texto(this.finalizacao.nome, COR_FINALIZACAO, { alto: true });
     }
     if (t === FATAL_ESCURECE + FATAL_GOLPE) {
       perd.trocar('ko');

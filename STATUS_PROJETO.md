@@ -142,8 +142,15 @@ partir de entradas **discretas** — a borda do `keydown` e do `pointerdown`, n�
 o booleano segurado — com 60 frames de tolerância entre uma e outra. Cada
 jogador tem seu buffer, então em versus quem venceu é quem finaliza.
 
-**A sequência fica visível na tela de propósito.** São colegas jogando no
-celular de alguém: combo secreto que ninguém descobre é combo que não existe.
+**A sequência NÃO aparece na luta.** Ela mora na ficha do personagem — no card
+da tela de seleção e no lado do jogador no briefing —, para se decorar antes.
+Tutorial no meio da finalização tapa justamente a cena que essa tela tem para
+mostrar.
+
+Na luta ficam só o aviso `FINALIZE!` e o relógio, pequenos, em vermelho escuro
+e **acima da cabeça dos lutadores**. Em escala de fliperama a cabeça chega a
+~250px, então a faixa de texto grande inteira subiu de 300 para 225: antes o
+`LUTEM!`, o `K.O.` e o nome da finalização ficavam todos na frente da cena.
 
 O chefão **não tem finalização**, de propósito — IA humilhando o jogador sem
 agência nenhuma não é diversão.
