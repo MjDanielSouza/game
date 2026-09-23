@@ -17,22 +17,28 @@ Depois abra <http://localhost:8123>. Abrir o `index.html` direto pelo disco
 
 ## Como se joga
 
-| Tecla | Ação |
-|---|---|
-| `A` `D` | andar |
-| `W` | pular |
-| `S` | agachar |
-| `Shift` | defender (ou segure para trás enquanto o outro ataca) |
-| `J` | soco |
-| `K` | chute |
-| `S` + `J` | golpe baixo |
-| `L` | habilidade do personagem |
-| `Espaço` | especial (precisa da barra roxa cheia) |
-| `Esc` | abandonar a luta |
+Dois modos: **campanha** (nove locais até o chefão) e **2 jogadores** no mesmo
+teclado — escolhe um, escolhe o outro, escolhe o local, briga.
+
+| Ação | Jogador 1 | Jogador 2 |
+|---|---|---|
+| andar | `A` `D` | `←` `→` |
+| pular | `W` | `↑` |
+| agachar | `S` | `↓` |
+| defender | `Shift` esq. | `Shift` dir. |
+| soco | `J` | `1` ou `,` |
+| chute | `K` | `2` ou `.` |
+| golpe baixo | agachar + soco | agachar + soco |
+| habilidade | `L` | `3` ou `/` |
+| especial (barra roxa cheia) | `Espaço` | `0` ou `Enter` |
+| abandonar a luta | `Esc` | — |
+
+Os números de `1` a `3` são os do **teclado numérico**; notebook sem numérico
+usa `,` `.` `/` `Enter`. Jogando sozinho, o jogador 1 também responde às setas.
 
 **No celular**, os botões aparecem na tela durante a luta — direção à esquerda,
 golpes à direita. Deite o aparelho: em pé o canvas de 16:9 vira uma tarja e o
-jogo pede para girar.
+jogo pede para girar. O 2 jogadores é só no teclado.
 
 As três regras que decidem a partida:
 
@@ -79,7 +85,7 @@ js/engine.js      loop, state machine, hitbox/hurtbox, projéteis, IA
 js/render.js      rig de ossos dos lutadores e desenho dos palcos
 js/ui.js          HUD no canvas e montagem das telas em DOM
 js/sprites.js     carrega e desenha sprite, quando o lutador tem arte
-js/main.js        cola: teclado, telas, progresso
+js/main.js        cola: teclado (dois), telas, progresso
 test.js           checagem do motor, sem navegador
 tools/balance.mjs sondagem de dificuldade
 tools/atlas.py    poses PNG -> folha de sprite + máscara alpha

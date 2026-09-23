@@ -286,4 +286,22 @@ teste('uma campanha inteira roda ate o chefao sem excecao', () => {
   }
 });
 
+teste('em versus o p2 obedece a segunda entrada e a IA nao roda', () => {
+  const m = lutando(new Mundo('joao', 'lucas', 'opera', 1, { duplo: true }));
+  m.pensarIA = () => { throw new Error('a IA rodou num versus'); };
+  const x0 = m.p2.x;
+  // p2 anda para a esquerda: e para la que esta o p1, entao o x dele cai.
+  for (let i = 0; i < 40; i++) m.atualizar(vazio(), { ...vazio(), esq: true });
+  assert.ok(m.p2.x < x0 - 20, 'o p2 nao andou com a entrada do segundo teclado');
+  // Sem segunda entrada ele fica parado, em vez de cair na IA. Longe do p1,
+  // porque encostado o empurra-corpos separa os dois e mexe no x de graca.
+  m.p2.x = m.p1.x + 400; m.p2.vx = 0;
+  const x1 = m.p2.x;
+  for (let i = 0; i < 40; i++) m.atualizar(vazio());
+  assert.ok(Math.abs(m.p2.x - x1) < 6, 'o p2 se mexeu sem ninguem mandar');
+  m.p2.bufferar('soco');
+  for (let i = 0; i < 6; i++) m.atualizar(vazio(), vazio());
+  assert.ok(m.p2.golpe, 'o p2 nao consegue atacar');
+});
+
 console.log(`\n${ok} checagens passaram.\n`);

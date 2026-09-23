@@ -70,7 +70,10 @@ export function desenharHUD(ctx, m, tick) {
   }
 
   // cooldowns / habilidades do jogador
-  atalhos(ctx, p1);
+  atalhos(ctx, p1, ['J', 'K', 'L', 'ESP'], 34);
+  // Em versus o p2 tambem precisa saber o que sabe fazer. A tira dele fica
+  // encostada na direita, espelhando a do p1, e com as teclas do p2.
+  if (m.duplo) atalhos(ctx, p2, ['1', '2', '3', '0'], LARGURA - 34 - 552);
 }
 
 function barra(ctx, x, y, w, f, espelho, cor) {
@@ -139,14 +142,14 @@ function pips(ctx, x, y, n, esq) {
   ctx.restore();
 }
 
-function atalhos(ctx, f) {
+function atalhos(ctx, f, teclas, x0) {
   const itens = [
-    { k: 'J', id: 'soco' }, { k: 'K', id: 'chute' },
-    { k: 'L', id: 'habilidade' }, { k: 'ESP', id: 'especial' },
+    { k: teclas[0], id: 'soco' }, { k: teclas[1], id: 'chute' },
+    { k: teclas[2], id: 'habilidade' }, { k: teclas[3], id: 'especial' },
   ];
   ctx.save();
   ctx.font = '700 12px system-ui, sans-serif';
-  let x = 34;
+  let x = x0;
   const y = ALTURA - 42;
   for (const it of itens) {
     const g = f.def.golpes[it.id];
@@ -358,4 +361,29 @@ export function montarBriefing(el, indice, idJogador) {
       <h3>${d.nome}</h3><p>${d.titulo}</p>
       ${n.chefao ? '<p class="tag-chefao">CHEFÃO</p>' : ''}
     </div>`;
+}
+
+// ---------------------------------------------------------------------------
+//  Escolha de palco (modo 2 jogadores)
+// ---------------------------------------------------------------------------
+// A campanha amarra palco e oponente; no versus nao existe oponente fixo,
+// entao os nove ficam abertos desde o comeco. Os nomes vem do MAPA porque e
+// la que o local tem nome de rua - PALCOS so guarda cor e silhueta.
+export function montarPalcos(el, onEscolher) {
+  el.innerHTML = '';
+  for (const n of MAPA) {
+    const p = PALCOS[n.palco];
+    const b = document.createElement('button');
+    b.className = 'palco-card';
+    // A placa entra quando existe e some sozinha quando nao existe: cinco dos
+    // nove ainda sao silhueta procedural, e ai fica so o degrade do ceu.
+    b.innerHTML = `
+      <span class="palco-arte" style="background:linear-gradient(180deg, ${p.ceu.join(', ')})">
+        <img src="assets/palcos/${n.palco}.png" alt="" onerror="this.remove()">
+      </span>
+      <span class="palco-nome">${n.nome}</span>
+      <span class="palco-hora">${p.hora}</span>`;
+    b.onclick = () => onEscolher(n.palco);
+    el.appendChild(b);
+  }
 }

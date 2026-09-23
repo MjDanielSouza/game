@@ -499,6 +499,9 @@ export class Mundo {
     this.faseT = 0;
     this.vencedor = null;
     this.onSom = opcoes.onSom || (() => {});
+    // Em versus o p2 vem do segundo teclado e a IA nao roda. E a unica
+    // diferenca entre os dois modos - o resto do motor nao sabe qual e qual.
+    this.duplo = !!opcoes.duplo;
     this.iaT = 0;
     this.iaPlano = null;
   }
@@ -556,7 +559,7 @@ export class Mundo {
   }
 
   // ---------------------------------------------------------------- update -
-  atualizar(entrada) {
+  atualizar(entrada, entrada2) {
     this.frame++;
 
     if (this.hitstop > 0) { this.hitstop--; this.decairEfeitos(); return; }
@@ -581,9 +584,9 @@ export class Mundo {
     if (this.tempo > 0) this.tempo--;
     if (this.tempo === 0) this.encerrar();
 
-    const entIA = this.pensarIA();
+    const entP2 = this.duplo ? (entrada2 || vazio()) : this.pensarIA();
     this.p1.atualizar(entrada, this.p2, this);
-    this.p2.atualizar(entIA, this.p1, this);
+    this.p2.atualizar(entP2, this.p1, this);
 
     this.empurrarCorpos();
     this.atualizarProjeteis();

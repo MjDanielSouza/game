@@ -17,7 +17,8 @@
     <h1 class="titulo-logo">CURITIBA<span>KOMBAT</span></h1>
     <p id="titulo-sub" class="titulo-sub"></p>
     <div class="titulo-btns">
-      <button class="btn grande" id="btn-comecar">COMEÇAR</button>
+      <button class="btn grande" id="btn-comecar">CAMPANHA</button>
+      <button class="btn grande" id="btn-versus">2 JOGADORES</button>
       <button class="btn secundario" id="btn-trocar">TROCAR LUTADOR</button>
       <button class="btn secundario" id="btn-som">SOM: LIGADO</button>
       <button class="btn fantasma" id="btn-zerar">ZERAR PROGRESSO</button>
@@ -36,7 +37,19 @@
         <div><kbd>Espaço</kbd> <span>especial (barra cheia)</span></div>
         <div><kbd>Esc</kbd> <span>abandonar luta</span></div>
       </div>
-      <p class="ctrl-nota">No celular os botões aparecem na tela — deite o aparelho.</p>
+      <h4 class="ctrl-p2">JOGADOR 2 &mdash; modo 2 jogadores</h4>
+      <div class="ctrl-grade">
+        <div><kbd>←</kbd><kbd>→</kbd> <span>andar</span></div>
+        <div><kbd>↑</kbd> <span>pular</span></div>
+        <div><kbd>↓</kbd> <span>agachar</span></div>
+        <div><kbd>Shift</kbd> dir. <span>defender</span></div>
+        <div><kbd>1</kbd> ou <kbd>,</kbd> <span>soco</span></div>
+        <div><kbd>2</kbd> ou <kbd>.</kbd> <span>chute</span></div>
+        <div><kbd>3</kbd> ou <kbd>/</kbd> <span>habilidade</span></div>
+        <div><kbd>0</kbd> ou <kbd>Enter</kbd> <span>especial</span></div>
+      </div>
+      <p class="ctrl-nota">Os números de <b>1</b> a <b>3</b> são os do teclado numérico. Notebook sem numérico: <kbd>,</kbd> <kbd>.</kbd> <kbd>/</kbd> <kbd>Enter</kbd>.</p>
+      <p class="ctrl-nota">No celular os botões aparecem na tela — deite o aparelho. O 2 jogadores é só no teclado.</p>
       <p class="ctrl-nota">Golpe alto só é bloqueado em pé. Golpe baixo só é bloqueado agachado. Agarrão não é bloqueado.</p>
     </div>
   </div>
@@ -45,8 +58,8 @@
 <!-- ------------------------------------------------------------ SELECAO -->
 <section id="tela-selecao" class="tela">
   <header class="topo">
-    <h2>ESCOLHA SEU LUTADOR</h2>
-    <button class="btn secundario" data-volta-mapa>MAPA</button>
+    <h2 id="selecao-titulo">ESCOLHA SEU LUTADOR</h2>
+    <button class="btn secundario" id="btn-selecao-volta">MAPA</button>
   </header>
   <div id="grade-personagens" class="grade"></div>
 </section>
@@ -65,6 +78,15 @@
     <div id="mapa-painel" class="mapa-painel"></div>
   </div>
   <p class="mapa-rodape">Clique num local liberado para lutar. O caminho segue a linha até a Pedreira.</p>
+</section>
+
+<!-- -------------------------------------------------------- PALCO (2P) -->
+<section id="tela-palco" class="tela">
+  <header class="topo">
+    <h2>ONDE VAI SER</h2>
+    <button class="btn secundario" id="btn-palco-volta">← VOLTAR</button>
+  </header>
+  <div id="grade-palcos" class="grade-palcos"></div>
 </section>
 
 <!-- ----------------------------------------------------------- BRIEFING -->

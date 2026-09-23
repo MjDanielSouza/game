@@ -5,7 +5,7 @@
 import { LARGURA, ALTURA, CHAO, ARENA, FPS, MAPA, LUTADORES, PALCOS, dificuldadeDoNo } from './data.js';
 import { Mundo, vazio } from './engine.js';
 import { desenharLutador, desenharPalco, desenharProjetil, desenharArmadilha, desenharEfeito, carregarPlaca } from './render.js';
-import { desenharHUD, montarSelecao, montarMapa, montarBriefing, retrato } from './ui.js';
+import { desenharHUD, montarSelecao, montarMapa, montarBriefing, montarPalcos, retrato } from './ui.js';
 import * as Sprites from './sprites.js';
 
 const $ = (s) => document.querySelector(s);
@@ -27,6 +27,11 @@ const S = {
   round: 1,
   tick: 0,
   som: true,
+  // versus
+  duplo: false,
+  escolhendo: 1,      // de quem e a vez na tela de selecao
+  versus: [null, null],
+  versusPalco: 'opera',
 };
 
 function salvar() {
@@ -74,39 +79,56 @@ function tocar(nome) {
 
 // ------------------------------------------------------------------ input --
 const teclas = {};
-const MAPA_TECLAS = {
-  ArrowLeft: 'esq', KeyA: 'esq',
-  ArrowRight: 'dir', KeyD: 'dir',
-  ArrowUp: 'cima', KeyW: 'cima',
-  ArrowDown: 'baixo', KeyS: 'baixo',
-  ShiftLeft: 'bloq', ShiftRight: 'bloq',
+// Dois jogadores no mesmo teclado: o p1 fica com o lado esquerdo e o p2 com as
+// setas e o numerico. Sozinho, o p1 responde aos dois lados - quem joga a
+// campanha nao tem motivo para ficar preso ao WASD.
+const TECLAS_P1 = { KeyA: 'esq', KeyD: 'dir', KeyW: 'cima', KeyS: 'baixo', ShiftLeft: 'bloq' };
+const TECLAS_P2 = { ArrowLeft: 'esq', ArrowRight: 'dir', ArrowUp: 'cima', ArrowDown: 'baixo', ShiftRight: 'bloq' };
+const TECLAS_SOZINHO = { ...TECLAS_P1, ...TECLAS_P2 };
+
+const ACOES_P1 = { KeyJ: 'soco', KeyK: 'chute', KeyL: 'habilidade', Space: 'especial' };
+// Virgula, ponto e barra sao o plano B: notebook nao tem teclado numerico, e
+// sem eles o segundo jogador simplesmente nao ataca.
+const ACOES_P2 = {
+  Numpad1: 'soco', Comma: 'soco',
+  Numpad2: 'chute', Period: 'chute',
+  Numpad3: 'habilidade', Slash: 'habilidade',
+  Numpad0: 'especial', NumpadEnter: 'especial', Enter: 'especial',
 };
-const ACOES = { KeyJ: 'soco', KeyK: 'chute', KeyL: 'habilidade', Space: 'especial' };
 
 addEventListener('keydown', (e) => {
-  if (MAPA_TECLAS[e.code] || ACOES[e.code] || e.code === 'Space') e.preventDefault();
+  // O Enter e a virgula do p2 so viram golpe dentro da luta. Fora dela o Enter
+  // precisa continuar acionando o botao em foco.
+  const p2Agora = S.duplo && S.tela === 'luta' && ACOES_P2[e.code];
+  if (TECLAS_SOZINHO[e.code] || ACOES_P1[e.code] || e.code === 'Space' || p2Agora) e.preventDefault();
   if (teclas[e.code]) return;
   teclas[e.code] = true;
 
-  const a = ACOES[e.code];
-  if (a) acao(a);
-  if (e.code === 'Escape' && S.tela === 'luta') irPara('mapa');
+  const a1 = ACOES_P1[e.code];
+  if (a1) acao(a1, 1);
+  if (S.duplo && ACOES_P2[e.code]) acao(ACOES_P2[e.code], 2);
+  if (e.code === 'Escape' && S.tela === 'luta') sairDaLuta();
 });
 addEventListener('keyup', (e) => { teclas[e.code] = false; });
 
 // Unico caminho de golpe: teclado e toque chamam os dois aqui.
-function acao(a) {
+function acao(a, jogador = 1) {
   if (S.tela !== 'luta' || !S.mundo || S.mundo.fase !== 'luta') return;
-  // Baixo + soco = golpe baixo
-  if (a === 'soco' && (teclas.ArrowDown || teclas.KeyS)) S.mundo.p1.bufferar('baixo');
-  else S.mundo.p1.bufferar(a);
+  const lutador = jogador === 2 ? S.mundo.p2 : S.mundo.p1;
+  // Baixo + soco = golpe baixo, com a tecla de baixo de quem esta socando.
+  const baixo = jogador === 2 ? teclas.ArrowDown
+    : (teclas.KeyS || (!S.duplo && teclas.ArrowDown));
+  if (a === 'soco' && baixo) lutador.bufferar('baixo');
+  else lutador.bufferar(a);
 }
 
-function entrada() {
+function lerTeclas(mapa) {
   const e = vazio();
-  for (const k in MAPA_TECLAS) if (teclas[k]) e[MAPA_TECLAS[k]] = true;
+  for (const k in mapa) if (teclas[k]) e[mapa[k]] = true;
   return e;
 }
+const entrada = () => lerTeclas(S.duplo ? TECLAS_P1 : TECLAS_SOZINHO);
+const entrada2 = () => lerTeclas(TECLAS_P2);
 
 // ------------------------------------------------------------------ toque --
 // Celular nao tem teclado. Os botoes de direcao escrevem no mesmo `teclas` que
@@ -152,7 +174,7 @@ for (const b of painelToque.querySelectorAll('.tq')) {
 }
 
 // ------------------------------------------------------------------ telas --
-const TELAS = ['titulo', 'selecao', 'mapa', 'briefing', 'luta', 'resultado', 'final'];
+const TELAS = ['titulo', 'selecao', 'mapa', 'palco', 'briefing', 'luta', 'resultado', 'final'];
 function irPara(t) {
   S.tela = t;
   for (const id of TELAS) {
@@ -163,7 +185,13 @@ function irPara(t) {
   atualizarToque();
   tocar('ui');
 
-  if (t === 'selecao') montarSelecao($('#grade-personagens'), escolherPersonagem);
+  if (t === 'selecao') {
+    $('#selecao-titulo').textContent = S.duplo
+      ? `JOGADOR ${S.escolhendo} — ESCOLHA` : 'ESCOLHA SEU LUTADOR';
+    $('#btn-selecao-volta').textContent = S.duplo ? '← MENU' : 'MAPA';
+    montarSelecao($('#grade-personagens'), escolherPersonagem);
+  }
+  if (t === 'palco') montarPalcos($('#grade-palcos'), lutarVersus);
   if (t === 'mapa') {
     montarMapa($('#mapa-painel'), S.progresso, abrirBriefing);
     $('#mapa-heroi').innerHTML = S.personagem
@@ -179,10 +207,26 @@ function irPara(t) {
 }
 
 function escolherPersonagem(id) {
+  if (S.duplo) {
+    S.versus[S.escolhendo - 1] = id;
+    if (S.escolhendo === 1) { S.escolhendo = 2; irPara('selecao'); }
+    else irPara('palco');
+    return;
+  }
   S.personagem = id;
   salvar();
   irPara('mapa');
 }
+
+function lutarVersus(palco) {
+  S.versusPalco = palco;
+  comecarLuta();
+}
+
+function sairDoVersus() { S.duplo = false; irPara('titulo'); }
+// Abandonar a luta volta ao mapa na campanha e ao menu no versus: no versus
+// nao existe mapa, e cair nele mostraria a campanha de outra pessoa.
+function sairDaLuta() { if (S.duplo) sairDoVersus(); else irPara('mapa'); }
 
 function abrirBriefing(i) { S.no = i; irPara('briefing'); }
 
@@ -194,10 +238,13 @@ function comecarLuta() {
 }
 
 function novoRound() {
-  const n = MAPA[S.no];
-  const dif = dificuldadeDoNo(S.no);
-  S.mundo = new Mundo(S.personagem, n.lutador, n.palco, dif, {
-    round: S.round, placar: S.placar.slice(), onSom: tocar,
+  const n = S.duplo ? null : MAPA[S.no];
+  const palco = S.duplo ? S.versusPalco : n.palco;
+  const a = S.duplo ? S.versus[0] : S.personagem;
+  const b = S.duplo ? S.versus[1] : n.lutador;
+  const dif = S.duplo ? 1 : dificuldadeDoNo(S.no);
+  S.mundo = new Mundo(a, b, palco, dif, {
+    round: S.round, placar: S.placar.slice(), onSom: tocar, duplo: S.duplo,
   });
   // So busca arte de quem declarou `sprite` em data.js. Quem nao declarou
   // continua no rig procedural e nao gera requisicao nenhuma. Nao esperamos
@@ -205,12 +252,13 @@ function novoRound() {
   for (const l of [S.mundo.p1, S.mundo.p2])
     if (l.def.sprite) Sprites.carregar(l.id, l.altura);
   // A placa do palco entra assim que carregar; ate la valem as silhuetas.
-  carregarPlaca(n.palco);
+  carregarPlaca(palco);
 }
 
 function fimDeRound() {
   S.placar = S.mundo.placar.slice();
   if (S.placar[0] >= 2 || S.placar[1] >= 2) {
+    if (S.duplo) { mostrarResultadoVersus(); return; }
     const ganhou = S.placar[0] >= 2;
     if (ganhou && S.no === S.progresso) { S.progresso = Math.min(MAPA.length, S.progresso + 1); salvar(); }
     if (ganhou && S.no === MAPA.length - 1) { mostrarFinal(); return; }
@@ -238,6 +286,24 @@ function mostrarResultado(ganhou) {
   irPara('resultado');
   $('#btn-revanche').onclick = comecarLuta;
   $('#btn-mapa').onclick = () => irPara('mapa');
+}
+
+function mostrarResultadoVersus() {
+  const p1Venceu = S.placar[0] >= 2;
+  const v = LUTADORES[S.versus[p1Venceu ? 0 : 1]];
+  $('#resultado-caixa').innerHTML = `
+    <h2 class="venceu">JOGADOR ${p1Venceu ? 1 : 2} VENCE</h2>
+    <p class="res-sub">${v.nome} — ${v.titulo}</p>
+    <p class="res-placar">${S.placar[0]} &nbsp;×&nbsp; ${S.placar[1]}</p>
+    <div class="res-btns">
+      <button class="btn" id="btn-revanche">REVANCHE</button>
+      <button class="btn secundario" id="btn-troca-2p">TROCAR LUTADORES</button>
+      <button class="btn fantasma" id="btn-sai-2p">MENU</button>
+    </div>`;
+  irPara('resultado');
+  $('#btn-revanche').onclick = comecarLuta;
+  $('#btn-troca-2p').onclick = () => { S.escolhendo = 1; irPara('selecao'); };
+  $('#btn-sai-2p').onclick = sairDoVersus;
 }
 
 function mostrarFinal() {
@@ -270,7 +336,7 @@ function loop(agora) {
     acumulado -= PASSO;
     S.tick++;
     if (S.tela === 'luta' && S.mundo) {
-      S.mundo.atualizar(entrada());
+      S.mundo.atualizar(entrada(), S.duplo ? entrada2() : undefined);
       if (S.mundo.fase === 'fim' && S.mundo.faseT > 150) fimDeRound();
     }
   }
@@ -338,8 +404,11 @@ Promise.all(
     .map((d) => Sprites.carregar(d.id, 172)),
 ).then(() => irPara(S.tela));
 
-$('#btn-comecar').onclick = () => irPara(S.personagem ? 'mapa' : 'selecao');
-$('#btn-trocar').onclick = () => irPara('selecao');
+$('#btn-comecar').onclick = () => { S.duplo = false; irPara(S.personagem ? 'mapa' : 'selecao'); };
+$('#btn-versus').onclick = () => { S.duplo = true; S.escolhendo = 1; irPara('selecao'); };
+$('#btn-trocar').onclick = () => { S.duplo = false; irPara('selecao'); };
+$('#btn-selecao-volta').onclick = () => (S.duplo ? sairDoVersus() : irPara('mapa'));
+$('#btn-palco-volta').onclick = () => { S.escolhendo = 2; irPara('selecao'); };
 $('#btn-zerar').onclick = () => {
   if (!confirm('Apagar o progresso e voltar do zero?')) return;
   S.progresso = 0; S.personagem = null; salvar(); irPara('selecao');
