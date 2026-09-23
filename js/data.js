@@ -337,6 +337,13 @@ export const LUTADORES = {
     cor: { pele: '#c1875c', roupa: '#e0632a', detalhe: '#2b2b30', acento: '#ffd166' },
     cabeca: { tipo: 'oculos', cor: '#3a2a1f' },
     fisico: { escala: 1.0, bulk: 0.96 },
+    sprite: {
+      frames: {
+        idle: 0, andar: [1, 2], soco: 3, chute: 4,
+        baixo: 5, agachar: 5, bloqueio: 6, hitstun: 7, ko: 7,
+        pulo: 8, aereo: 9, habilidade: 10, especial: 11,
+      },
+    },
     stats: { vida: 90, velocidade: 3.1, pulo: 13.0, stamina: 100, regen: 0.48, peso: 0.95, defesa: 0.95 },
     ia: { agressividade: 0.45, distancia: 165, reacao: 13, defesa: 0.58 },
     golpes: {

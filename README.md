@@ -153,9 +153,13 @@ usar. Trocar o desenho de um osso não encosta no motor. Os ângulos em
 positivo é para a frente**, então 90° é horizontal na direção que o lutador
 encara e 180° é para cima.
 
-O jogo também já aceita **sprite**: se um lutador declara `sprite` em
+O jogo também aceita **sprite**: se um lutador declara `sprite` em
 `js/data.js`, `js/sprites.js` carrega `assets/<id>.png` + `assets/<id>.json` e
-desenha o frame; quem não declara continua no rig. A troca é por personagem.
+desenha o frame; quem não declara continua no rig. A troca é por personagem, e
+os dois convivem na mesma luta.
+
+**Os oito jogáveis estão em pixel art** (12 frames cada, 96 no total). Só a
+ARAUCÁRIA continua no rig, de propósito: ela é fictícia e não tem referência.
 **[ARTE.md](ARTE.md)** tem o pipeline completo da foto até o sprite, e os
 repositórios que ajudam.
 
