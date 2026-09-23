@@ -19,13 +19,13 @@ import argparse
 import os
 
 import numpy as np
-from PIL import Image
+from PIL import Image, ImageEnhance
 
 RAIZ = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 DESTINO = os.path.join(RAIZ, 'assets', 'palcos')
 
 
-def processar(ident, origem, largura, cores):
+def processar(ident, origem, largura, cores, luz=1.0, cor=1.0):
     if not os.path.isfile(origem):
         raise SystemExit(f'nao existe: {origem}')
     os.makedirs(DESTINO, exist_ok=True)
@@ -36,6 +36,14 @@ def processar(ident, origem, largura, cores):
     # linhas finas da estrutura, a media preserva a forma antes do corte de
     # paleta. Mesma escolha do pixelize.py.
     p = im.resize((largura, alt), Image.BOX)
+    # Placa vinda de foto/pintura chega mais clara e mais saturada que uma
+    # gerada: o prompt pede fundo apagado, a foto nao. Sem abaixar, o fundo
+    # briga com o sprite, que tem 24 cores saturadas e contorno de 1px.
+    # Geracao propria nao precisa disto, entao o padrao e nao mexer.
+    if cor != 1.0:
+        p = ImageEnhance.Color(p).enhance(cor)
+    if luz != 1.0:
+        p = ImageEnhance.Brightness(p).enhance(luz)
     # MEDIANCUT sem dithering: dithering num fundo grande vira ruido que
     # compete com o sprite desenhado por cima.
     # Fica em modo paleta ate o disco: converter de volta para RGB perde a
@@ -59,5 +67,9 @@ if __name__ == '__main__':
                     help='largura final em pixels (padrao 1440, ver docstring)')
     ap.add_argument('--cores', type=int, default=48,
                     help='tamanho da paleta (padrao 48)')
+    ap.add_argument('--luz', type=float, default=1.0,
+                    help='fator de brilho (1.0 nao mexe; 0.7 escurece)')
+    ap.add_argument('--cor', type=float, default=1.0,
+                    help='fator de saturacao (1.0 nao mexe; 0.7 lava)')
     a = ap.parse_args()
-    processar(a.ident, a.origem, a.largura, a.cores)
+    processar(a.ident, a.origem, a.largura, a.cores, a.luz, a.cor)

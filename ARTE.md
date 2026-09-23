@@ -192,9 +192,15 @@ guia de composição e passe por
 python tools/palco.py opera assets/brutos/palcos/opera.png
 ```
 
-que reduz para 1440px de largura e corta a paleta em 48 cores. Quatro palcos
+que reduz para 1440px de largura e corta a paleta em 48 cores. Cinco palcos
 prontos; os outros cinco esperam foto e continuam na silhueta procedural sem
 quebrar nada.
+
+Quando a imagem **já existe** e não vai ser gerada — foi o caso de Araucária —
+o mesmo script aceita `--luz` e `--cor`. Geração já sai apagada porque o prompt
+pede; foto e pintura não, e sem abaixar as duas o fundo briga com o sprite.
+Recorte a **2:1 exato**: a placa é ancorada pela base, então placa alta perde o
+topo fora da tela.
 
 A ideia antiga de gerar **três camadas separadas** de parallax foi abandonada:
 três gerações não concordam entre si sobre onde fica o horizonte, e o

@@ -367,23 +367,24 @@ export function montarBriefing(el, indice, idJogador) {
 //  Escolha de palco (modo 2 jogadores)
 // ---------------------------------------------------------------------------
 // A campanha amarra palco e oponente; no versus nao existe oponente fixo,
-// entao os nove ficam abertos desde o comeco. Os nomes vem do MAPA porque e
-// la que o local tem nome de rua - PALCOS so guarda cor e silhueta.
+// entao todos ficam abertos desde o comeco. A lista sai de PALCOS e nao do
+// MAPA: existe palco que nao e no de campanha, e ler do MAPA deixava esse de
+// fora sem ninguem perceber.
 export function montarPalcos(el, onEscolher) {
   el.innerHTML = '';
-  for (const n of MAPA) {
-    const p = PALCOS[n.palco];
+  for (const id in PALCOS) {
+    const p = PALCOS[id];
     const b = document.createElement('button');
     b.className = 'palco-card';
     // A placa entra quando existe e some sozinha quando nao existe: cinco dos
-    // nove ainda sao silhueta procedural, e ai fica so o degrade do ceu.
+    // dez ainda sao silhueta procedural, e ai fica so o degrade do ceu.
     b.innerHTML = `
       <span class="palco-arte" style="background:linear-gradient(180deg, ${p.ceu.join(', ')})">
-        <img src="assets/palcos/${n.palco}.png" alt="" onerror="this.remove()">
+        <img src="assets/palcos/${id}.png" alt="" onerror="this.remove()">
       </span>
-      <span class="palco-nome">${n.nome}</span>
+      <span class="palco-nome">${p.nome}</span>
       <span class="palco-hora">${p.hora}</span>`;
-    b.onclick = () => onEscolher(n.palco);
+    b.onclick = () => onEscolher(id);
     el.appendChild(b);
   }
 }
