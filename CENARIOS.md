@@ -112,16 +112,11 @@ colonial, luz amarela de poste.
 composição — o que aquele lugar *é* — e a geração entrega algo que obedece à
 especificação acima, que nenhuma foto turística obedece.
 
-Estado dos dez palcos. Nove são nós da campanha; **Araucária é só do modo
-2 jogadores**, porque um nó de campanha precisa de um oponente e o elenco tem
-nove lutadores para nove nós.
-
-
+Estado dos nove palcos:
 
 | Palco | Placa | Referência |
 |---|---|---|
 | Ópera de Arame | sim | `referencias/cenarios/` |
-| Araucária (a cidade) | sim | cartaz fornecido, procedência desconhecida |
 | Jardim Botânico | sim | `referencias/cenarios/` |
 | Praça do Japão | sim | `referencias/cenarios/` |
 | Parque Barigui | sim | `referencias/cenarios/` |
@@ -131,19 +126,30 @@ nove lutadores para nove nós.
 | Torre Panorâmica | **não** | falta foto |
 | Pedreira Paulo Leminski | **não** | falta foto |
 
-### A exceção: placa feita direto de uma imagem
+### Placa feita direto de uma imagem: por que não fazemos mais
 
-Araucária não foi gerada. A imagem já existia (um cartaz da cidade) e virou
-placa direto: recorte 2:1 sem o texto → `tools/palco.py --luz 0.72 --cor 0.78`.
+Existiu um décimo palco, Araucária, feito **direto** de um cartaz da cidade em
+vez de gerado a partir de referência: recorte 2:1 sem o texto →
+`tools/palco.py --luz 0.72 --cor 0.78`. Foi retirado.
 
-**A procedência dela é desconhecida.** Não é foto: é um cartaz promocional
-aparentemente gerado por IA, que compõe igreja matriz, cachoeira, refinaria e
-moinho num quadro só que não existe na realidade. Não sei de onde veio nem sob
-que licença. É a placa que mais parece o lugar de todas — a refinaria ao fundo
-é a silhueta de verdade da cidade — mas é também a única derivada direta de
-uma imagem de terceiro, e não de referência. Se a origem importar, **é esta que
-sai primeiro**; o palco cai na silhueta procedural sozinho, sem tocar em mais
-nada.
+O motivo não foi técnico — era a placa que mais parecia o lugar. Foi
+procedência: não se sabia de onde a imagem tinha vindo nem sob que licença, e
+ela era a única placa **derivada direta** de imagem de terceiro. Toda placa
+daqui em diante é gerada tendo a foto como guia de composição, e é por isso que
+a foto de referência fica em `referencias/`, fora do repositório.
+
+Duas coisas daquele trabalho continuaram, porque valem para qualquer placa:
+
+**`--luz` e `--cor` no `palco.py`**, padrão 1.0 nos dois, que não mexem em
+nada. Geração já sai apagada porque o prompt pede; foto e pintura não — chegam
+claras e saturadas e brigam com o sprite, que tem 24 cores fortes e contorno de
+1px.
+
+**O corte em 2:1 exato.** A placa é ancorada pela base em `CHAO + 60`, então
+quanto mais alta ela for, mais do topo some fora da tela. A 1,74:1 a placa sai
+com 826px de altura e perde 166px de topo; a 2:1 sai com 719 e perde 59. Num
+cenário com silhueta alta — chaminé, torre, cúpula — a diferença é perder ou
+não o que identifica o lugar.
 
 Os dois valores existem por causa disto. Uma geração já sai apagada porque o
 prompt pede; uma foto ou pintura não — chega clara e saturada, e briga com o
