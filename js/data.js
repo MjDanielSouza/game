@@ -333,7 +333,11 @@ export const LUTADORES = {
       habilidade: golpe({
         nome: 'ARMADILHA', tipo: 'armadilha', startup: 9, ativo: 3, recovery: 18,
         dano: 0, stamina: 15, cooldown: 100, ganhoSuper: 12, pose: 'armadilha',
-        armadilhaDados: { dano: 15, hitstun: 42, vida: 600, raio: 26, max: 2 }, som: 'buff',
+        // Contra o chefao a armadilha e 43% do dano dele e os normais colapsam
+        // (13,8 acertos limpos num oponente comum contra 6,0 no chefao). Num
+        // oponente comum ela e so 16%, entao reforcar aqui mexe onde ele e
+        // fraco sem inflar onde ele ja e forte.
+        armadilhaDados: { dano: 17, hitstun: 42, vida: 600, raio: 26, max: 2 }, som: 'buff',
       }),
       especial: golpe({
         nome: 'XEQUE-MATE', tipo: 'detona', startup: 12, ativo: 8, recovery: 28,

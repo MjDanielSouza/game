@@ -54,7 +54,7 @@ Melhor de 3 rounds, 99 segundos cada. Tempo esgotado decide por percentual de vi
 | **NEUMANN** | tanque | MURALHA — 3 de armadura por 2,5 s | FIM DE EXPEDIENTE — onda rasteira |
 | **RAFAEL LATA** | mobilidade | LADEIRA — dash invencível que atravessa, sem dano: rende super | CAPACETE DE AÇO — investida de tela cheia, 3 acertos |
 | **VINICIUS** | zoner | GEADA — projétil que deixa lento | NEVASCA — 5 projéteis |
-| **COSTELA** | técnico | ARMADILHA — planta no chão (até 2) | XEQUE-MATE — detona todas de uma vez |
+| **COSTELA** | técnico | ARMADILHA — planta no chão (até 2, 17 de dano cada) | XEQUE-MATE — detona todas de uma vez |
 | **DANIEL** | grappler | REUNIÃO — agarrão que avança e não pode ser bloqueado | ÚLTIMA PALAVRA — investida com 2 de armadura |
 | **ARAUCÁRIA** | **CHEFÃO** | CHUVA DE PINHÃO — 3 projéteis em arco | QUEDA DA COPA — onda nos dois sentidos |
 
