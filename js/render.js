@@ -89,6 +89,14 @@ function pose(f, tick) {
     return p;
   }
 
+  if (est === 'atordoado') {
+    const b = Math.sin(f.t * 0.16) * 9;
+    p.dx = b * 0.5; p.torso = -4 + b; p.cabeca = 8 + b * 0.6;
+    p.bracoT = [-14, 26]; p.bracoF = [-8, 20];
+    p.pernaT = [18, -4]; p.pernaF = [-18, 8];
+    return p;
+  }
+
   if (est === 'hitstun') {
     const k = Math.min(1, f.t / 4);
     p.torso = -4 - 22 * k; p.cabeca = -12 * k; p.dy = 3;
@@ -228,7 +236,11 @@ export function desenharLutador(ctx, f, tick) {
     const mapa = f.def.sprite && f.def.sprite.frames;
     ctx.save();
     if (f.piscar > 0 && f.piscar % 4 < 2) ctx.globalAlpha = 0.72;
-    Sprites.desenhar(ctx, f.id, Sprites.frameDe(f, mapa, tick), f.x, f.y, f.dir);
+    // Atordoado balanca no lugar. O frame e o de hitstun, que sozinho fica
+    // parado e parece pausa; o balanco e o que diz "ele ainda esta de pe, mas
+    // nao esta mais em si".
+    const bal = f.estado === 'atordoado' ? Math.sin(tick * 0.16) * 7 * s * 0.4 : 0;
+    Sprites.desenhar(ctx, f.id, Sprites.frameDe(f, mapa, tick), f.x + bal, f.y, f.dir);
     ctx.restore();
     auras(ctx, f);
     return;

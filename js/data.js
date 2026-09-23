@@ -165,6 +165,9 @@ export const LUTADORES = {
     },
     stats: { vida: 100, velocidade: 3.0, pulo: 13.2, stamina: 100, regen: 0.45, peso: 1.0, defesa: 1.0 },
     ia: { agressividade: 0.55, distancia: 90, reacao: 14, defesa: 0.50 },
+    // Finalizacao (Sprint 2). So vale no round que decide a luta e so
+    // por KO - tempo esgotado nao rende finalizacao.
+    finalizacao: { nome: 'PONTO FINAL', sequencia: ['baixo', 'baixo', 'soco'], cor: '#ffd23f' },
     golpes: {
       soco: golpe({ nome: 'Jab', startup: 4, ativo: 3, recovery: 8, dano: 6, stamina: 5, cancela: ['chute', 'baixo', 'habilidade', 'especial'] }),
       chute: golpe({ nome: 'Chute Alto', startup: 9, ativo: 4, recovery: 16, dano: 13, hitstun: 20, empurrao: 7, stamina: 13, pose: 'chute', alcance: { x: 28, y: -44, w: 54, h: 26 }, cancela: ['especial'], som: 'pesado' }),
@@ -202,6 +205,9 @@ export const LUTADORES = {
     },
     stats: { vida: 115, velocidade: 2.7, pulo: 12.0, stamina: 100, regen: 0.40, peso: 1.25, defesa: 1.05 },
     ia: { agressividade: 0.82, distancia: 55, reacao: 17, defesa: 0.38 },
+    // Finalizacao (Sprint 2). So vale no round que decide a luta e so
+    // por KO - tempo esgotado nao rende finalizacao.
+    finalizacao: { nome: 'ULTIMA RODADA', sequencia: ['esq', 'dir', 'soco'], cor: '#e8563f' },
     golpes: {
       soco: golpe({ nome: 'Direto', startup: 5, ativo: 3, recovery: 10, dano: 8, stamina: 7, cancela: ['chute', 'habilidade', 'especial'] }),
       chute: golpe({ nome: 'Cotovelada', startup: 12, ativo: 4, recovery: 20, dano: 18, hitstun: 24, empurrao: 9, stamina: 18, pose: 'chute', alcance: { x: 20, y: -52, w: 46, h: 30 }, armadura: 1, cancela: ['especial'], som: 'pesado' }),
@@ -237,6 +243,9 @@ export const LUTADORES = {
     },
     stats: { vida: 82, velocidade: 4.2, pulo: 15.0, stamina: 110, regen: 0.55, peso: 0.85, defesa: 0.9 },
     ia: { agressividade: 0.95, distancia: 60, reacao: 11, defesa: 0.32 },
+    // Finalizacao (Sprint 2). So vale no round que decide a luta e so
+    // por KO - tempo esgotado nao rende finalizacao.
+    finalizacao: { nome: 'MARE VAZANTE', sequencia: ['dir', 'dir', 'chute'], cor: '#5d8fc4' },
     golpes: {
       soco: golpe({ nome: 'Tapa', startup: 3, ativo: 3, recovery: 6, dano: 5, stamina: 4, hitstun: 13, cancela: ['soco', 'chute', 'baixo', 'habilidade', 'especial'] }),
       chute: golpe({ nome: 'Chute Giratorio', startup: 8, ativo: 5, recovery: 15, dano: 12, hitstun: 19, stamina: 12, pose: 'chute', alcance: { x: 26, y: -48, w: 52, h: 28 }, cancela: ['especial'], som: 'pesado' }),
@@ -275,6 +284,9 @@ export const LUTADORES = {
     // nem por cima nem por baixo.
     stats: { vida: 145, velocidade: 2.2, pulo: 11.5, stamina: 120, regen: 0.35, peso: 1.6, defesa: 1.12 },
     ia: { agressividade: 0.6, distancia: 70, reacao: 20, defesa: 0.42 },
+    // Finalizacao (Sprint 2). So vale no round que decide a luta e so
+    // por KO - tempo esgotado nao rende finalizacao.
+    finalizacao: { nome: 'HORA EXTRA', sequencia: ['baixo', 'baixo', 'chute'], cor: '#9aa0ad' },
     golpes: {
       soco: golpe({ nome: 'Empurrao', startup: 6, ativo: 4, recovery: 12, dano: 9, empurrao: 8, stamina: 8, alcance: { x: 26, y: -62, w: 48, h: 26 }, cancela: ['chute', 'habilidade', 'especial'] }),
       chute: golpe({ nome: 'Pisao', startup: 14, ativo: 5, recovery: 22, dano: 21, hitstun: 26, empurrao: 10, stamina: 20, pose: 'chute', armadura: 1, alcance: { x: 24, y: -36, w: 58, h: 36 }, cancela: ['especial'], som: 'pesado' }),
@@ -312,6 +324,9 @@ export const LUTADORES = {
     },
     stats: { vida: 92, velocidade: 3.9, pulo: 16.0, stamina: 105, regen: 0.5, peso: 0.9, defesa: 0.95 },
     ia: { agressividade: 0.7, distancia: 110, reacao: 12, defesa: 0.52 },
+    // Finalizacao (Sprint 2). So vale no round que decide a luta e so
+    // por KO - tempo esgotado nao rende finalizacao.
+    finalizacao: { nome: 'SEM FREIO', sequencia: ['dir', 'esq', 'chute'], cor: '#f0a04b' },
     golpes: {
       soco: golpe({ nome: 'Cutucada', startup: 3, ativo: 3, recovery: 6, dano: 6, stamina: 5, cancela: ['chute', 'baixo', 'habilidade', 'especial'] }),
       chute: golpe({ nome: 'Voadora', startup: 8, ativo: 5, recovery: 13, dano: 14, hitstun: 20, empurrao: 8, stamina: 14, avanco: 5, pose: 'chute', alcance: { x: 28, y: -46, w: 56, h: 26 }, cancela: ['especial'], som: 'pesado' }),
@@ -351,6 +366,9 @@ export const LUTADORES = {
     },
     stats: { vida: 88, velocidade: 2.9, pulo: 12.4, stamina: 100, regen: 0.45, peso: 1.0, defesa: 0.95 },
     ia: { agressividade: 0.35, distancia: 250, reacao: 13, defesa: 0.62 },
+    // Finalizacao (Sprint 2). So vale no round que decide a luta e so
+    // por KO - tempo esgotado nao rende finalizacao.
+    finalizacao: { nome: 'ZERO ABSOLUTO', sequencia: ['baixo', 'dir', 'habilidade'], cor: '#8fd8ff' },
     golpes: {
       soco: golpe({ nome: 'Soco Longo', startup: 5, ativo: 3, recovery: 11, dano: 6, stamina: 6, alcance: { x: 28, y: -56, w: 58, h: 20 }, cancela: ['chute', 'habilidade', 'especial'] }),
       chute: golpe({ nome: 'Chute Estendido', startup: 11, ativo: 5, recovery: 19, dano: 13, hitstun: 20, empurrao: 10, stamina: 14, pose: 'chute', alcance: { x: 30, y: -44, w: 74, h: 22 }, cancela: ['especial'], som: 'pesado' }),
@@ -388,6 +406,9 @@ export const LUTADORES = {
     },
     stats: { vida: 90, velocidade: 3.1, pulo: 13.0, stamina: 100, regen: 0.48, peso: 0.95, defesa: 0.95 },
     ia: { agressividade: 0.45, distancia: 165, reacao: 13, defesa: 0.58 },
+    // Finalizacao (Sprint 2). So vale no round que decide a luta e so
+    // por KO - tempo esgotado nao rende finalizacao.
+    finalizacao: { nome: 'CONTA FECHADA', sequencia: ['esq', 'baixo', 'habilidade'], cor: '#3ad07a' },
     golpes: {
       soco: golpe({ nome: 'Jab Tecnico', startup: 4, ativo: 3, recovery: 9, dano: 6, stamina: 5, cancela: ['chute', 'baixo', 'habilidade', 'especial'] }),
       chute: golpe({ nome: 'Chute Calculado', startup: 10, ativo: 4, recovery: 17, dano: 13, hitstun: 20, empurrao: 7, stamina: 13, pose: 'chute', alcance: { x: 28, y: -46, w: 54, h: 24 }, cancela: ['especial'], som: 'pesado' }),
@@ -429,6 +450,9 @@ export const LUTADORES = {
     },
     stats: { vida: 108, velocidade: 2.75, pulo: 11.8, stamina: 110, regen: 0.55, peso: 1.3, defesa: 1.05 },
     ia: { agressividade: 0.86, distancia: 44, reacao: 15, defesa: 0.34 },
+    // Finalizacao (Sprint 2). So vale no round que decide a luta e so
+    // por KO - tempo esgotado nao rende finalizacao.
+    finalizacao: { nome: 'ATA FINAL', sequencia: ['baixo', 'esq', 'soco'], cor: '#c9a6ff' },
     golpes: {
       // Alcance curto de proposito: ele tem que atravessar o poke dos outros
       // para existir. A armadura da cotovelada e o pedagio que ele paga.

@@ -133,6 +133,13 @@ export function frameDe(f, mapa, tick) {
     case 'blockstun': return pega('bloqueio', 'idle');
     case 'hitstun': return pega('hitstun', 'idle');
     case 'ko': return pega('ko', 'hitstun', 'idle');
+    // Atordoado na janela de finalizacao: de pe, sem guarda. O frame de
+    // hitstun e o que mais parece "levou e nao reagiu"; o balanco quem faz e
+    // o render.
+    case 'atordoado': return pega('atordoado', 'hitstun', 'idle');
+    // Executando a finalizacao. `finalizacao` e o frame 12 quando existe;
+    // sem ele cai no especial, que ja e a pose mais dramatica do lutador.
+    case 'finalizando': return pega('finalizacao', 'especial', 'soco', 'idle');
     default: return pega('idle');
   }
 }

@@ -18,6 +18,19 @@ export const BOTOES = ['soco', 'chute', 'baixo', 'aereo', 'habilidade', 'especia
 const CAMERA_Y_MAX = 150;
 const MARGEM_TOPO = 96;
 
+// Janela de finalizacao: 5 segundos com o perdedor atordoado de pe.
+export const FINALIZE_FRAMES = 5 * FPS;
+// Vermelho escuro. O nome da finalizacao e o aviso ficam em cima e apagados:
+// a cena e o que tem que ser vista, nao a legenda dela.
+export const COR_FINALIZACAO = '#9c1c12';
+// Quanto tempo um input da sequencia espera pelo proximo antes de zerar.
+export const SEQUENCIA_GAP = 60;
+// Duracao da finalizacao em si, por etapa: escurece, golpe, queda.
+const FATAL_ESCURECE = 26;
+const FATAL_GOLPE = 40;
+const FATAL_QUEDA = 84;
+export const FATAL_TOTAL = FATAL_ESCURECE + FATAL_GOLPE + FATAL_QUEDA;
+
 // ============================================================================
 //  LUTADOR
 // ============================================================================
@@ -112,7 +125,7 @@ export class Lutador {
   trocar(estado) { this.estado = estado; this.t = 0; }
 
   travado() {
-    return ['ataque', 'hitstun', 'blockstun', 'ko', 'agarrado'].includes(this.estado);
+    return ['ataque', 'hitstun', 'blockstun', 'ko', 'agarrado', 'atordoado'].includes(this.estado);
   }
 
   // Pode iniciar `id`? Livre, ou cancelando o golpe atual depois de acertar.
@@ -307,6 +320,16 @@ export class Lutador {
     }
 
     if (this.estado === 'ko') { this.fisica(); return; }
+
+    // Atordoado: de pe, sem controle, esperando a finalizacao ou o nocaute
+    // padrao. Nao sai deste estado sozinho - quem tira e o Mundo.
+    if (this.estado === 'atordoado') {
+      this.vx *= ATRITO;
+      this.bloqueando = false;
+      this.agachado = false;
+      this.fisica();
+      return;
+    }
 
     const vel = this.def.stats.velocidade * ESC * (this.lentidao > 0 ? 0.45 : 1) * (this.fase2 ? this.def.fase2.velocidade : 1);
 
@@ -508,9 +531,14 @@ export class Mundo {
     this.round = opcoes.round || 1;
     this.placar = opcoes.placar || [0, 0];
     this.tempo = 99 * FPS;
-    this.fase = 'intro';          // intro | luta | fim
+    // intro | luta | finalize | fatality | fim
+    this.fase = 'intro';
     this.faseT = 0;
     this.vencedor = null;
+    // Finalizacao
+    this.decisivo = false;        // este round decide a luta?
+    this.finalizacao = null;      // a def do golpe, quando executada
+    this.fatalT = 0;
     this.onSom = opcoes.onSom || (() => {});
     // Em versus o p2 vem do segundo teclado e a IA nao roda. E a unica
     // diferenca entre os dois modos - o resto do motor nao sabe qual e qual.
@@ -525,7 +553,9 @@ export class Mundo {
     this.efeitos.push({ tipo, x, y, t: 0, vida: tipo === 'acerto' ? 14 : 20, escala, ang: Math.random() * 6.28 });
   }
 
-  texto(txt, cor) { this.textos.push({ txt, cor, t: 0, vida: 70 }); }
+  // `opts.alto` desenha em cima, pequeno, acima da cabeca dos lutadores - e
+  // onde vai o nome da finalizacao, que nao pode tapar a cena.
+  texto(txt, cor, opts) { this.textos.push({ txt, cor, t: 0, vida: 70, ...opts }); }
 
   combo(quem, n) {
     const ja = this.textos.find((t) => t.combo);
@@ -593,6 +623,30 @@ export class Mundo {
       this.faseT++;
       this.p1.atualizar(vazio(), this.p2, this);
       this.p2.atualizar(vazio(), this.p1, this);
+      this.decairEfeitos();
+      return;
+    }
+
+    // Janela de finalizacao. O vencedor continua jogando - anda, pula, bate -
+    // e e por isso que ele consegue entrar a sequencia. O perdedor fica de pe,
+    // atordoado, sem controle nenhum.
+    if (this.fase === 'finalize') {
+      this.faseT++;
+      const [venc, perd] = this.dupla();
+      venc.atualizar(this.vencedor === 'p1' ? entrada : (entrada2 || vazio()), perd, this);
+      perd.atualizar(vazio(), venc, this);
+      this.empurrarCorpos();
+      this.atualizarProjeteis();
+      this.atualizarCamera();
+      this.decairEfeitos();
+      if (this.faseT >= FINALIZE_FRAMES) this.semFinalizacao();
+      return;
+    }
+
+    // Finalizacao em execucao: cena scriptada, ninguem controla nada.
+    if (this.fase === 'fatality') {
+      this.fatalT++;
+      this.rodarFinalizacao();
       this.decairEfeitos();
       return;
     }
@@ -682,11 +736,15 @@ export class Mundo {
     this.textos = this.textos.filter((t) => t.t < t.vida);
   }
 
+  // [vencedor, perdedor] - so faz sentido depois de encerrar()
+  dupla() {
+    return this.vencedor === 'p1' ? [this.p1, this.p2] : [this.p2, this.p1];
+  }
+
   encerrar() {
-    if (this.fase === 'fim') return;
-    this.fase = 'fim';
-    this.faseT = 0;
+    if (this.fase !== 'luta') return;
     const a = this.p1, b = this.p2;
+    const porKO = !a.vivo || !b.vivo;
     if (!a.vivo && !b.vivo) this.vencedor = 'empate';
     else if (!b.vivo) this.vencedor = 'p1';
     else if (!a.vivo) this.vencedor = 'p2';
@@ -694,8 +752,86 @@ export class Mundo {
 
     if (this.vencedor === 'p1') this.placar[0]++;
     else if (this.vencedor === 'p2') this.placar[1]++;
+
+    this.decisivo = this.placar[0] >= 2 || this.placar[1] >= 2;
+
+    // Janela de finalizacao: so no round que decide a luta, so quando a vida
+    // chegou a zero (tempo esgotado nao rende finalizacao) e so quando quem
+    // venceu tem uma finalizacao definida. O chefao nao tem, de proposito - a
+    // IA finalizando o jogador seria humilhacao sem agencia nenhuma.
+    const [venc, perd] = this.vencedor === 'empate' ? [null, null] : this.dupla();
+    if (this.decisivo && porKO && venc && venc.def.finalizacao && (venc.ehJogador || this.duplo)) {
+      this.fase = 'finalize';
+      this.faseT = 0;
+      // Limpa o que sobrou do round. O LUTEM! vive 70 frames, entao um KO
+      // rapido deixava ele na tela junto com o FINALIZE! - duas chamadas
+      // brigando pela mesma cena.
+      this.textos.length = 0;
+      perd.trocar('atordoado');
+      perd.vx = 0; perd.vy = 0; perd.y = CHAO; perd.noChao = true;
+      perd.golpe = null; perd.invencivel = 0;
+      // Quem escreve FINALIZE! na tela e o HUD (ui.js), com a sequencia e o
+      // relogio junto. Um texto aqui ficava por cima dele.
+      this.som('super');
+      return;
+    }
+
+    this.fase = 'fim';
+    this.faseT = 0;
     this.texto(this.vencedor === 'p1' ? 'K.O.' : this.vencedor === 'p2' ? 'DERROTA' : 'EMPATE',
       this.vencedor === 'p1' ? '#ffd23f' : '#ff4a32');
+  }
+
+  // Sequencia entrou a tempo. Chamado de fora (main.js le o teclado e o toque).
+  finalizar() {
+    if (this.fase !== 'finalize') return false;
+    const [venc, perd] = this.dupla();
+    this.finalizacao = venc.def.finalizacao;
+    this.fase = 'fatality';
+    this.textos.length = 0;
+    this.fatalT = 0;
+    venc.trocar('finalizando');
+    venc.vx = 0;
+    perd.vx = 0;
+    // encosta os dois, e o vencedor olhando para o perdedor
+    venc.dir = perd.x >= venc.x ? 1 : -1;
+    this.som('super');
+    return true;
+  }
+
+  // A janela fechou sem sequencia: nocaute padrao.
+  semFinalizacao() {
+    const [, perd] = this.dupla();
+    perd.morrer(this);
+    this.fase = 'fim';
+    this.faseT = 0;
+    this.texto(this.vencedor === 'p1' ? 'K.O.' : 'DERROTA',
+      this.vencedor === 'p1' ? '#ffd23f' : '#ff4a32');
+  }
+
+  rodarFinalizacao() {
+    const t = this.fatalT;
+    const [venc, perd] = this.dupla();
+    if (t === FATAL_ESCURECE) {
+      // o golpe conecta
+      this.som('ko');
+      this.hitstop = 14;
+      this.tremor = 30;
+      this.efeito('acerto', perd.x, perd.y - perd.altura * 0.55, 2.6);
+      this.texto(this.finalizacao.nome, COR_FINALIZACAO, { alto: true });
+    }
+    if (t === FATAL_ESCURECE + FATAL_GOLPE) {
+      perd.trocar('ko');
+      perd.vida = 0;
+      perd.vy = -11;
+      perd.vx = -perd.dir * 9 * ESC;
+      this.tremor = 20;
+    }
+    if (t > FATAL_ESCURECE + FATAL_GOLPE) perd.atualizar(vazio(), venc, this);
+    if (t >= FATAL_TOTAL) {
+      this.fase = 'fim';
+      this.faseT = 0;
+    }
   }
 
   // -------------------------------------------------------------------- IA -

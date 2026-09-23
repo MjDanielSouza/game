@@ -4,7 +4,7 @@
 // ============================================================================
 import assert from 'node:assert/strict';
 import { readFileSync } from 'node:fs';
-import { Mundo, Lutador, vazio } from './js/engine.js';
+import { Mundo, Lutador, vazio, FINALIZE_FRAMES, FATAL_TOTAL } from './js/engine.js';
 import { LUTADORES, MAPA, PALCOS, JOGAVEIS, CHAO, FPS, ESC } from './js/data.js';
 
 let ok = 0;
@@ -307,6 +307,85 @@ teste('em versus o p2 obedece a segunda entrada e a IA nao roda', () => {
   m.p2.bufferar('soco');
   for (let i = 0; i < 6; i++) m.atualizar(vazio(), vazio());
   assert.ok(m.p2.golpe, 'o p2 nao consegue atacar');
+});
+
+teste('finalizacao: KO no round decisivo abre a janela, e so nele', () => {
+  const decisivo = (placar) => {
+    const m = lutando(new Mundo('lucas', 'joao', 'opera', 1, { duplo: true }));
+    m.placar = placar.slice();
+    m.p2.vida = 1;
+    m.p2.x = m.p1.x + 90;
+    m.p1.bufferar('soco');
+    for (let i = 0; i < 60 && m.fase === 'luta'; i++) m.atualizar(vazio(), vazio());
+    return m;
+  };
+  assert.equal(decisivo([1, 0]).fase, 'finalize', 'round decisivo tem que abrir a janela');
+  assert.equal(decisivo([0, 0]).fase, 'fim', 'round 1 de 3 nao abre janela');
+
+  const m = decisivo([1, 0]);
+  assert.equal(m.p2.estado, 'atordoado');
+  assert.equal(m.placar[0], 2, 'o placar e marcado quando o round encerra, nao depois da cena');
+});
+
+teste('finalizacao: a janela limpa o texto que sobrou do round', () => {
+  const m = lutando(new Mundo('lucas', 'joao', 'opera', 1, { duplo: true }));
+  m.placar = [1, 0]; m.p2.vida = 1; m.p2.x = m.p1.x + 90;
+  m.texto('LUTEM!', '#ffd23f');           // como no comeco de qualquer round
+  m.p1.bufferar('soco');
+  for (let i = 0; i < 60 && m.fase === 'luta'; i++) m.atualizar(vazio(), vazio());
+  assert.equal(m.fase, 'finalize');
+  // O LUTEM! vive 70 frames: num KO rapido ele ficava na tela junto com o
+  // FINALIZE!, duas chamadas brigando pela mesma cena.
+  assert.equal(m.textos.length, 0, 'a janela de finalizacao tem que entrar com a tela limpa');
+  m.finalizar();
+  assert.ok(m.textos.every((x) => x.txt !== 'LUTEM!'), 'a cena tambem entra limpa');
+});
+
+teste('finalizacao: sem sequencia vira nocaute padrao', () => {
+  const m = lutando(new Mundo('lucas', 'joao', 'opera', 1, { duplo: true }));
+  m.placar = [1, 0]; m.p2.vida = 1; m.p2.x = m.p1.x + 90; m.p1.bufferar('soco');
+  for (let i = 0; i < 60 && m.fase === 'luta'; i++) m.atualizar(vazio(), vazio());
+  // margem porque o hitstop congela o contador de fase
+  for (let i = 0; i < FINALIZE_FRAMES + 40; i++) m.atualizar(vazio(), vazio());
+  assert.equal(m.fase, 'fim');
+  assert.equal(m.p2.estado, 'ko');
+  assert.equal(m.finalizar(), false, 'nao da para finalizar depois da janela');
+});
+
+teste('finalizacao: a cena roda e termina com o perdedor no chao', () => {
+  const m = lutando(new Mundo('lucas', 'joao', 'opera', 1, { duplo: true }));
+  m.placar = [1, 0]; m.p2.vida = 1; m.p2.x = m.p1.x + 90; m.p1.bufferar('soco');
+  for (let i = 0; i < 60 && m.fase === 'luta'; i++) m.atualizar(vazio(), vazio());
+  assert.equal(m.finalizar(), true);
+  assert.equal(m.fase, 'fatality');
+  assert.equal(m.p1.estado, 'finalizando');
+  for (let i = 0; i < FATAL_TOTAL + 40; i++) m.atualizar(vazio(), vazio());
+  assert.equal(m.fase, 'fim');
+  assert.equal(m.p2.estado, 'ko');
+});
+
+teste('finalizacao: o chefao nao finaliza ninguem', () => {
+  const m = lutando(new Mundo('araucaria', 'lucas', 'pedreira', 1, { duplo: true }));
+  m.placar = [1, 0]; m.p2.vida = 1; m.p2.x = m.p1.x + 120; m.p1.bufferar('soco');
+  for (let i = 0; i < 60 && m.fase === 'luta'; i++) m.atualizar(vazio(), vazio());
+  assert.equal(m.fase, 'fim', 'o chefao nao tem finalizacao, de proposito');
+});
+
+teste('todo jogavel tem finalizacao com sequencia de 3 e nome proprio', () => {
+  const nomes = new Set();
+  for (const id of JOGAVEIS) {
+    const f = LUTADORES[id].finalizacao;
+    assert.ok(f, `${id} sem finalizacao`);
+    assert.equal(f.sequencia.length, 3, `${id}: sequencia tem que ter 3 entradas`);
+    for (const k of f.sequencia)
+      assert.ok(['esq','dir','cima','baixo','soco','chute','habilidade','especial'].includes(k),
+        `${id}: token invalido na sequencia: ${k}`);
+    // nome nao pode repetir o de um golpe, senao o texto na tela mente
+    for (const g in LUTADORES[id].golpes)
+      assert.notEqual(f.nome, LUTADORES[id].golpes[g].nome, `${id}: finalizacao com nome de golpe`);
+    assert.ok(!nomes.has(f.nome), `nome de finalizacao repetido: ${f.nome}`);
+    nomes.add(f.nome);
+  }
 });
 
 console.log(`\n${ok} checagens passaram.\n`);

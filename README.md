@@ -41,6 +41,14 @@ usa `,` `.` `/` `Enter`. Jogando sozinho, o jogador 1 também responde às setas
 golpes à direita. Deite o aparelho: em pé o canvas de 16:9 vira uma tarja e o
 jogo pede para girar. O 2 jogadores é só no teclado.
 
+**FINALIZE!** Quando você vence o round decisivo por nocaute, o oponente fica
+5 segundos de pé, atordoado. Acertou a sua sequência nesse tempo, a arena
+escurece e sai a finalização. Errou ou demorou, é nocaute normal.
+
+**A sequência não aparece durante a luta** — ela está na ficha do personagem,
+na tela de seleção e no briefing. Decore antes: `↓ ↓ SOCO` do LUCAS,
+`← ↓ HAB` do COSTELA.
+
 As três regras que decidem a partida:
 
 - **Golpe alto** só é bloqueado **em pé**. **Golpe baixo** só é bloqueado
