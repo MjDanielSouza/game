@@ -42,12 +42,20 @@ Estado atual das referências (640×640, COSTELA 476×476):
 | LUCAS, VINICIUS, NEUMANN, RAFAEL LATA, DANIEL | servem |
 | JULIANO | serve depois de cortar — a lente distorce a **mão** esticada para a câmera, não o rosto |
 | JOÃO | serve com ressalva — óculos escuros escondem os olhos, então eles viraram traço do personagem |
-| COSTELA | 476px e desfocada — dá pra tentar, mas o rosto vai sair genérico |
+| COSTELA | serve — 476px, mas é retrato apertado, então o rosto ocupa quase todo o quadro |
 
-Duas dessas eu tinha descartado cedo demais. Vale abrir a foto e olhar antes de
-pedir outra: o defeito costuma estar numa parte que o recorte resolve. E quando
-ele está mesmo no rosto — como os óculos do JOÃO — assumir vira design honesto:
-não dá para inventar olhos que nunca se viu.
+**As três que eu tinha descartado serviam.** O erro foi sempre o mesmo: julgar
+pelo defeito aparente em vez de pelo que o sprite precisa.
+
+- O tamanho do arquivo não diz nada. O que importa é **quanto do quadro o rosto
+  ocupa** — 476px de retrato apertado rendem mais que 640px de foto de corpo
+  inteiro na calçada. Em jogo o rosto tem ~18px.
+- Distorção de lente costuma estar numa **parte** da foto. Recorte resolve.
+- Quando o defeito está mesmo no rosto — os óculos escuros do JOÃO — assumir
+  vira design honesto: não dá para inventar olhos que nunca se viu, e óculos
+  escuros num "O BRIGA DE RUA" é escolha, não defeito.
+
+Abra a foto e olhe antes de pedir outra.
 
 Peça ao grupo: *selfie de frente, luz do dia, sem óculos escuros, sozinho no
 quadro, o maior arquivo que o celular der.* Trinta segundos de cada um valem
