@@ -8,6 +8,28 @@
 import { LARGURA, ALTURA, CHAO, ARENA, PALCOS } from './data.js';
 import * as Sprites from './sprites.js';
 
+// ----------------------------------------------------------------------------
+//  Placas de palco
+//  Quem tem placa em assets/palcos/<id>.png desenha a foto-referencia
+//  pixelizada; quem nao tem segue nas silhuetas procedurais. A troca e por
+//  palco, igual ao sprite dos lutadores: da para trazer um cenario de cada vez
+//  sem mexer nos outros.
+// ----------------------------------------------------------------------------
+const placas = {};        // id -> Image pronta
+const semPlaca = {};      // id -> true, para nao bater no servidor de novo
+
+export function carregarPlaca(id) {
+  if (placas[id] || semPlaca[id]) return;
+  semPlaca[id] = true;                       // so tenta uma vez
+  const im = new Image();
+  im.onload = () => { placas[id] = im; delete semPlaca[id]; };
+  im.src = `assets/palcos/${id}.png`;
+}
+
+// Fator de parallax do fundo. A placa precisa cobrir
+// LARGURA + (ARENA - LARGURA) * PARALLAXE pixels de largura.
+const PARALLAXE = 0.35;
+
 const TAU = Math.PI * 2;
 const clamp = (v, a, b) => (v < a ? a : v > b ? b : v);
 const rad = (g) => (g * Math.PI) / 180;
@@ -398,18 +420,34 @@ export function desenharPalco(ctx, idPalco, camX, tick) {
   ctx.fillRect(0, 0, LARGURA, ALTURA);
 
   const off = (k) => -(camX - LARGURA / 2) * k;
+  const placa = placas[idPalco];
 
-  // camada 0 - ceu / astro
-  ctx.save();
-  ctx.translate(off(0.15), 0);
-  astro(ctx, P, idPalco, tick);
-  ctx.restore();
+  if (placa) {
+    // A placa cobre ceu e monumento numa camada so. Perde o parallax entre os
+    // dois, que a 0.15 e 0.45 quase nao se via, e ganha o lugar de verdade.
+    // Encostada embaixo em CHAO + 60: a faixa de chao da imagem fica atras do
+    // chao procedural, que continua sendo quem define onde o lutador pisa.
+    const w = LARGURA + (ARENA - LARGURA) * PARALLAXE;
+    const h = (w * placa.height) / placa.width;
+    ctx.save();
+    ctx.imageSmoothingEnabled = false;
+    ctx.translate(off(PARALLAXE), 0);
+    ctx.drawImage(placa, Math.round(-(w - LARGURA) / 2), Math.round(CHAO + 60 - h),
+      Math.round(w), Math.round(h));
+    ctx.restore();
+  } else {
+    // camada 0 - ceu / astro
+    ctx.save();
+    ctx.translate(off(0.15), 0);
+    astro(ctx, P, idPalco, tick);
+    ctx.restore();
 
-  // camada 1 - o monumento
-  ctx.save();
-  ctx.translate(off(0.45), 0);
-  silhueta(ctx, P, idPalco, tick);
-  ctx.restore();
+    // camada 1 - o monumento
+    ctx.save();
+    ctx.translate(off(0.45), 0);
+    silhueta(ctx, P, idPalco, tick);
+    ctx.restore();
+  }
 
   // chao
   chao(ctx, P, off(1));

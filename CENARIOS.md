@@ -10,24 +10,39 @@ os personagens vão ficar.
 
 ## Especificação técnica (igual para todos)
 
-- **Tela** 1920×1080. **Arte** 2560×1080 — a sobra é o espaço de câmera, que
-  acompanha os lutadores lateralmente.
-- **Linha do horizonte a 58% da altura.** Isso põe a câmera na altura do peito
-  dos lutadores, que é a altura de câmera de todo fighter de arcade.
-- **Terço inferior = chão.** Plano, livre, sem obstáculo, sem detalhe que
-  chame atenção. Textura sim, informação não.
-- **Monumento deslocado do centro**, ocupando o terço esquerdo ou direito.
-- **Três camadas parallax**, geradas separadas e com fundo transparente nas
-  duas da frente:
+A especificação antiga pedia **três camadas** de parallax em 2560×1080 com
+fundo transparente nas duas da frente. Não foi isso que ficou. Gerar três
+camadas que se alinham exige três gerações que concordem entre si, e elas não
+concordam: o monumento da camada do meio nunca nasce na mesma altura do
+horizonte da camada de trás. O que ficou é **uma placa só**, e o parallax
+continua existindo porque o chão, a névoa e a moldura da frente continuam
+sendo proceduais, desenhados por cima.
 
-| Camada | Conteúdo | Velocidade |
-|---|---|---|
-| `ceu` | céu, sol/lua, nuvens, silhueta distante | 0,15× |
-| `fundo` | o monumento, a mata, os prédios | 0,45× |
-| `frente` | galhos, postes, grade — moldura que passa rápido | 1,25× |
+- **Placa:** 1440×804, 48 cores, PNG em modo paleta (~200 KB).
+- **A largura sai da conta do parallax.** A tela tem 1280 e a arena 1700; o
+  fundo anda a 0,35, então a placa precisa cobrir
+  `1280 + (1700-1280)*0,35 = 1427px`. Menos que isso e a borda aparece quando
+  a câmera chega na ponta.
+- **Ancorada pela base** em `CHAO + 60`, não pelo topo. O que não pode escapar
+  é a linha onde o chão da placa encontra o chão desenhado.
+- **Horizonte a ~72% da altura** (a especificação antiga dizia 58%, mas com a
+  placa ancorada embaixo o que importa é onde o chão começa).
+- **Quarto inferior = chão raso, plano e vazio.** É onde os lutadores pisam.
+- **Monumento fora do centro.** O centro é dos personagens.
+- **Mais escura e de menos contraste que um sprite.** O sprite tem contorno de
+  1px e 24 cores saturadas; se o fundo brigar, os dois somem.
 
-- **Uma cor dominante por palco.** Se dois palcos têm a mesma paleta, viram o
-  mesmo palco na memória do jogador.
+```bash
+python tools/palco.py opera assets/brutos/palcos/opera.png
+```
+
+Lê a geração bruta e escreve `assets/palcos/<id>.png`: reduz com BOX para 1440
+e corta a paleta em 48 cores com MEDIANCUT **sem dithering** — dithering num
+fundo desse tamanho vira ruído que compete com o sprite.
+
+O carregamento é **por palco**, igual ao dos personagens: `js/render.js` tenta
+`assets/palcos/<id>.png` e, se não existir, desenha a silhueta procedural de
+sempre. Palco sem placa não quebra nada, e dá pra trazer um de cada vez.
 
 ## Os três palcos
 
@@ -93,11 +108,48 @@ colonial, luz amarela de poste.
 
 ## De onde vêm as imagens
 
-Temos referência boa só da Ópera de Arame. Para os outros dois, o caminho é
-baixar na mão da galeria da **Viaje Paraná** — travada para automação por
-certificado expirado, mas num navegador comum passa. Procure ali a foto que
-cumpre a especificação do topo deste arquivo, não a mais bonita.
+**A placa é gerada, não é a foto pixelizada.** A foto entra como referência de
+composição — o que aquele lugar *é* — e a geração entrega algo que obedece à
+especificação acima, que nenhuma foto turística obedece.
 
-Vale lembrar: SDXL já conhece a Ópera de Arame, a estufa do Jardim Botânico e
-o Museu Oscar Niemeyer — são arquitetura publicada no mundo inteiro. A
-referência melhora o resultado, mas não é bloqueio para começar a testar.
+Estado dos nove palcos:
+
+| Palco | Placa | Referência |
+|---|---|---|
+| Ópera de Arame | sim | `referencias/cenarios/` |
+| Jardim Botânico | sim | `referencias/cenarios/` |
+| Praça do Japão | sim | `referencias/cenarios/` |
+| Parque Barigui | sim | `referencias/cenarios/` |
+| Largo da Ordem | **não** | falta foto |
+| Museu Oscar Niemeyer | **não** | falta foto |
+| Estação Tubo | **não** | falta foto |
+| Torre Panorâmica | **não** | falta foto |
+| Pedreira Paulo Leminski | **não** | falta foto |
+
+A foto que serve é **horizontal de 2:1 pra cima, na altura dos olhos, com o
+terço de baixo em chão liso e visível, o monumento fora do centro e sem
+multidão**. Foto vertical, foto aérea e foto com o monumento centralizado não
+servem — e é o que todo banco de imagem tem.
+
+Os bancos oficiais do Paraná não abrem por automação: o da Viaje Paraná está
+com certificado SSL expirado, o álbum do Flickr da prefeitura não está
+publicado, e a busca do banco estadual é um POST de ASP.NET. Num navegador
+comum passam. `referencias/cenarios/CREDITOS.md` tem as oito que já vieram do
+Wikimedia e a licença de cada uma.
+
+### A fórmula do prompt
+
+O que fez diferença não foi descrever o lugar bonito — foi descrever a
+**composição**, e dizer o que não fazer:
+
+- sem nenhuma pessoa, sem personagem, sem texto
+- elevação lateral reta, na altura dos olhos, **sem perspectiva convergindo**
+- horizonte a ~72% da altura
+- quarto de baixo em chão liso e vazio, *"porque é ali que os lutadores ficam"*
+- monumento no terço esquerdo ou direito, *"porque o meio é dos personagens"*
+- três faixas chapadas de profundidade, sem degradê entre elas
+- mais escuro e de menos contraste que um sprite de primeiro plano
+
+Dizer *por que* cada regra existe mudou o resultado mais que qualquer ajuste de
+estilo. Sem o "porque é ali que os lutadores ficam" vinha sempre um canteiro,
+uma escada ou uma mureta bem onde o pé pisa.

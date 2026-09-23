@@ -4,7 +4,7 @@
 
 import { LARGURA, ALTURA, CHAO, ARENA, FPS, MAPA, LUTADORES, PALCOS, dificuldadeDoNo } from './data.js';
 import { Mundo, vazio } from './engine.js';
-import { desenharLutador, desenharPalco, desenharProjetil, desenharArmadilha, desenharEfeito } from './render.js';
+import { desenharLutador, desenharPalco, desenharProjetil, desenharArmadilha, desenharEfeito, carregarPlaca } from './render.js';
 import { desenharHUD, montarSelecao, montarMapa, montarBriefing, retrato } from './ui.js';
 import * as Sprites from './sprites.js';
 
@@ -158,6 +158,8 @@ function novoRound() {
   // o carregamento: o sprite entra assim que ficar pronto.
   for (const l of [S.mundo.p1, S.mundo.p2])
     if (l.def.sprite) Sprites.carregar(l.id, l.altura);
+  // A placa do palco entra assim que carregar; ate la valem as silhuetas.
+  carregarPlaca(n.palco);
 }
 
 function fimDeRound() {
@@ -278,6 +280,17 @@ addEventListener('resize', ajustar);
 carregar();
 cv.width = LARGURA; cv.height = ALTURA;
 ajustar();
+
+// Busca as folhas de sprite antes das telas de DOM, porque o retrato e montado
+// uma vez e vira data URL - se a folha chegar depois, o card fica com o rig
+// para sempre. Quando terminar, remonta a tela atual.
+// A altura (172) e a mesma do lutador em jogo, entao o retrato usa exatamente
+// o frame que vai aparecer na luta.
+Promise.all(
+  Object.values(LUTADORES)
+    .filter((d) => d.sprite)
+    .map((d) => Sprites.carregar(d.id, 172)),
+).then(() => irPara(S.tela));
 
 $('#btn-comecar').onclick = () => irPara(S.personagem ? 'mapa' : 'selecao');
 $('#btn-trocar').onclick = () => irPara('selecao');

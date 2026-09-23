@@ -65,6 +65,26 @@ export function carregar(id, alturaAlvo) {
 
 export function tem(id) { return !!atlas[id]; }
 
+// Desenha o frame parado dentro de uma caixa w x h, encostado embaixo. Serve
+// para o retrato das telas de DOM: antes elas desenhavam o rig procedural
+// mesmo quando o lutador ja tinha arte, entao a selecao mostrava um boneco que
+// nao era o personagem que ia entrar na luta.
+export function desenharEm(ctx, id, w, h, margem = 0.86) {
+  const a = atlas[id];
+  if (!a) return false;
+  const f = a.frames[0];
+  const s = Math.min((h * margem) / f.h, (w * margem) / f.w);
+  ctx.save();
+  ctx.imageSmoothingEnabled = false;
+  ctx.drawImage(
+    f.tile,
+    Math.round(w / 2 - (f.w * s) / 2), Math.round(h * 0.95 - f.h * s),
+    Math.round(f.w * s), Math.round(f.h * s),
+  );
+  ctx.restore();
+  return true;
+}
+
 export function desenhar(ctx, id, indice, x, y, dir, mult = 1) {
   const a = atlas[id];
   if (!a) return false;

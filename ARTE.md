@@ -180,21 +180,26 @@ python tools/atlas.py --autoteste
 
 ## Cenários
 
-Palco não é foto pixelizada. `CENARIOS.md` manda: horizonte a ~58% da altura,
-terço inferior livre pros pés, monumento fora do centro, uma cor dominante.
-Foto de cartão-postal falha nas três.
+O mesmo caminho dos personagens: a foto é **referência**, não é o resultado.
+Palco não é foto pixelizada — foto turística é vertical, põe o monumento no
+centro e enche o chão de detalhe, e as três coisas brigam com a luta.
 
-O caminho é gerar o palco como pixel art usando a referência só como guia de
-composição, e depois separar em três camadas (céu / monumento / moldura da
-frente) para o parallax que o `render.js` já espera.
+A especificação completa, a fórmula do prompt e o estado dos nove palcos estão
+em **[CENARIOS.md](CENARIOS.md)**. O resumo: gere a placa com a referência como
+guia de composição e passe por
 
-Só a Ópera de Arame tem referência aprovada (`referencias/cenarios/`). Para os
-outros, `CENARIOS.md` tem os prompts prontos e diz onde baixar.
+```bash
+python tools/palco.py opera assets/brutos/palcos/opera.png
+```
 
-Se quiser testar o caminho "foto → pixel art" direto, `pyxelate` faz isso em
-uma linha — serve pra prototipar, não pro palco final.
+que reduz para 1440px de largura e corta a paleta em 48 cores. Quatro palcos
+prontos; os outros cinco esperam foto e continuam na silhueta procedural sem
+quebrar nada.
 
----
+A ideia antiga de gerar **três camadas separadas** de parallax foi abandonada:
+três gerações não concordam entre si sobre onde fica o horizonte, e o
+monumento nunca encaixa. Uma placa só, com o chão e a moldura da frente
+continuando proceduais por cima, resolve com um terço do trabalho.
 
 ## Repositórios
 
