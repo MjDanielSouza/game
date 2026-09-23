@@ -4,7 +4,7 @@
 
 import { LARGURA, ALTURA, CHAO, ARENA, FPS, MAPA, LUTADORES, PALCOS, dificuldadeDoNo } from './data.js';
 import { Mundo, vazio } from './engine.js';
-import { desenharLutador, desenharPalco, desenharProjetil, desenharArmadilha, desenharEfeito } from './render.js';
+import { desenharLutador, desenharPalco, desenharProjetil, desenharArmadilha, desenharEfeito, carregarPlaca } from './render.js';
 import { desenharHUD, montarSelecao, montarMapa, montarBriefing, retrato } from './ui.js';
 import * as Sprites from './sprites.js';
 
@@ -158,6 +158,8 @@ function novoRound() {
   // o carregamento: o sprite entra assim que ficar pronto.
   for (const l of [S.mundo.p1, S.mundo.p2])
     if (l.def.sprite) Sprites.carregar(l.id, l.altura);
+  // A placa do palco entra assim que carregar; ate la valem as silhuetas.
+  carregarPlaca(n.palco);
 }
 
 function fimDeRound() {

@@ -79,6 +79,7 @@ js/main.js        cola: teclado, telas, progresso
 test.js           checagem do motor, sem navegador
 tools/balance.mjs sondagem de dificuldade
 tools/atlas.py    poses PNG -> folha de sprite + máscara alpha
+tools/palco.py    geração bruta de cenário -> placa de palco
 ```
 
 O motor não conhece nenhum golpe pelo nome. Tudo — alcance, frames, dano,
@@ -163,9 +164,16 @@ ARAUCÁRIA continua no rig, de propósito: ela é fictícia e não tem referênc
 **[ARTE.md](ARTE.md)** tem o pipeline completo da foto até o sprite, e os
 repositórios que ajudam.
 
-Os palcos seguem a especificação de `CENARIOS.md`: horizonte a ~58% da altura,
-terço inferior livre para os pés, monumento fora do centro, uma cor dominante
-por palco.
+Os palcos funcionam igual: se existe `assets/palcos/<id>.png`, o palco usa a
+placa; se não existe, cai na silhueta procedural. **Quatro dos nove** têm placa
+— Ópera de Arame, Jardim Botânico, Praça do Japão e Parque Barigui. Os outros
+cinco ainda não têm foto de referência e continuam procedurais.
+
+A placa é **gerada com a foto do lugar como referência**, não é a foto
+pixelizada: foto turística é vertical, centraliza o monumento e enche o chão
+de detalhe — exatamente as três coisas que um palco de luta não pode ter.
+`CENARIOS.md` tem a especificação, a fórmula do prompt e que tipo de foto
+serve.
 
 ---
 
