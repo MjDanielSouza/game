@@ -180,9 +180,9 @@ onze poses. **[ARTE.md](ARTE.md)** tem o pipeline completo da foto até o sprite
 e os repositórios que ajudam.
 
 Os palcos funcionam igual: se existe `assets/palcos/<id>.png`, o palco usa a
-placa; se não existe, cai na silhueta procedural. **Quatro dos nove** têm placa
-— Ópera de Arame, Jardim Botânico, Praça do Japão e Parque Barigui. Os outros
-cinco ainda não têm foto de referência e continuam procedurais.
+placa; se não existe, cai na silhueta procedural. **Os nove têm placa.** O rig
+procedural dos palcos continua no código como fallback, igual ao dos
+lutadores.
 
 A placa é **gerada com a foto do lugar como referência**, não é a foto
 pixelizada: foto turística é vertical, centraliza o monumento e enche o chão

@@ -221,9 +221,13 @@ guia de composição e passe por
 python tools/palco.py opera assets/brutos/palcos/opera.png
 ```
 
-que reduz para 1440px de largura e corta a paleta em 48 cores. Quatro palcos
-prontos; os outros cinco esperam foto e continuam na silhueta procedural sem
-quebrar nada.
+que reduz para 1440px de largura e corta a paleta em 48 cores. **Os nove
+palcos estão prontos.**
+
+Duas coisas que só apareceram na última leva: foto **aérea** serve de
+referência desde que o prompt diga para não copiar o ângulo de câmera, e o
+quinto superior da placa é descartado pela ancoragem, então nada importante
+pode estar lá em cima.
 
 Se algum dia a imagem **já existir** e não for gerada, o script aceita `--luz`
 e `--cor`. Geração já sai apagada porque o prompt pede; foto e pintura não, e

@@ -112,66 +112,78 @@ colonial, luz amarela de poste.
 composição — o que aquele lugar *é* — e a geração entrega algo que obedece à
 especificação acima, que nenhuma foto turística obedece.
 
-Estado dos nove palcos:
+**Os nove palcos têm placa.** A última leva — Largo da Ordem, Museu Oscar
+Niemeyer, Estação Tubo, Torre Panorâmica e Pedreira Paulo Leminski — fechou a
+lista.
 
 | Palco | Placa | Referência |
 |---|---|---|
-| Ópera de Arame | sim | `referencias/cenarios/` |
-| Jardim Botânico | sim | `referencias/cenarios/` |
-| Praça do Japão | sim | `referencias/cenarios/` |
-| Parque Barigui | sim | `referencias/cenarios/` |
-| Largo da Ordem | **não** | falta foto |
-| Museu Oscar Niemeyer | **não** | falta foto |
-| Estação Tubo | **não** | falta foto |
-| Torre Panorâmica | **não** | falta foto |
-| Pedreira Paulo Leminski | **não** | falta foto |
+| Ópera de Arame | sim | Wikimedia |
+| Jardim Botânico | sim | Wikimedia |
+| Praça do Japão | sim | Wikimedia |
+| Parque Barigui | sim | Wikimedia |
+| Largo da Ordem | sim | foto de terceiro, só como guia |
+| Museu Oscar Niemeyer | sim | foto aérea, só como guia |
+| Estação Tubo | sim | foto aérea, só como guia |
+| Torre Panorâmica | sim | foto aérea, só como guia |
+| Pedreira Paulo Leminski | sim | foto aérea, só como guia |
+
+As fotos de referência **não vão para o repositório** (`referencias/` é
+ignorado). O que é publicado é a placa gerada. Uma delas tem marca d'água de
+fotógrafo; como a foto entra só como guia de composição e nada dela é copiado
+pixel a pixel, a marca não chega à placa — mas é mais um motivo para a foto
+ficar fora.
+
+### Foto aérea serve, e eu estava errado
+
+Este arquivo dizia que foto aérea **não** serve. Quatro das cinco últimas
+referências são aéreas, e as cinco placas saíram certas.
+
+O que não serve é *copiar* o ângulo. A foto aérea carrega perfeitamente o que
+se precisa dela — a arquitetura, os materiais, as cores, o arranjo do lugar — e
+o ângulo se corrige no prompt, dizendo explicitamente:
+
+> *"A imagem de referência é uma fotografia AÉREA. NÃO copie o ângulo de câmera
+> nem o ponto de vista dela. Tire dela só a arquitetura, os materiais e as
+> cores do lugar real. Aqui estamos no chão, olhando de lado."*
+
+Sem essa frase o modelo devolve a vista de cima. Com ela, devolve a elevação
+lateral. A regra que sobra é mais simples do que a antiga: **qualquer foto que
+mostre bem o lugar serve; o enquadramento é problema do prompt, não da foto.**
+
+### O quinto de cima é descartável
+
+A placa é ancorada pela base em `CHAO + 60`, então o topo dela sai da tela:
+numa placa 16:9 (1440×806) perdem-se ~150px, quase um quinto. Por isso o prompt
+manda manter o quinto superior em céu vazio — e, quando o marco é alto, manda
+onde o topo dele deve cair:
+
+> *"O topo da torre fica a cerca de um quarto da altura, a partir da borda de
+> cima — não mais alto."*
+
+Foi o que salvou a Torre Panorâmica de virar um toco.
+
+### A moldura da frente some quando existe placa
+
+`render.js` desenha uma camada de frente a parallax 1,25 — galhos, postes,
+lascas de rocha. Ela existe para dar profundidade a um fundo procedural
+chapado. Sobre uma placa, vira defeito: na Estação Tubo eram duas barras pretas
+de 46px coladas na borda, na Pedreira eram dois triângulos escuros por cima da
+rocha que a própria placa já desenha. Palco com placa não desenha a moldura; a
+profundidade vem da imagem.
 
 ### Placa feita direto de uma imagem: por que não fazemos mais
 
 Existiu um décimo palco, Araucária, feito **direto** de um cartaz da cidade em
-vez de gerado a partir de referência: recorte 2:1 sem o texto →
-`tools/palco.py --luz 0.72 --cor 0.78`. Foi retirado.
+vez de gerado a partir de referência. Foi retirado — não por qualidade, era a
+placa que mais parecia o lugar, mas por procedência: não se sabia de onde a
+imagem tinha vindo nem sob que licença, e era a única **derivada direta** de
+imagem de terceiro.
 
-O motivo não foi técnico — era a placa que mais parecia o lugar. Foi
-procedência: não se sabia de onde a imagem tinha vindo nem sob que licença, e
-ela era a única placa **derivada direta** de imagem de terceiro. Toda placa
-daqui em diante é gerada tendo a foto como guia de composição, e é por isso que
-a foto de referência fica em `referencias/`, fora do repositório.
-
-Duas coisas daquele trabalho continuaram, porque valem para qualquer placa:
-
-**`--luz` e `--cor` no `palco.py`**, padrão 1.0 nos dois, que não mexem em
-nada. Geração já sai apagada porque o prompt pede; foto e pintura não — chegam
-claras e saturadas e brigam com o sprite, que tem 24 cores fortes e contorno de
-1px.
-
-**O corte em 2:1 exato.** A placa é ancorada pela base em `CHAO + 60`, então
-quanto mais alta ela for, mais do topo some fora da tela. A 1,74:1 a placa sai
-com 826px de altura e perde 166px de topo; a 2:1 sai com 719 e perde 59. Num
-cenário com silhueta alta — chaminé, torre, cúpula — a diferença é perder ou
-não o que identifica o lugar.
-
-Os dois valores existem por causa disto. Uma geração já sai apagada porque o
-prompt pede; uma foto ou pintura não — chega clara e saturada, e briga com o
-sprite, que tem 24 cores fortes e contorno de 1px. O padrão dos dois é 1.0,
-que não mexe em nada.
-
-O recorte em **2:1 exato** também não é gosto. A placa é ancorada pela base em
-`CHAO + 60`, então quanto mais alta ela for, mais do topo some fora da tela. A
-2:1 a altura sai em 719px e o topo perde 59px — as chaminés da refinaria, que
-são a silhueta de verdade da cidade, sobrevivem. No primeiro corte, a 1,74:1,
-elas ficavam quase todas de fora.
-
-A foto que serve é **horizontal de 2:1 pra cima, na altura dos olhos, com o
-terço de baixo em chão liso e visível, o monumento fora do centro e sem
-multidão**. Foto vertical, foto aérea e foto com o monumento centralizado não
-servem — e é o que todo banco de imagem tem.
-
-Os bancos oficiais do Paraná não abrem por automação: o da Viaje Paraná está
-com certificado SSL expirado, o álbum do Flickr da prefeitura não está
-publicado, e a busca do banco estadual é um POST de ASP.NET. Num navegador
-comum passam. `referencias/cenarios/CREDITOS.md` tem as oito que já vieram do
-Wikimedia e a licença de cada uma.
+Sobraram dois parâmetros no `palco.py` para o caso de alguém precisar repetir
+aquilo: `--luz` e `--cor`, padrão 1.0 nos dois, que não mexem em nada. Geração
+já sai apagada porque o prompt pede; foto e pintura não — chegam claras e
+saturadas e brigam com o sprite, que tem 24 cores fortes e contorno de 1px.
 
 ### A fórmula do prompt
 
