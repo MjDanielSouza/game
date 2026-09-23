@@ -3,6 +3,7 @@
 // ============================================================================
 
 import { LARGURA, ALTURA, LUTADORES, MAPA, JOGAVEIS, PALCOS, FPS } from './data.js';
+import * as Sprites from './sprites.js';
 
 const clamp = (v, a, b) => (v < a ? a : v > b ? b : v);
 
@@ -193,6 +194,12 @@ export function retrato(id, w = 150, h = 190) {
   c.fillStyle = gr; c.fillRect(0, 0, w, h);
   c.fillStyle = 'rgba(255,255,255,0.05)';
   c.beginPath(); c.ellipse(w / 2, h * 0.92, w * 0.42, h * 0.10, 0, 0, Math.PI * 2); c.fill();
+
+  // Quem tem arte aparece com a arte. O rig abaixo so desenha para quem ainda
+  // nao tem - hoje so o chefao. Antes a selecao mostrava o boneco procedural
+  // mesmo para personagem com sprite pronto: voce escolhia uma coisa e entrava
+  // na luta com outra.
+  if (Sprites.desenharEm(c, id, w, h)) return cv.toDataURL();
 
   c.save();
   c.translate(w / 2, h * 0.94);
