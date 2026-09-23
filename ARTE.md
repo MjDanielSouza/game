@@ -39,9 +39,15 @@ Estado atual das referências (640×640, COSTELA 476×476):
 
 | Lutador | Situação |
 |---|---|
-| LUCAS, VINICIUS, NEUMANN, RAFAEL LATA | servem |
+| LUCAS, VINICIUS, NEUMANN, RAFAEL LATA, DANIEL | servem |
+| JULIANO | serve depois de cortar — a lente distorce a **mão** esticada para a câmera, não o rosto |
+| JOÃO | serve com ressalva — óculos escuros escondem os olhos, então eles viraram traço do personagem |
 | COSTELA | 476px e desfocada — dá pra tentar, mas o rosto vai sair genérico |
-| JOÃO, JULIANO | **não servem** — óculos escuros / rosto distorcido por lente |
+
+Duas dessas eu tinha descartado cedo demais. Vale abrir a foto e olhar antes de
+pedir outra: o defeito costuma estar numa parte que o recorte resolve. E quando
+ele está mesmo no rosto — como os óculos do JOÃO — assumir vira design honesto:
+não dá para inventar olhos que nunca se viu.
 
 Peça ao grupo: *selfie de frente, luz do dia, sem óculos escuros, sozinho no
 quadro, o maior arquivo que o celular der.* Trinta segundos de cada um valem
