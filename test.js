@@ -327,6 +327,20 @@ teste('finalizacao: KO no round decisivo abre a janela, e so nele', () => {
   assert.equal(m.placar[0], 2, 'o placar e marcado quando o round encerra, nao depois da cena');
 });
 
+teste('finalizacao: a janela limpa o texto que sobrou do round', () => {
+  const m = lutando(new Mundo('lucas', 'joao', 'opera', 1, { duplo: true }));
+  m.placar = [1, 0]; m.p2.vida = 1; m.p2.x = m.p1.x + 90;
+  m.texto('LUTEM!', '#ffd23f');           // como no comeco de qualquer round
+  m.p1.bufferar('soco');
+  for (let i = 0; i < 60 && m.fase === 'luta'; i++) m.atualizar(vazio(), vazio());
+  assert.equal(m.fase, 'finalize');
+  // O LUTEM! vive 70 frames: num KO rapido ele ficava na tela junto com o
+  // FINALIZE!, duas chamadas brigando pela mesma cena.
+  assert.equal(m.textos.length, 0, 'a janela de finalizacao tem que entrar com a tela limpa');
+  m.finalizar();
+  assert.ok(m.textos.every((x) => x.txt !== 'LUTEM!'), 'a cena tambem entra limpa');
+});
+
 teste('finalizacao: sem sequencia vira nocaute padrao', () => {
   const m = lutando(new Mundo('lucas', 'joao', 'opera', 1, { duplo: true }));
   m.placar = [1, 0]; m.p2.vida = 1; m.p2.x = m.p1.x + 90; m.p1.bufferar('soco');

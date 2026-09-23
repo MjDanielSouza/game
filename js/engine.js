@@ -763,6 +763,10 @@ export class Mundo {
     if (this.decisivo && porKO && venc && venc.def.finalizacao && (venc.ehJogador || this.duplo)) {
       this.fase = 'finalize';
       this.faseT = 0;
+      // Limpa o que sobrou do round. O LUTEM! vive 70 frames, entao um KO
+      // rapido deixava ele na tela junto com o FINALIZE! - duas chamadas
+      // brigando pela mesma cena.
+      this.textos.length = 0;
       perd.trocar('atordoado');
       perd.vx = 0; perd.vy = 0; perd.y = CHAO; perd.noChao = true;
       perd.golpe = null; perd.invencivel = 0;
@@ -784,6 +788,7 @@ export class Mundo {
     const [venc, perd] = this.dupla();
     this.finalizacao = venc.def.finalizacao;
     this.fase = 'fatality';
+    this.textos.length = 0;
     this.fatalT = 0;
     venc.trocar('finalizando');
     venc.vx = 0;
