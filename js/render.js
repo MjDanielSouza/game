@@ -680,17 +680,21 @@ function silhueta(ctx, P, id, tick) {
   }
 }
 
+// FUNDO_EXTRA: o chao e desenhado abaixo da borda da tela para a camera
+// vertical poder descer sem abrir faixa vazia embaixo.
+const FUNDO_EXTRA = 200;
+
 function chao(ctx, P, offX) {
   ctx.fillStyle = P.chao;
-  ctx.fillRect(0, CHAO, LARGURA, ALTURA - CHAO);
+  ctx.fillRect(0, CHAO, LARGURA, ALTURA + FUNDO_EXTRA - CHAO);
   ctx.strokeStyle = P.chaoLinha;
   ctx.lineWidth = 2;
   ctx.globalAlpha = 0.5;
   for (let i = -40; i < 60; i++) {
     const x = (i * 90 + offX % 90);
-    ctx.beginPath(); ctx.moveTo(x, CHAO); ctx.lineTo(x - 60, ALTURA); ctx.stroke();
+    ctx.beginPath(); ctx.moveTo(x, CHAO); ctx.lineTo(x - 60, ALTURA + FUNDO_EXTRA); ctx.stroke();
   }
-  for (let y = CHAO + 14; y < ALTURA; y += 26) {
+  for (let y = CHAO + 14; y < ALTURA + FUNDO_EXTRA; y += 26) {
     ctx.beginPath(); ctx.moveTo(0, y); ctx.lineTo(LARGURA, y); ctx.stroke();
   }
   ctx.globalAlpha = 1;

@@ -5,7 +5,7 @@
 import assert from 'node:assert/strict';
 import { readFileSync } from 'node:fs';
 import { Mundo, Lutador, vazio } from './js/engine.js';
-import { LUTADORES, MAPA, PALCOS, JOGAVEIS, CHAO, FPS } from './js/data.js';
+import { LUTADORES, MAPA, PALCOS, JOGAVEIS, CHAO, FPS, ESC } from './js/data.js';
 
 let ok = 0;
 const teste = (nome, fn) => {
@@ -48,7 +48,7 @@ console.log('\n-- combate --');
 
 teste('soco conecta e tira vida', () => {
   const m = novo();
-  m.p2.x = m.p1.x + 70;
+  m.p2.x = m.p1.x + 70 * ESC;   // distancia de soco, na escala do jogo
   const antes = m.p2.vida;
   m.p1.bufferar('soco');
   rodar(m, 30);
@@ -204,11 +204,14 @@ teste('chefao entra em fase 2 abaixo de 40% de vida', () => {
 console.log('\n-- round --');
 
 teste('vida zerada encerra o round e marca o placar', () => {
-  const m = novo();
+  // `duplo` desliga a IA do p2. Este teste e sobre contabilidade de round, nao
+  // sobre IA: com a IA ligada ele dependia de ela nao escolher bloquear, e
+  // falhava em 5 de 6 execucoes conforme o Math.random dos testes anteriores.
+  const m = lutando(new Mundo('lucas', 'lucas', 'botanico', 1, { duplo: true }));
   m.p2.vida = 1;
-  m.p2.x = m.p1.x + 70;
+  m.p2.x = m.p1.x + 70 * ESC;   // distancia de soco, na escala do jogo
   m.p1.bufferar('soco');
-  rodar(m, 40);
+  for (let i = 0; i < 40; i++) m.atualizar(vazio(), vazio());
   assert.equal(m.fase, 'fim');
   assert.equal(m.vencedor, 'p1');
   assert.equal(m.placar[0], 1);
@@ -226,7 +229,9 @@ teste('tempo esgotado decide por percentual de vida', () => {
 teste('lutador nao sai da arena nem atravessa o chao', () => {
   const m = novo();
   rodar(m, 200, { ...vazio(), esq: true });
-  assert.ok(m.p1.x >= 60, 'saiu pela esquerda');
+  // A parede e a meia-largura do corpo, nao um numero fixo: corpo maior
+  // para mais cedo. Derivar daqui evita o teste envelhecer junto com a escala.
+  assert.ok(m.p1.x >= m.p1.largura / 2 - 0.5, 'saiu pela esquerda');
   assert.ok(m.p1.y <= CHAO + 0.01, 'afundou no chao');
 });
 

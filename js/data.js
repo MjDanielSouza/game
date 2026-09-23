@@ -10,9 +10,48 @@ export const FPS = 60;
 export const LARGURA = 1280;
 export const ALTURA = 720;
 export const CHAO = 600;           // y do piso
-export const GRAVIDADE = 0.72;
+// Gravidade baixa de proposito: o pulo precisa de tempo de voo para dar para
+// ler um projetil no ar e decidir. A 0.72 o pulo durava 0,6s e era reflexo,
+// nao leitura. Projetil em arco tem gravidade propria (0.16 em engine.js) e
+// nao muda com isto - o arco da CHUVA DE PINHAO continua o mesmo.
+export const GRAVIDADE = 0.46;
 export const ATRITO = 0.82;
 export const ARENA = 1700;         // largura jogavel (a camera acompanha)
+
+// Proporcao de fliperama. O lutador ocupa ~48% da altura da tela, como em
+// fighter de arcade, em vez dos ~24% de antes. Multiplica altura, largura,
+// hitbox e alcance junto - tudo em engine.js deriva daqui, entao a geometria
+// relativa da luta nao muda, so a escala.
+export const ESCALA_ARCADE = 2.6;
+// Fator de comprimento. TUDO que tem unidade de pixel-de-mundo multiplica por
+// aqui: velocidade, empurrao, avanco, projetil, raio de armadilha e as
+// distancias com que a IA decide.
+//
+// Escalar so o corpo e a hitbox quebra a luta. Medido: o alcance do golpe
+// dobrou e o passo continuou do mesmo tamanho, entao recuar deixou de ser
+// resposta - o chefao foi de 18% para 2% de derrota e tres nos do meio
+// inverteram de dificuldade. Comprimento e comprimento; ou escala tudo, ou
+// nao escala nada.
+//
+// ALTURA, LARGURA e CHAO NAO escalam: sao a tela, que e fixa. Por isso a
+// arena fica relativamente menor que antes, e isso muda o jogo de proposito -
+// e o preco de por o lutador em tamanho de fliperama.
+export const ESC = ESCALA_ARCADE / 1.3;
+// Impulso de pulo, e a compressao da dispersao do stat `pulo`.
+//
+// Medido: com a dispersao crua (11,5 a 16,0) nao existe gravidade que sirva.
+// A que faz o NEUMANN limpar um projetil faz o RAFAEL pular 69% da altura da
+// tela; a que segura o RAFAEL deixa o NEUMANN com 3 frames de janela, que e
+// reacao, nao leitura. Comprimir em torno da media resolve os dois de uma vez
+// e mantem a ordem - quem pula mais continua pulando mais.
+//
+// `pulo` em data.js continua significando "quanto este lutador pula em
+// relacao aos outros"; o quanto isso vira pixel na tela se decide aqui.
+export const PULO_MEDIO = 13.1;
+export const PULO_COMPRESSAO = 0.55;
+export const IMPULSO_PULO = 1.32;
+export const impulsoDe = (d) =>
+  (PULO_MEDIO + (d.stats.pulo - PULO_MEDIO) * PULO_COMPRESSAO) * IMPULSO_PULO;
 
 // --- molde de golpe ---------------------------------------------------------
 // startup  : frames ate a hitbox ficar ativa
@@ -231,7 +270,10 @@ export const LUTADORES = {
         pulo: 8, aereo: 9, habilidade: 10, especial: 11,
       },
     },
-    stats: { vida: 145, velocidade: 2.2, pulo: 10.2, stamina: 120, regen: 0.35, peso: 1.6, defesa: 1.12 },
+    // pulo 10.2 -> 11.5: continua o mais baixo do elenco, mas agora limpa um
+    // projetil. Abaixo disto o NEUMANN nao tinha resposta nenhuma para zoner,
+    // nem por cima nem por baixo.
+    stats: { vida: 145, velocidade: 2.2, pulo: 11.5, stamina: 120, regen: 0.35, peso: 1.6, defesa: 1.12 },
     ia: { agressividade: 0.6, distancia: 70, reacao: 20, defesa: 0.42 },
     golpes: {
       soco: golpe({ nome: 'Empurrao', startup: 6, ativo: 4, recovery: 12, dano: 9, empurrao: 8, stamina: 8, alcance: { x: 26, y: -62, w: 48, h: 26 }, cancela: ['chute', 'habilidade', 'especial'] }),
@@ -474,11 +516,14 @@ export const LUTADORES = {
 // tem que subir de forma monotona. Zoner e armadilheiro vem DEPOIS do lutador
 // de mobilidade porque punem mais quem ainda nao aprendeu a defender.
 export const MAPA = [
+  // A ordem e definida pela MEDICAO, nao pelo conceito do personagem:
+  // tools/balance.mjs decide quem vem antes. Refeita depois da escala de
+  // fliperama, que mexeu em quem e dificil - o JULIANO subiu e o JOAO desceu.
   { id: 'n1', lutador: 'lucas', palco: 'botanico', x: 17, y: 80, nome: 'Jardim Botanico', desc: 'Um lutador sem truque, so fundamento. Se ele te pega, foi limpo.' },
-  { id: 'n2', lutador: 'neumann', palco: 'niemeyer', x: 50, y: 80, nome: 'Museu Oscar Niemeyer', desc: 'Parede de carne. Nao adianta empurrar, tem que derrubar.' },
-  { id: 'n3', lutador: 'juliano', palco: 'barigui', x: 83, y: 80, nome: 'Parque Barigui', desc: 'Espaco aberto e o cara mais rapido do jogo. Boa sorte.' },
-  { id: 'n4', lutador: 'joao', palco: 'largo', x: 83, y: 50, nome: 'Largo da Ordem', desc: 'O aquecimento. Pedra molhada e briga suja - ele agarra o que nao se move.' },
-  { id: 'n5', lutador: 'vinicius', palco: 'japao', x: 50, y: 50, nome: 'Praca do Japao', desc: 'Ele nao quer chegar perto. Ele quer que voce tente. Aprenda a bloquear aqui.' },
+  { id: 'n2', lutador: 'juliano', palco: 'barigui', x: 50, y: 80, nome: 'Parque Barigui', desc: 'Espaco aberto e o cara mais rapido do jogo. Boa sorte.' },
+  { id: 'n3', lutador: 'neumann', palco: 'niemeyer', x: 83, y: 80, nome: 'Museu Oscar Niemeyer', desc: 'Parede de carne. Nao adianta empurrar, tem que derrubar.' },
+  { id: 'n4', lutador: 'vinicius', palco: 'japao', x: 83, y: 50, nome: 'Praca do Japao', desc: 'Ele nao quer chegar perto. Ele quer que voce tente. Aprenda a bloquear aqui.' },
+  { id: 'n5', lutador: 'joao', palco: 'largo', x: 50, y: 50, nome: 'Largo da Ordem', desc: 'O aquecimento. Pedra molhada e briga suja - ele agarra o que nao se move.' },
   { id: 'n6', lutador: 'daniel', palco: 'torre', x: 17, y: 50, nome: 'Torre Panoramica', desc: 'Ele nao corre atras. Ele chega. E de perto voce nao bloqueia o que ele faz.' },
   { id: 'n7', lutador: 'rafael', palco: 'opera', x: 17, y: 20, nome: 'Opera de Arame', desc: 'Palco de verdade. Ele usa o espaco inteiro e some.' },
   { id: 'n8', lutador: 'costela', palco: 'tubo', x: 50, y: 20, nome: 'Estacao Tubo', desc: 'Apertado. Cada passo pode ter uma armadilha embaixo.' },
@@ -495,6 +540,6 @@ export const dificuldadeDoNo = (i) => 0.85 + (0.38 * i) / (MAPA.length - 1);
 // dela antes de existir um Lutador: sprites.js fixa a escala da folha na
 // primeira chamada de carregar() e ignora as seguintes, entao pre-carregar
 // todo mundo numa altura fixa desenhava o chefao a 70% do tamanho dele.
-export const alturaDe = (d) => 132 * d.fisico.escala * 1.3;
+export const alturaDe = (d) => 132 * d.fisico.escala * ESCALA_ARCADE;
 
 export const JOGAVEIS = Object.keys(LUTADORES).filter((k) => !LUTADORES[k].chefao);

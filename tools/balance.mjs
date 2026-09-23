@@ -15,12 +15,17 @@
 // ============================================================================
 
 import { Mundo, vazio } from '../js/engine.js';
-import { JOGAVEIS, MAPA, LUTADORES, dificuldadeDoNo } from '../js/data.js';
+import { JOGAVEIS, MAPA, LUTADORES, dificuldadeDoNo, ESC } from '../js/data.js';
 
 const RODADAS = Number(process.argv[2] || 6);
 
 // Bot de habilidade media: bloqueia, mistura alto/baixo, pune recovery,
 // pula projetil e usa o especial. Nao e um humano bom - e o piso.
+// Toda distancia aqui e em pixel de mundo e multiplica por ESC, igual ao
+// motor. Esquecer isso ja custou uma investigacao inteira: com o corpo em
+// escala de fliperama, o empurra-corpos segura o bot a 132px do chefao e o
+// gatilho de ataque estava em 120 - ele nunca apertava um botao e o chefao
+// aparecia como "quase impossivel" quando o problema era a regua.
 export function botMedio(m, i) {
   const e = vazio();
   const eu = m.p1, op = m.p2;
@@ -28,7 +33,7 @@ export function botMedio(m, i) {
   const dist = Math.abs(d);
   const opAtacando = op.estado === 'ataque' && op.fase !== 'recovery';
   const opPunivel = op.estado === 'ataque' && op.fase === 'recovery';
-  const vindo = m.projeteis.filter((p) => p.dono === op && Math.abs(p.x - eu.x) < 200);
+  const vindo = m.projeteis.filter((p) => p.dono === op && Math.abs(p.x - eu.x) < 200 * ESC);
   // onda rastejando no chao se pula; coisa que vem pelo alto se bloqueia em pe.
   // (a versao anterior pulava de tudo, inclusive de pinhao caindo do ceu, e
   //  media o chefao como bem mais dificil do que ele e)
@@ -45,7 +50,7 @@ export function botMedio(m, i) {
     e.baixo = vindo.every((p) => p.altura === 'baixo');
     return e;
   }
-  if (opAtacando && dist < 140) {
+  if (opAtacando && dist < 140 * ESC) {
     const h = eu.def.golpes.habilidade;
     // Parry no lugar do bloqueio, mas so em metade dos golpes do outro.
     // Acertar parry e leitura, e este bot e o piso, nao um humano bom.
@@ -62,24 +67,24 @@ export function botMedio(m, i) {
     e.baixo = !!(op.golpe && op.golpe.altura === 'baixo');
     return e;
   }
-  if (dist > 130) { if (d > 0) e.dir = true; else e.esq = true; }
-  else if (dist < 60) { if (d > 0) e.esq = true; else e.dir = true; }
+  if (dist > 130 * ESC) { if (d > 0) e.dir = true; else e.esq = true; }
+  else if (dist < 60 * ESC) { if (d > 0) e.esq = true; else e.dir = true; }
 
-  if (eu.super >= 100 && dist < 170) { eu.bufferar('especial'); return e; }
-  if (opPunivel && dist < 130) { eu.bufferar('chute'); return e; }
-  if (dist < 120 && i % 9 === 0) eu.bufferar(i % 27 === 0 ? 'baixo' : i % 18 === 0 ? 'chute' : 'soco');
+  if (eu.super >= 100 && dist < 170 * ESC) { eu.bufferar('especial'); return e; }
+  if (opPunivel && dist < 130 * ESC) { eu.bufferar('chute'); return e; }
+  if (dist < 120 * ESC && i % 9 === 0) eu.bufferar(i % 27 === 0 ? 'baixo' : i % 18 === 0 ? 'chute' : 'soco');
   // A habilidade depende do tipo. A versao anterior so a usava a dist > 190,
   // que e exatamente quando um agarrao nao serve para nada: media o JOAO e o
   // RAFAEL como se o golpe que os define nao existisse.
   if (i % 24 === 0 && eu.podeUsar('habilidade')) {
     const h = eu.def.golpes.habilidade;
     const serve =
-      h.tipo === 'projetil' || h.tipo === 'armadilha' ? dist > 150 :
-      h.tipo === 'agarrao' ? dist < 120 :
-      h.tipo === 'parry' ? opAtacando && dist < 150 :
+      h.tipo === 'projetil' || h.tipo === 'armadilha' ? dist > 150 * ESC :
+      h.tipo === 'agarrao' ? dist < 120 * ESC :
+      h.tipo === 'parry' ? opAtacando && dist < 150 * ESC :
       h.tipo === 'buff' ? eu.armadura <= 0 :
-      h.tipo === 'dash' ? dist > 200 || opAtacando :
-      dist > 110 && dist < 320;
+      h.tipo === 'dash' ? dist > 200 * ESC || opAtacando :
+      dist > 110 * ESC && dist < 320 * ESC;
     if (serve) { eu.bufferar('habilidade'); return e; }
   }
   return e;

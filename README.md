@@ -53,6 +53,10 @@ Bloquear gasta stamina. Stamina zerada = **defesa quebrada** e um tempo parado.
 
 Melhor de 3 rounds, 99 segundos cada. Tempo esgotado decide por percentual de vida.
 
+**Pular é resposta a projétil.** O pulo tem tempo de voo longo de propósito —
+dá para ler o projétil e decidir, e todos os oito lutadores conseguem passar
+por cima. A janela vai de 18 frames (NEUMANN, o mais pesado) a 45 (RAFAEL).
+
 ---
 
 ## O elenco
@@ -134,10 +138,30 @@ um oponente de meio de campanha num muro.
 campanha inteira com cada lutador. Ele não substitui jogar, mas pega o que jogar
 algumas partidas não pega: dificuldade que não sobe, e chefão impossível.
 
-Estado atual (bot médio — um humano vai bem melhor):
+Estado atual, 200 rounds por nó (bot médio — um humano vai bem melhor):
 
-| nó | oponente | vitórias do bot |
-|---|---|---|
+| nó | local | oponente | vitórias do bot |
+|---|---|---|---|
+| 1 | Jardim Botânico | LUCAS | 90% |
+| 2 | Parque Barigui | JULIANO | 85% |
+| 3 | Museu Oscar Niemeyer | NEUMANN | 79% |
+| 4 | Praça do Japão | VINICIUS | 76% |
+| 5 | Largo da Ordem | JOÃO | 60% |
+| 6 | Torre Panorâmica | DANIEL | 46% |
+| 7 | Ópera de Arame | RAFAEL LATA | 45% |
+| 8 | Estação Tubo | COSTELA | 29% |
+| 9 | Pedreira Paulo Leminski | **ARAUCÁRIA** | 18% |
+
+A 200 rounds o erro padrão fica em ~3 pontos, então os nós 6 e 7 estão
+empatados e a ordem entre eles é arbitrária.
+
+**A ordem do mapa é definida por essa medição, não pelo conceito dos
+personagens** — e por isso ela muda quando o jogo muda. A escala de fliperama
+reordenou metade da campanha: o JULIANO subiu para o nó 2 e o JOÃO desceu para
+o 5, porque corpo maior em arena do mesmo tamanho favorece quem entra e pune
+quem espera.
+
+---|---|---|
 | 1 | LUCAS | ~89% |
 | 2 | JOÃO | ~92% |
 | 3 | VINICIUS | ~90% |
