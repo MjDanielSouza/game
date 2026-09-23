@@ -139,6 +139,23 @@ export const PALCOS = {
 };
 
 // ============================================================================
+//  DICAS - aparecem na tela de carregamento
+//  Regra, nao elogio: cada uma tem que ser algo que muda como se joga.
+// ============================================================================
+export const DICAS = [
+  'Golpe <b>alto</b> so e bloqueado em pe. Golpe <b>baixo</b> so agachado. Errar a altura e levar o golpe inteiro.',
+  '<b>Agarrao nao e bloqueavel.</b> E a resposta para quem trava na defesa.',
+  'Bloquear gasta stamina. <b>Stamina zerada quebra a defesa</b> e te deixa parado.',
+  'Quem esta com <b>armadura</b> nao recua. Golpe avulso nao interrompe: precisa de combo.',
+  'Voce ganha barra de super <b>apanhando, batendo e bloqueando</b>. Apanhar nao e so perder.',
+  '<b>Pule o projetil.</b> O pulo tem tempo de voo longo de proposito - da para ler e decidir.',
+  'Cada golpe tem <b>recovery</b>: a janela depois do ataque em que quem errou apanha.',
+  'Ganhou o round decisivo por nocaute? <b>Voce tem 5 segundos para finalizar.</b> A sequencia esta na ficha do seu lutador.',
+  'Pontos vem de <b>vida que sobrou, tempo, especiais usados e finalizacao</b>. Ganhar raspando vale pouco.',
+  'O chefao <b>recarrega a armadura a cada 2,4s</b>. A janela de combo e logo depois de ele gastar.',
+];
+
+// ============================================================================
 //  LUTADORES
 //  cor.pele / roupa / detalhe / acento -> paleta do rig
 //  cabeca.tipo -> desenho do topo (gorro, capacete, careca, bucket, oculos...)
