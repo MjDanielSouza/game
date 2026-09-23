@@ -81,6 +81,10 @@ nele; `entrada()` lê. Não existe segundo caminho de input.
 Sozinho, o p1 também responde às setas. No modo 2 jogadores cada um fica com o
 seu lado.
 
+**O jogo não vê tecla digitada em campo de texto.** O `keydown` sai cedo se o
+foco está num `<input>`. Sem isso as iniciais do recorde não entram: A, D, W,
+S, J, K e L são todas teclas de jogo e o `preventDefault` comia a letra.
+
 **Toque:** overlay `#toque` sobre o canvas, ligado por
 `matchMedia('(pointer: coarse)')` ou pelo primeiro `touchstart`. Usa **Pointer
 Events com `setPointerCapture`**, não `touchstart`/`touchend` — a captura
@@ -165,6 +169,36 @@ Armadura passiva que absorve um golpe e recarrega em ~2,4 s: golpe avulso não
 interrompe, combo sim. Abaixo de 40% de vida entra em **fase 2** — mais rápido,
 cooldowns menores, mais dano.
 
+### Pontuação e recordes (`js/pontos.js`)
+
+Módulo **puro**: não toca no DOM e recebe o `store` por parâmetro, então os
+testes rodam sem navegador.
+
+Pontua por round ganho — `VITORIA 500 · VIDA até 1500 · PERFEITO 1500 ·
+TEMPO 12/s · ESPECIAL 200 cada · FINALIZACAO 2500` — e multiplica pela
+dificuldade do nó: ganhar do chefão com a mesma jogada vale mais.
+
+O resultado mostra a quebra linha a linha. Sem isso a pontuação é um número
+que sobe sozinho e não ensina nada.
+
+Terminada a campanha, se entrou no top 10 aparece um `<input>` de 3 letras
+**por cima do canvas** e a tabela é salva em `localStorage`
+(`curitiba-kombat-recordes`). Storage bloqueado ou com lixo devolve tabela
+vazia em vez de quebrar.
+
+**Buraco conhecido:** repetir um nó antes de terminar a campanha soma de novo.
+Fechar pediria melhor-pontuação por nó.
+
+### Tela de carregamento
+
+`comecarLuta()` espera de verdade: as folhas dos dois lutadores e a placa do
+palco, com barra de progresso e uma dica de `DICAS` em `data.js`. Tem tempo
+mínimo de 900 ms — sem ele, com tudo em cache a tela pisca por dois frames e
+vira defeito visual.
+
+`carregarPlaca` passou a devolver promessa e **nunca rejeita**: palco sem placa
+é caso normal, não erro.
+
 ### Modos
 
 - **Campanha:** 9 nós, dificuldade de 0,85 a 1,23 distribuída por
@@ -194,7 +228,7 @@ Pipeline completo em [ARTE.md](ARTE.md) e [CENARIOS.md](CENARIOS.md).
 |---|---|---|
 | 1 | Escala arcade e física de pulo | **pronta** |
 | 2 | Sistema de finalização (FINALIZE!) | **pronta** — falta só o frame de arte |
-| 3 | Ranking, loading e nova seleção | a fazer |
+| 3 | Ranking, loading e nova seleção | **pronta** |
 | 4 | Visual de console portátil + tela cheia no toque | a fazer — **o sistema já existe** |
 | 5 | Habilidades novas dos 8 do elenco | a fazer |
 

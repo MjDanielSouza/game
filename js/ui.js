@@ -226,7 +226,10 @@ function sombra(hex) {
 // ============================================================================
 //  RETRATO (usado nos cards do DOM) - mini rig estatico
 // ============================================================================
-export function retrato(id, w = 150, h = 190) {
+// `semFundo` deixa o canvas transparente. Serve para a arte gigante da
+// selecao, onde o retangulo de fundo viraria uma caixa cinza de 420x540 no
+// meio da tela em vez de um lutador recortado.
+export function retrato(id, w = 150, h = 190, semFundo = false) {
   const d = LUTADORES[id];
   const cv = document.createElement('canvas');
   cv.width = w; cv.height = h;
@@ -235,11 +238,13 @@ export function retrato(id, w = 150, h = 190) {
   const cor = d.cor, bulk = d.fisico.bulk;
 
   // fundo claro o bastante para roupa preta (JOAO, VINICIUS) continuar legivel
-  const gr = c.createLinearGradient(0, 0, 0, h);
-  gr.addColorStop(0, '#3b4150'); gr.addColorStop(0.65, '#262b36'); gr.addColorStop(1, '#161a22');
-  c.fillStyle = gr; c.fillRect(0, 0, w, h);
-  c.fillStyle = 'rgba(255,255,255,0.05)';
-  c.beginPath(); c.ellipse(w / 2, h * 0.92, w * 0.42, h * 0.10, 0, 0, Math.PI * 2); c.fill();
+  if (!semFundo) {
+    const gr = c.createLinearGradient(0, 0, 0, h);
+    gr.addColorStop(0, '#3b4150'); gr.addColorStop(0.65, '#262b36'); gr.addColorStop(1, '#161a22');
+    c.fillStyle = gr; c.fillRect(0, 0, w, h);
+    c.fillStyle = 'rgba(255,255,255,0.05)';
+    c.beginPath(); c.ellipse(w / 2, h * 0.92, w * 0.42, h * 0.10, 0, 0, Math.PI * 2); c.fill();
+  }
 
   // Quem tem arte aparece com a arte. O rig abaixo so desenha para quem ainda
   // nao tem - hoje so o chefao. Antes a selecao mostrava o boneco procedural
@@ -308,30 +313,98 @@ function sombraCor(hex) {
 // ============================================================================
 //  TELAS EM DOM
 // ============================================================================
-export function montarSelecao(el, onEscolher) {
-  el.innerHTML = '';
-  for (const id of JOGAVEIS) {
+// ----------------------------------------------------------------------------
+//  Selecao: arte gigante a esquerda, grade de miniaturas no meio, ficha a
+//  direita. O `marcado` e quem esta em destaque; escolher e um segundo passo.
+//
+//  Por que dois passos: no desktop o mouse passa por cima e ja marca, entao um
+//  clique escolhe. No celular nao existe passar por cima - o primeiro toque
+//  marca e mostra a arte, o segundo (ou o botao ESCOLHER) confirma. Um passo
+//  so faria o jogador de toque escolher sem nunca ter visto o personagem.
+// ----------------------------------------------------------------------------
+export function montarSelecao(refs, onEscolher) {
+  const { grade, arte, ficha } = refs;
+  grade.innerHTML = '';
+  let marcado = null;
+
+  const marcar = (id) => {
+    if (marcado === id) return;
+    marcado = id;
     const d = LUTADORES[id];
-    const card = document.createElement('button');
-    card.className = 'card';
-    card.innerHTML = `
-      <img src="${retrato(id)}" alt="${d.nome}">
-      <div class="card-nome">${d.nome}</div>
-      <div class="card-titulo">${d.titulo}</div>
-      <div class="card-arq">${d.arquetipo}</div>
+    for (const b of grade.children) b.classList.toggle('marcado', b.dataset.id === id);
+
+    arte.innerHTML = `<img src="${retrato(id, 420, 540, true)}" alt="${d.nome}">
+      <div class="sel-arte-nome">${d.nome}</div>`;
+
+    ficha.innerHTML = `
+      <h3>${d.nome}</h3>
+      <p class="sf-titulo">${d.titulo}</p>
+      <p class="sf-arq">${d.arquetipo}</p>
       <div class="card-stats">
         ${stat('VIDA', d.stats.vida / 150)}
         ${stat('VELOC', d.stats.velocidade / 4.5)}
         ${stat('DANO', d.golpes.chute.dano / 25)}
       </div>
-      <div class="card-bio">${d.bio}</div>
-      <div class="card-golpes">
-        <b>${d.golpes.habilidade.nome}</b> · <b>${d.golpes.especial.nome}</b>
+      <p class="sf-bio">${d.bio}</p>
+      <div class="sf-golpes">
+        <div><span>HABILIDADE</span><b>${d.golpes.habilidade.nome}</b></div>
+        <div><span>ESPECIAL</span><b>${d.golpes.especial.nome}</b></div>
       </div>
-      ${fichaFinalizacao(d)}`;
-    card.onclick = () => onEscolher(id);
-    el.appendChild(card);
+      ${fichaFinalizacao(d)}
+      <button class="btn grande btn-escolher">ESCOLHER</button>`;
+    ficha.querySelector('.btn-escolher').onclick = () => onEscolher(id);
+  };
+
+  for (const id of JOGAVEIS) {
+    const d = LUTADORES[id];
+    const b = document.createElement('button');
+    b.className = 'mini';
+    b.dataset.id = id;
+    b.innerHTML = `<img src="${retrato(id, 150, 200)}" alt=""><span>${d.nome}</span>`;
+    b.onmouseenter = () => marcar(id);
+    b.onfocus = () => marcar(id);
+    b.onclick = () => (marcado === id ? onEscolher(id) : marcar(id));
+    grade.appendChild(b);
   }
+
+  // Setas andam na grade, Enter escolhe. A grade tem 4 colunas.
+  grade.onkeydown = (e) => {
+    const ids = JOGAVEIS;
+    const i = ids.indexOf(marcado);
+    if (i < 0) return;
+    const passo = { ArrowLeft: -1, ArrowRight: 1, ArrowUp: -4, ArrowDown: 4 }[e.key];
+    if (passo) {
+      e.preventDefault();
+      const alvo = ids[Math.max(0, Math.min(ids.length - 1, i + passo))];
+      grade.children[ids.indexOf(alvo)].focus();
+    } else if (e.key === 'Enter' || e.key === ' ') {
+      e.preventDefault();
+      onEscolher(marcado);
+    }
+  };
+
+  marcar(JOGAVEIS[0]);
+}
+
+// ----------------------------------------------------------------------------
+//  Tabela de recordes
+// ----------------------------------------------------------------------------
+export function montarRecordes(el, lista, destaque = 0) {
+  if (!lista.length) {
+    el.innerHTML = '<p class="rec-vazio">Ninguem terminou a campanha ainda.</p>';
+    return;
+  }
+  el.innerHTML = lista
+    .map((r, i) => {
+      const d = r.personagem && LUTADORES[r.personagem];
+      return `<div class="rec-linha ${i + 1 === destaque ? 'novo' : ''}">
+        <span class="rec-pos">${i + 1}</span>
+        <span class="rec-nome">${r.nome}</span>
+        <span class="rec-quem">${d ? d.nome : ''}</span>
+        <span class="rec-pontos">${r.pontos.toLocaleString('pt-BR')}</span>
+      </div>`;
+    })
+    .join('');
 }
 
 // Bloco de finalizacao da ficha. E aqui que o jogador decora a sequencia,

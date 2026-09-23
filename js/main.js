@@ -2,10 +2,11 @@
 //  CURITIBA KOMBAT - cola: loop, input, telas, progresso
 // ============================================================================
 
-import { LARGURA, ALTURA, CHAO, ARENA, FPS, MAPA, LUTADORES, PALCOS, dificuldadeDoNo, alturaDe } from './data.js';
+import { LARGURA, ALTURA, CHAO, ARENA, FPS, MAPA, LUTADORES, PALCOS, DICAS, dificuldadeDoNo, alturaDe } from './data.js';
 import { Mundo, vazio, SEQUENCIA_GAP } from './engine.js';
 import { desenharLutador, desenharPalco, desenharProjetil, desenharArmadilha, desenharEfeito, carregarPlaca } from './render.js';
-import { desenharHUD, montarSelecao, montarMapa, montarBriefing, montarPalcos, retrato } from './ui.js';
+import { desenharHUD, montarSelecao, montarMapa, montarBriefing, montarPalcos, montarRecordes, retrato } from './ui.js';
+import { pontosDoRound, salvarRecorde, lerRecordes, ehRecorde } from './pontos.js';
 import * as Sprites from './sprites.js';
 
 const $ = (s) => document.querySelector(s);
@@ -32,6 +33,10 @@ const S = {
   escolhendo: 1,      // de quem e a vez na tela de selecao
   versus: [null, null],
   versusPalco: 'opera',
+  // pontuacao da campanha corrente (js/pontos.js). Nao persiste: o que
+  // persiste e a tabela de recordes.
+  pontos: 0,
+  ultimoGanho: null,
 };
 
 function salvar() {
@@ -97,6 +102,12 @@ const ACOES_P2 = {
 };
 
 addEventListener('keydown', (e) => {
+  // Digitando num campo? O jogo nao ve a tecla. Sem isto, as iniciais do
+  // recorde nao entram: A, D, W, S, J, K e L sao todas teclas de jogo e o
+  // preventDefault abaixo comia a letra antes de chegar no <input>.
+  const alvo = e.target;
+  if (alvo && (alvo.tagName === 'INPUT' || alvo.tagName === 'TEXTAREA' || alvo.isContentEditable)) return;
+
   // O Enter e a virgula do p2 so viram golpe dentro da luta. Fora dela o Enter
   // precisa continuar acionando o botao em foco.
   const p2Agora = S.duplo && S.tela === 'luta' && ACOES_P2[e.code];
@@ -211,7 +222,7 @@ for (const b of painelToque.querySelectorAll('.tq')) {
 }
 
 // ------------------------------------------------------------------ telas --
-const TELAS = ['titulo', 'selecao', 'mapa', 'palco', 'briefing', 'luta', 'resultado', 'final'];
+const TELAS = ['titulo', 'selecao', 'mapa', 'palco', 'briefing', 'carregando', 'luta', 'resultado', 'final', 'recorde'];
 function irPara(t) {
   S.tela = t;
   for (const id of TELAS) {
@@ -226,7 +237,8 @@ function irPara(t) {
     $('#selecao-titulo').textContent = S.duplo
       ? `JOGADOR ${S.escolhendo} — ESCOLHA` : 'ESCOLHA SEU LUTADOR';
     $('#btn-selecao-volta').textContent = S.duplo ? '← MENU' : 'MAPA';
-    montarSelecao($('#grade-personagens'), escolherPersonagem);
+    montarSelecao({ grade: $('#grade-personagens'), arte: $('#sel-arte'), ficha: $('#sel-ficha') },
+      escolherPersonagem);
   }
   if (t === 'palco') montarPalcos($('#grade-palcos'), lutarVersus);
   if (t === 'mapa') {
@@ -251,6 +263,7 @@ function escolherPersonagem(id) {
     return;
   }
   S.personagem = id;
+  S.pontos = 0;            // campanha nova, pontuacao nova
   salvar();
   irPara('mapa');
 }
@@ -267,11 +280,41 @@ function sairDaLuta() { if (S.duplo) sairDoVersus(); else irPara('mapa'); }
 
 function abrirBriefing(i) { S.no = i; irPara('briefing'); }
 
-function comecarLuta() {
+// Tempo minimo na tela de carregamento. Sem ele, quando tudo ja esta em cache
+// a tela pisca por 2 frames e vira defeito visual em vez de transicao.
+const MIN_CARREGANDO = 900;
+
+// Espera os recursos DO ROUND: as folhas dos dois lutadores e a placa do
+// palco. Nada aqui rejeita - lutador sem sprite e palco sem placa sao casos
+// normais, com fallback procedural.
+function recursosDoRound(aoAndar) {
+  const m = S.mundo;
+  const tarefas = [];
+  for (const l of [m.p1, m.p2]) if (l.def.sprite) tarefas.push(Sprites.carregar(l.id, alturaDe(l.def)));
+  tarefas.push(carregarPlaca(m.palco));
+  let prontas = 0;
+  return Promise.all(tarefas.map((p) => p.then(() => aoAndar(++prontas / tarefas.length))));
+}
+
+async function comecarLuta() {
   S.placar = [0, 0];
   S.round = 1;
   novoRound();
-  irPara('luta');
+
+  const barra = $('#load-preenche');
+  barra.style.width = '0%';
+  $('#load-local').textContent = S.duplo ? PALCOS[S.versusPalco].nome : MAPA[S.no].nome;
+  $('#load-dica').innerHTML = DICAS[Math.floor(Math.random() * DICAS.length)];
+  irPara('carregando');
+
+  const t0 = performance.now();
+  await recursosDoRound((p) => { barra.style.width = Math.round(p * 100) + '%'; });
+  barra.style.width = '100%';
+  const resta = MIN_CARREGANDO - (performance.now() - t0);
+  if (resta > 0) await new Promise((r) => setTimeout(r, resta));
+
+  // O jogador pode ter saido da tela enquanto carregava.
+  if (S.tela === 'carregando') irPara('luta');
 }
 
 function novoRound() {
@@ -295,6 +338,12 @@ function novoRound() {
 }
 
 function fimDeRound() {
+  // Pontua antes de trocar de round: o `S.mundo` daqui ainda e o do round que
+  // acabou, com a vida, o relogio e a finalizacao dele.
+  if (!S.duplo) {
+    S.ultimoGanho = pontosDoRound(S.mundo, dificuldadeDoNo(S.no));
+    S.pontos += S.ultimoGanho.total;
+  }
   S.placar = S.mundo.placar.slice();
   if (S.placar[0] >= 2 || S.placar[1] >= 2) {
     if (S.duplo) { mostrarResultadoVersus(); return; }
@@ -315,6 +364,7 @@ function mostrarResultado(ganhou) {
     <h2 class="${ganhou ? 'venceu' : 'perdeu'}">${ganhou ? 'VITÓRIA' : 'DERROTA'}</h2>
     <p class="res-sub">${n.nome} — ${d.nome}</p>
     <p class="res-placar">${S.placar[0]} &nbsp;×&nbsp; ${S.placar[1]}</p>
+    ${detalhePontos()}
     <p class="res-txt">${ganhou
       ? (S.progresso < MAPA.length ? `Próximo destino liberado: <b>${MAPA[Math.min(S.progresso, MAPA.length - 1)].nome}</b>` : 'Todos os locais liberados.')
       : `Dica: ${d.dica}`}</p>
@@ -345,11 +395,27 @@ function mostrarResultadoVersus() {
   $('#btn-sai-2p').onclick = sairDoVersus;
 }
 
+// Quebra da pontuacao do ultimo round, para o jogador ver DE ONDE vieram os
+// pontos - sem isso a pontuacao e um numero que sobe sozinho.
+function detalhePontos() {
+  const g = S.ultimoGanho;
+  if (S.duplo || !g || !g.total) return '';
+  const linhas = g.partes
+    .map(([k, v]) => `<div><span>${k}</span><b>+${v}</b></div>`)
+    .join('');
+  const mult = g.multiplicador !== 1 ? `<div class="pt-mult"><span>DIFICULDADE</span><b>×${g.multiplicador.toFixed(2)}</b></div>` : '';
+  return `<div class="pt-quebra">${linhas}${mult}
+    <div class="pt-total"><span>ROUND</span><b>+${g.total}</b></div>
+    <div class="pt-acum"><span>TOTAL</span><b>${S.pontos.toLocaleString('pt-BR')}</b></div>
+  </div>`;
+}
+
 function mostrarFinal() {
   $('#final-caixa').innerHTML = `
     <h2>ARAUCÁRIA DERRUBADA</h2>
     <img src="${retrato(S.personagem, 200, 250)}" alt="">
     <p><b>${LUTADORES[S.personagem].nome}</b> atravessou os oito locais e derrubou o colosso da Pedreira.</p>
+    <p class="final-pontos">${S.pontos.toLocaleString('pt-BR')} <i>PONTOS</i></p>
     <p class="final-sub">Curitiba dorme. Por enquanto.</p>
     <div class="res-btns">
       <button class="btn" id="btn-outro">JOGAR COM OUTRO</button>
@@ -358,6 +424,42 @@ function mostrarFinal() {
   irPara('final');
   $('#btn-outro').onclick = () => irPara('selecao');
   $('#btn-final-mapa').onclick = () => irPara('mapa');
+  if (ehRecorde(localStorage, S.pontos)) pedirNome();
+}
+
+// ------------------------------------------------------------- recordes ----
+// O <input> fica POR CIMA do canvas, nao numa tela separada: o jogador acabou
+// de derrubar o chefao e a cena continua atras.
+function pedirNome() {
+  const ov = $('#nome-overlay');
+  const inp = $('#nome-input');
+  $('#nome-pontos').textContent = S.pontos.toLocaleString('pt-BR');
+  inp.value = '';
+  ov.classList.add('ativa');
+  setTimeout(() => inp.focus(), 60);
+
+  const confirmar = () => {
+    ov.classList.remove('ativa');
+    const { lista, posicao } = salvarRecorde(localStorage, {
+      nome: inp.value,
+      pontos: S.pontos,
+      personagem: S.personagem,
+      no: MAPA.length,
+    });
+    // Run encerrada: a proxima campanha comeca do zero. Sem isto, terminar e
+    // voltar a jogar somava em cima do total ja registrado.
+    // Nao fecha o buraco todo: repetir um no ANTES de terminar ainda acumula.
+    // Fechar de verdade pede melhor-pontuacao por no, que e outra conversa.
+    S.pontos = 0;
+    abrirRecordes(lista, posicao);
+  };
+  $('#nome-ok').onclick = confirmar;
+  inp.onkeydown = (e) => { if (e.key === 'Enter') { e.preventDefault(); confirmar(); } };
+}
+
+function abrirRecordes(lista, destaque = 0) {
+  montarRecordes($('#recorde-tabela'), lista || lerRecordes(localStorage), destaque);
+  irPara('recorde');
 }
 
 // -------------------------------------------------------------------- loop --
@@ -464,10 +566,12 @@ $('#btn-comecar').onclick = () => { S.duplo = false; irPara(S.personagem ? 'mapa
 $('#btn-versus').onclick = () => { S.duplo = true; S.escolhendo = 1; irPara('selecao'); };
 $('#btn-trocar').onclick = () => { S.duplo = false; irPara('selecao'); };
 $('#btn-selecao-volta').onclick = () => (S.duplo ? sairDoVersus() : irPara('mapa'));
+$('#btn-recordes').onclick = () => abrirRecordes();
+$('#btn-recorde-volta').onclick = () => irPara('titulo');
 $('#btn-palco-volta').onclick = () => { S.escolhendo = 2; irPara('selecao'); };
 $('#btn-zerar').onclick = () => {
   if (!confirm('Apagar o progresso e voltar do zero?')) return;
-  S.progresso = 0; S.personagem = null; salvar(); irPara('selecao');
+  S.progresso = 0; S.personagem = null; S.pontos = 0; salvar(); irPara('selecao');
 };
 $('#btn-som').onclick = (e) => {
   S.som = !S.som;

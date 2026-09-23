@@ -18,12 +18,21 @@ import * as Sprites from './sprites.js';
 const placas = {};        // id -> Image pronta
 const semPlaca = {};      // id -> true, para nao bater no servidor de novo
 
+const tentandoPlaca = {};
+
+// Devolve promessa para a tela de carregamento poder esperar. Nunca rejeita:
+// palco sem placa e caso normal (cai na silhueta procedural), nao erro.
 export function carregarPlaca(id) {
-  if (placas[id] || semPlaca[id]) return;
-  semPlaca[id] = true;                       // so tenta uma vez
-  const im = new Image();
-  im.onload = () => { placas[id] = im; delete semPlaca[id]; };
-  im.src = `assets/palcos/${id}.png`;
+  if (placas[id]) return Promise.resolve(true);
+  if (semPlaca[id]) return Promise.resolve(false);
+  if (tentandoPlaca[id]) return tentandoPlaca[id];
+  tentandoPlaca[id] = new Promise((ok) => {
+    const im = new Image();
+    im.onload = () => { placas[id] = im; delete tentandoPlaca[id]; ok(true); };
+    im.onerror = () => { semPlaca[id] = true; delete tentandoPlaca[id]; ok(false); };
+    im.src = `assets/palcos/${id}.png`;
+  });
+  return tentandoPlaca[id];
 }
 
 // Fator de parallax do fundo. A placa precisa cobrir

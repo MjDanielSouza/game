@@ -6,6 +6,7 @@ import assert from 'node:assert/strict';
 import { readFileSync } from 'node:fs';
 import { Mundo, Lutador, vazio, FINALIZE_FRAMES, FATAL_TOTAL } from './js/engine.js';
 import { LUTADORES, MAPA, PALCOS, JOGAVEIS, CHAO, FPS, ESC } from './js/data.js';
+import { pontosDoRound, BONUS, normalizarNome, lerRecordes, salvarRecorde, ehRecorde, MAX_RECORDES } from './js/pontos.js';
 
 let ok = 0;
 const teste = (nome, fn) => {
@@ -386,6 +387,81 @@ teste('todo jogavel tem finalizacao com sequencia de 3 e nome proprio', () => {
     assert.ok(!nomes.has(f.nome), `nome de finalizacao repetido: ${f.nome}`);
     nomes.add(f.nome);
   }
+});
+
+// --- pontuacao ---------------------------------------------------------------
+// storage de mentira: o modulo nao pode depender de navegador
+const fakeStore = () => {
+  const m = new Map();
+  return { getItem: (k) => (m.has(k) ? m.get(k) : null), setItem: (k, v) => m.set(k, String(v)) };
+};
+
+teste('pontuacao: round perdido nao pontua', () => {
+  const m = lutando(new Mundo('lucas', 'joao', 'opera', 1, { duplo: true }));
+  m.p1.vida = 0;
+  m.atualizar(vazio(), vazio());
+  assert.equal(m.vencedor, 'p2');
+  assert.equal(pontosDoRound(m, 1).total, 0);
+});
+
+teste('pontuacao: vida cheia da PERFEITO, e a dificuldade multiplica', () => {
+  const m = lutando(new Mundo('lucas', 'joao', 'opera', 1, { duplo: true }));
+  m.p2.vida = 0;
+  m.atualizar(vazio(), vazio());
+  assert.equal(m.vencedor, 'p1');
+  const r = pontosDoRound(m, 1);
+  const nomes = r.partes.map(([k]) => k);
+  assert.ok(nomes.includes('PERFEITO'), 'vida cheia tem que dar PERFEITO');
+  assert.ok(nomes.includes('VITORIA') && nomes.includes('VIDA') && nomes.includes('TEMPO'));
+  // mesmo round, dificuldade maior, mais pontos
+  assert.ok(pontosDoRound(m, 1.23).total > r.total, 'a dificuldade tem que multiplicar');
+});
+
+teste('pontuacao: especial e finalizacao entram no calculo', () => {
+  const base = lutando(new Mundo('lucas', 'joao', 'opera', 1, { duplo: true }));
+  base.p2.vida = 0; base.atualizar(vazio(), vazio());
+  const semNada = pontosDoRound(base, 1).total;
+
+  const m = lutando(new Mundo('lucas', 'joao', 'opera', 1, { duplo: true }));
+  m.p1.especiaisUsados = 2;
+  m.p2.vida = 0; m.atualizar(vazio(), vazio());
+  m.finalizacao = { nome: 'PONTO FINAL' };
+  const r = pontosDoRound(m, 1);
+  assert.equal(r.total, semNada + BONUS.especial * 2 + BONUS.finalizacao);
+});
+
+teste('recordes: guarda os 10 melhores, ordenados, e diz a posicao', () => {
+  const s = fakeStore();
+  assert.deepEqual(lerRecordes(s), []);
+  for (let i = 1; i <= 12; i++) salvarRecorde(s, { nome: 'p' + i, pontos: i * 100 });
+  const lista = lerRecordes(s);
+  assert.equal(lista.length, MAX_RECORDES);
+  assert.equal(lista[0].pontos, 1200, 'o maior vem primeiro');
+  assert.ok(lista.every((r, i) => i === 0 || lista[i - 1].pontos >= r.pontos), 'tem que estar ordenado');
+
+  const { posicao } = salvarRecorde(s, { nome: 'top', pontos: 99999 });
+  assert.equal(posicao, 1);
+  assert.equal(salvarRecorde(s, { nome: 'zzz', pontos: 1 }).posicao, 0, 'pontuacao baixa nao entra');
+});
+
+teste('recordes: nome vira sempre 3 caracteres A-Z0-9', () => {
+  assert.equal(normalizarNome('abc'), 'ABC');
+  assert.equal(normalizarNome(''), 'AAA', 'quem nao digita nada nao fica de fora');
+  assert.equal(normalizarNome('a!b@c#d'), 'ABC');
+  assert.equal(normalizarNome('z'), 'ZAA');
+  assert.equal(normalizarNome(null).length, 3);
+});
+
+teste('recordes: storage quebrado nao derruba o jogo', () => {
+  const ruim = {
+    getItem: () => { throw new Error('bloqueado'); },
+    setItem: () => { throw new Error('bloqueado'); },
+  };
+  assert.deepEqual(lerRecordes(ruim), [], 'storage bloqueado tem que dar tabela vazia');
+  assert.doesNotThrow(() => salvarRecorde(ruim, { nome: 'AAA', pontos: 10 }));
+  const lixo = { getItem: () => '{nao e json', setItem: () => {} };
+  assert.deepEqual(lerRecordes(lixo), []);
+  assert.equal(ehRecorde(fakeStore(), 1), true, 'tabela vazia aceita qualquer pontuacao');
 });
 
 console.log(`\n${ok} checagens passaram.\n`);

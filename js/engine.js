@@ -88,6 +88,7 @@ export class Lutador {
     this.buffer = {};             // acao -> frames restantes
     this.combo = 0;
     this.comboT = 0;
+    this.especiaisUsados = 0;     // conta para a pontuacao (js/pontos.js)
     this.piscar = 0;
     this.fase2 = false;
 
@@ -156,7 +157,7 @@ export class Lutador {
     this.hitsDados = 0;
     this.trocar('ataque');
     this.stamina = Math.max(0, this.stamina - g.stamina);
-    if (g.custoSuper > 0) this.super -= g.custoSuper;
+    if (g.custoSuper > 0) { this.super -= g.custoSuper; this.especiaisUsados++; }
     if (g.cooldown) this.cooldowns[id] = Math.round(g.cooldown * (this.def.chefao && this.fase2 ? this.def.fase2.cooldown : 1));
     if (g.invencivel) this.invencivel = Math.max(this.invencivel, g.invencivel);
     if (g.armadura && g.tipo !== 'buff') { this.armadura = Math.max(this.armadura, g.armadura); this.armaduraT = g.startup + g.ativo + 4; }

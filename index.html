@@ -20,6 +20,7 @@
       <button class="btn grande" id="btn-comecar">CAMPANHA</button>
       <button class="btn grande" id="btn-versus">2 JOGADORES</button>
       <button class="btn secundario" id="btn-trocar">TROCAR LUTADOR</button>
+      <button class="btn secundario" id="btn-recordes">RECORDES</button>
       <button class="btn secundario" id="btn-som">SOM: LIGADO</button>
       <button class="btn fantasma" id="btn-zerar">ZERAR PROGRESSO</button>
     </div>
@@ -61,7 +62,30 @@
     <h2 id="selecao-titulo">ESCOLHA SEU LUTADOR</h2>
     <button class="btn secundario" id="btn-selecao-volta">MAPA</button>
   </header>
-  <div id="grade-personagens" class="grade"></div>
+  <div class="sel-palco">
+    <div id="sel-arte" class="sel-arte"></div>
+    <div id="grade-personagens" class="sel-grade"></div>
+    <div id="sel-ficha" class="sel-ficha"></div>
+  </div>
+</section>
+
+<!-- ----------------------------------------------------------- CARREGANDO -->
+<section id="tela-carregando" class="tela">
+  <div class="load-wrap">
+    <p class="load-tag">PREPARANDO</p>
+    <h2 id="load-local" class="load-local"></h2>
+    <div class="load-barra"><i id="load-preenche"></i></div>
+    <p id="load-dica" class="load-dica"></p>
+  </div>
+</section>
+
+<!-- ------------------------------------------------------------- RECORDES -->
+<section id="tela-recorde" class="tela">
+  <header class="topo">
+    <h2>RECORDES</h2>
+    <button class="btn secundario" id="btn-recorde-volta">VOLTAR</button>
+  </header>
+  <div id="recorde-tabela" class="recordes"></div>
 </section>
 
 <!-- --------------------------------------------------------------- MAPA -->
@@ -107,6 +131,18 @@
 <section id="tela-final" class="tela">
   <div id="final-caixa" class="caixa final"></div>
 </section>
+
+<!-- ------------------------------------------- NOME DO RECORDE (no canvas) -->
+<div id="nome-overlay" class="nome-overlay">
+  <div class="nome-caixa">
+    <p class="nome-tag">NOVO RECORDE</p>
+    <p id="nome-pontos" class="nome-pontos"></p>
+    <p class="nome-ajuda">TRES LETRAS</p>
+    <input id="nome-input" class="nome-input" maxlength="3" autocomplete="off"
+           autocapitalize="characters" spellcheck="false" aria-label="suas iniciais">
+    <button class="btn" id="nome-ok">CONFIRMAR</button>
+  </div>
+</div>
 
 <!-- ------------------------------------------------------ TOQUE (celular) -->
 <!-- Os botoes de direcao escrevem no mesmo mapa de teclas que o teclado, entao
