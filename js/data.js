@@ -438,6 +438,18 @@ export const LUTADORES = {
     // tamanho lhe da, o jogador nunca saia da zona de ameaca: luta inganhavel.
     // O que assusta no chefao e o peso de cada golpe, nao a cadencia.
     ia: { agressividade: 0.55, distancia: 95, reacao: 22, defesa: 0.12 },
+    // O chefao nao tem foto de referencia porque nao e ninguem: e ficcional.
+    // As 12 poses sairam de texto, com o idle aprovado servindo de referencia
+    // para as outras 11. Pixelizado a 244px e nao 176 como o elenco, porque
+    // escala 1,42 x 1,3 da 244px de altura em jogo - gerar no tamanho certo
+    // deixa o pixel do chefao do mesmo tamanho do pixel dos outros.
+    sprite: {
+      frames: {
+        idle: 0, andar: [1, 2], soco: 3, chute: 4,
+        baixo: 5, agachar: 5, bloqueio: 6, hitstun: 7, ko: 7,
+        pulo: 8, aereo: 9, habilidade: 10, especial: 11,
+      },
+    },
     golpes: {
       soco: golpe({ nome: 'Galhada', startup: 8, ativo: 5, recovery: 16, dano: 13, empurrao: 9, stamina: 6, alcance: { x: 24, y: -86, w: 44, h: 30 }, cancela: ['chute', 'habilidade', 'especial'], som: 'pesado' }),
       chute: golpe({ nome: 'Pinhao', startup: 15, ativo: 6, recovery: 28, dano: 17, hitstun: 26, empurrao: 13, stamina: 12, pose: 'chute', armadura: 2, alcance: { x: 24, y: -50, w: 54, h: 44 }, cancela: ['especial'], som: 'pesado' }),
@@ -489,5 +501,11 @@ export const MAPA = [
 // Contar o indice direto (0.85 + i * 0.055) fazia acrescentar um lutador ao
 // mapa empurrar o chefao para cima sem ninguem pedir.
 export const dificuldadeDoNo = (i) => 0.85 + (0.38 * i) / (MAPA.length - 1);
+
+// Altura do lutador em jogo. Mora aqui porque quem carrega o sprite precisa
+// dela antes de existir um Lutador: sprites.js fixa a escala da folha na
+// primeira chamada de carregar() e ignora as seguintes, entao pre-carregar
+// todo mundo numa altura fixa desenhava o chefao a 70% do tamanho dele.
+export const alturaDe = (d) => 132 * d.fisico.escala * 1.3;
 
 export const JOGAVEIS = Object.keys(LUTADORES).filter((k) => !LUTADORES[k].chefao);

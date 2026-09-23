@@ -2,7 +2,7 @@
 //  CURITIBA KOMBAT - cola: loop, input, telas, progresso
 // ============================================================================
 
-import { LARGURA, ALTURA, CHAO, ARENA, FPS, MAPA, LUTADORES, PALCOS, dificuldadeDoNo } from './data.js';
+import { LARGURA, ALTURA, CHAO, ARENA, FPS, MAPA, LUTADORES, PALCOS, dificuldadeDoNo, alturaDe } from './data.js';
 import { Mundo, vazio } from './engine.js';
 import { desenharLutador, desenharPalco, desenharProjetil, desenharArmadilha, desenharEfeito, carregarPlaca } from './render.js';
 import { desenharHUD, montarSelecao, montarMapa, montarBriefing, montarPalcos, retrato } from './ui.js';
@@ -396,12 +396,15 @@ ajustar();
 // Busca as folhas de sprite antes das telas de DOM, porque o retrato e montado
 // uma vez e vira data URL - se a folha chegar depois, o card fica com o rig
 // para sempre. Quando terminar, remonta a tela atual.
-// A altura (172) e a mesma do lutador em jogo, entao o retrato usa exatamente
-// o frame que vai aparecer na luta.
+// Cada um na altura que ele tem em jogo, e nao numa altura fixa: sprites.js
+// fixa a escala da folha na primeira chamada e ignora as seguintes, entao um
+// numero fixo aqui desenharia o chefao - o unico com escala != 1 - a 70% do
+// tamanho dele pelo resto da sessao. O retrato nao se importa, porque
+// desenharEm() calcula a propria escala pelo tamanho do frame.
 Promise.all(
   Object.values(LUTADORES)
     .filter((d) => d.sprite)
-    .map((d) => Sprites.carregar(d.id, 172)),
+    .map((d) => Sprites.carregar(d.id, alturaDe(d))),
 ).then(() => irPara(S.tela));
 
 $('#btn-comecar').onclick = () => { S.duplo = false; irPara(S.personagem ? 'mapa' : 'selecao'); };

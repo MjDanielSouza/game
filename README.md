@@ -170,10 +170,14 @@ O jogo também aceita **sprite**: se um lutador declara `sprite` em
 desenha o frame; quem não declara continua no rig. A troca é por personagem, e
 os dois convivem na mesma luta.
 
-**Os oito jogáveis estão em pixel art** (12 frames cada, 96 no total). Só a
-ARAUCÁRIA continua no rig, de propósito: ela é fictícia e não tem referência.
-**[ARTE.md](ARTE.md)** tem o pipeline completo da foto até o sprite, e os
-repositórios que ajudam.
+**Os nove estão em pixel art** — 12 frames cada, 108 no total. O rig
+procedural continua no código e continua funcionando; hoje ele é o fallback,
+não o que se vê.
+
+A ARAUCÁRIA foi a última e a única sem foto: ela é fictícia, não é ninguém do
+grupo. Saiu de texto, com o idle aprovado servindo de referência para as outras
+onze poses. **[ARTE.md](ARTE.md)** tem o pipeline completo da foto até o sprite,
+e os repositórios que ajudam.
 
 Os palcos funcionam igual: se existe `assets/palcos/<id>.png`, o palco usa a
 placa; se não existe, cai na silhueta procedural. **Cinco dos dez** têm placa —

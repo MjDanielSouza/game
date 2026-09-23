@@ -39,6 +39,7 @@ Estado atual das referências (640×640, COSTELA 476×476):
 
 | Lutador | Situação |
 |---|---|
+| ARAUCÁRIA | **não tem foto e não precisa** — é ficcional, saiu de texto |
 | LUCAS, VINICIUS, NEUMANN, RAFAEL LATA, DANIEL | servem |
 | JULIANO | serve depois de cortar — a lente distorce a **mão** esticada para a câmera, não o rosto |
 | JOÃO | serve com ressalva — óculos escuros escondem os olhos, então eles viraram traço do personagem |
@@ -90,12 +91,20 @@ muda. O idle é a âncora.
 
 Duas rotas, dependendo do que você quiser gastar:
 
-**Rota A — nuvem (validada no LUCAS).** Modelo **GPT 2.5** (`gpt-2-mini`) no
-Magnific: é dos poucos que aceitam `transparentBackground` **e** referência por
-imagem, e é o recomendado para arte não-fotorealista. Receita que funcionou:
+**Rota A — nuvem (validada no LUCAS, e depois no chefão).** Modelo **GPT 2.5**
+— `gpt-2-mini` no Magnific, `gpt_image_2_5` no Higgsfield. É dos poucos que
+aceitam fundo transparente **e** referência por imagem, e é o recomendado para
+arte não-fotorealista.
 
-- `aspectRatio: 2:3`, `quality: high`, `transparentBackground: true`
-- a foto do colega como `references: [{type: 'image', ...}]`
+> O elenco de oito saiu pelo **Magnific**; o chefão saiu pelo **Higgsfield**,
+> depois que o Magnific foi descartado. Mesmo modelo, resultado indistinguível,
+> e o preço não é comparável: **325 créditos por imagem** num, **1,5** no
+> outro. Vale medir antes de escolher o fornecedor.
+
+Receita que funcionou:
+
+- `aspect_ratio: 2:3`, `quality: high`, `background: transparent`
+- a foto do colega (ou o idle aprovado) como referência de imagem
 - prompt em três blocos: **pose** (corpo inteiro, de perfil 3/4, virado para a
   direita) → **personagem** (cabelo, roupa peça por peça, "mantenha a
   semelhança facial da referência") → **estilo** (16-bit tipo Street Fighter
@@ -106,11 +115,22 @@ imagem, e é o recomendado para arte não-fotorealista. Receita que funcionou:
 Saiu com alpha limpo: 68% totalmente transparente, 32% totalmente opaco, só
 0,5% de franja — e a franja que sobra é justamente o que a máscara RLE resolve.
 
-> **Custo real: 325 créditos por imagem** nessa qualidade. Oito poses por
-> lutador × sete lutadores ≈ **18 mil créditos**. Meça o saldo antes
-> (`account_balance`) e considere o modelo barato (`imagen-nano-banana-2-lite`)
-> para as poses secundárias, deixando o GPT 2.5 só para o idle, que é o frame
-> que serve de referência para todos os outros.
+**Sem foto, funciona igual.** A ARAUCÁRIA não tem referência nenhuma — é
+ficcional — e as doze poses saíram de texto puro, com o idle aprovado virando
+referência das outras onze. O que substitui a foto é descrever o personagem
+peça por peça (copa chapada de araucária no lugar da cabeça, tronco de casca
+com lajes de granito, pés de raiz, pinhões dourados) e repetir essa descrição
+inteira em **todos** os onze prompts, junto com "exatamente o mesmo da imagem
+de referência".
+
+**Diga para onde o corpo aponta, e diga o que não fazer.** O primeiro idle do
+chefão saiu de frente, simétrico, apesar de o prompt pedir 3/4 virado para a
+direita. Só virou quando o prompt passou a dizer *"cabeça, peito, quadril e os
+dois pés apontam para a DIREITA; vemos o ombro de perto grande na frente e o de
+longe pequeno atrás; absolutamente NÃO de frente para o espectador, NÃO uma
+pose simétrica"*. O mesmo valeu para o chute, que saiu como postura de guarda
+até o prompt exigir *"uma perna completamente FORA do chão, horizontal, a mais
+longa coisa da imagem; a outra é o ÚNICO ponto de contato com o chão"*.
 
 **Rota B — local.** ComfyUI + SDXL + IPAdapter FaceID em 768px, que cabe nos
 8 GB da 3070. Grátis depois de baixar, mas são ~10 GB de modelo, cinco pacotes
@@ -130,6 +150,15 @@ nenhuma. Bonito ampliado, vira papa numa tela de 1280.
 pip install pillow numpy scipy
 python tools/pixelize.py lucas --chroma
 ```
+
+**`--altura` é a altura do lutador em jogo, não um número fixo.** O elenco vai
+a 176; o chefão vai a **244**, porque a escala dele é 1,42 e
+`alturaDe()` em `js/data.js` dá 244px. Pixelizar todo mundo no mesmo tamanho
+faria o pixel do chefão ser 40% maior que o dos outros na tela — ele seria o
+único fora da grade. E o mesmo número precisa chegar ao `Sprites.carregar()`:
+`js/sprites.js` fixa a escala da folha na **primeira** chamada e ignora as
+seguintes, então pré-carregar todo mundo numa altura fixa desenha o chefão no
+tamanho errado pelo resto da sessão.
 
 `--chroma` abre o alpha a partir das bordas, para os modelos que devolvem
 fundo branco chapado em vez de canal alpha. Quase todos devolvem.
