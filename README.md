@@ -134,22 +134,27 @@ um oponente de meio de campanha num muro.
 campanha inteira com cada lutador. Ele não substitui jogar, mas pega o que jogar
 algumas partidas não pega: dificuldade que não sobe, e chefão impossível.
 
-Estado atual (bot médio — um humano vai bem melhor):
+Estado atual, 200 rounds por nó (bot médio — um humano vai bem melhor):
 
-| nó | oponente | vitórias do bot |
-|---|---|---|
-| 1 | LUCAS | ~89% |
-| 2 | JOÃO | ~92% |
-| 3 | VINICIUS | ~90% |
-| 4 | JULIANO | ~76% |
-| 5 | NEUMANN | ~69% |
-| 6 | COSTELA | ~36% |
-| 7 | RAFAEL LATA | ~24% |
-| 8 | **ARAUCÁRIA** | ~11% |
+| nó | local | oponente | vitórias do bot |
+|---|---|---|---|
+| 1 | Jardim Botânico | LUCAS | 96% |
+| 2 | Museu Oscar Niemeyer | NEUMANN | 85% |
+| 3 | Parque Barigui | JULIANO | 86% |
+| 4 | Largo da Ordem | JOÃO | 78% |
+| 5 | Praça do Japão | VINICIUS | 72% |
+| 6 | Torre Panorâmica | DANIEL | 60% |
+| 7 | Ópera de Arame | RAFAEL LATA | 45% |
+| 8 | Estação Tubo | COSTELA | 24% |
+| 9 | Pedreira Paulo Leminski | **ARAUCÁRIA** | 18% |
+
+A 200 rounds o erro padrão fica em ~3 pontos, então os nós 2 e 3 estão
+empatados e a ordem entre eles é arbitrária. O resto da curva desce de
+verdade.
 
 A ordem do mapa foi definida por essa medição, não pelo conceito dos
-personagens. O zoner e o armadilheiro *parecem* oponentes de começo e são dos
-mais difíceis; o tanque *parece* um muro e é punível.
+personagens. O armadilheiro *parece* oponente de começo e é o segundo mais
+difícil do jogo; o tanque *parece* um muro e cai no segundo nó.
 
 ---
 
