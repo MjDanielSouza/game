@@ -1,7 +1,8 @@
 # Curitiba Kombat
 
 Jogo de luta 2D que roda direto no navegador. Oito lutadores, nove locais de
-Curitiba e um chefão na Pedreira Paulo Leminski.
+Curitiba e um chefão na Pedreira Paulo Leminski. Dá para jogar a campanha
+sozinho, contra outra pessoa no mesmo teclado, e no celular.
 
 Sem build, sem framework, sem dependência. É HTML + CSS + JavaScript de módulo
 nativo, servido como arquivo estático.
@@ -175,9 +176,15 @@ ARAUCÁRIA continua no rig, de propósito: ela é fictícia e não tem referênc
 repositórios que ajudam.
 
 Os palcos funcionam igual: se existe `assets/palcos/<id>.png`, o palco usa a
-placa; se não existe, cai na silhueta procedural. **Quatro dos nove** têm placa
-— Ópera de Arame, Jardim Botânico, Praça do Japão e Parque Barigui. Os outros
-cinco ainda não têm foto de referência e continuam procedurais.
+placa; se não existe, cai na silhueta procedural. **Cinco dos dez** têm placa —
+Ópera de Arame, Jardim Botânico, Praça do Japão, Parque Barigui e Araucária. Os
+outros cinco ainda não têm foto de referência e continuam procedurais.
+
+Araucária é o décimo palco e **só aparece no modo 2 jogadores**: nó de campanha
+precisa de oponente, e o elenco tem nove lutadores para nove nós. Ela também é a
+única feita direto de uma imagem pronta em vez de gerada a partir de
+referência, e a procedência dessa imagem é desconhecida — `CENARIOS.md`
+registra o que se sabe e o que isso implica.
 
 A placa é **gerada com a foto do lugar como referência**, não é a foto
 pixelizada: foto turística é vertical, centraliza o monumento e enche o chão

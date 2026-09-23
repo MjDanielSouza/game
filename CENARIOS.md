@@ -112,11 +112,16 @@ colonial, luz amarela de poste.
 composição — o que aquele lugar *é* — e a geração entrega algo que obedece à
 especificação acima, que nenhuma foto turística obedece.
 
-Estado dos nove palcos:
+Estado dos dez palcos. Nove são nós da campanha; **Araucária é só do modo
+2 jogadores**, porque um nó de campanha precisa de um oponente e o elenco tem
+nove lutadores para nove nós.
+
+
 
 | Palco | Placa | Referência |
 |---|---|---|
 | Ópera de Arame | sim | `referencias/cenarios/` |
+| Araucária (a cidade) | sim | cartaz fornecido, procedência desconhecida |
 | Jardim Botânico | sim | `referencias/cenarios/` |
 | Praça do Japão | sim | `referencias/cenarios/` |
 | Parque Barigui | sim | `referencias/cenarios/` |
@@ -125,6 +130,31 @@ Estado dos nove palcos:
 | Estação Tubo | **não** | falta foto |
 | Torre Panorâmica | **não** | falta foto |
 | Pedreira Paulo Leminski | **não** | falta foto |
+
+### A exceção: placa feita direto de uma imagem
+
+Araucária não foi gerada. A imagem já existia (um cartaz da cidade) e virou
+placa direto: recorte 2:1 sem o texto → `tools/palco.py --luz 0.72 --cor 0.78`.
+
+**A procedência dela é desconhecida.** Não é foto: é um cartaz promocional
+aparentemente gerado por IA, que compõe igreja matriz, cachoeira, refinaria e
+moinho num quadro só que não existe na realidade. Não sei de onde veio nem sob
+que licença. É a placa que mais parece o lugar de todas — a refinaria ao fundo
+é a silhueta de verdade da cidade — mas é também a única derivada direta de
+uma imagem de terceiro, e não de referência. Se a origem importar, **é esta que
+sai primeiro**; o palco cai na silhueta procedural sozinho, sem tocar em mais
+nada.
+
+Os dois valores existem por causa disto. Uma geração já sai apagada porque o
+prompt pede; uma foto ou pintura não — chega clara e saturada, e briga com o
+sprite, que tem 24 cores fortes e contorno de 1px. O padrão dos dois é 1.0,
+que não mexe em nada.
+
+O recorte em **2:1 exato** também não é gosto. A placa é ancorada pela base em
+`CHAO + 60`, então quanto mais alta ela for, mais do topo some fora da tela. A
+2:1 a altura sai em 719px e o topo perde 59px — as chaminés da refinaria, que
+são a silhueta de verdade da cidade, sobrevivem. No primeiro corte, a 1,74:1,
+elas ficavam quase todas de fora.
 
 A foto que serve é **horizontal de 2:1 pra cima, na altura dos olhos, com o
 terço de baixo em chão liso e visível, o monumento fora do centro e sem
