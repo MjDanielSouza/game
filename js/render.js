@@ -452,11 +452,17 @@ export function desenharPalco(ctx, idPalco, camX, tick) {
   // chao
   chao(ctx, P, off(1));
 
-  // camada 2 - moldura da frente
-  ctx.save();
-  ctx.translate(off(1.25), 0);
-  frente(ctx, P, idPalco, tick);
-  ctx.restore();
+  // camada 2 - moldura da frente, so para palco sem placa.
+  // Ela existe para dar profundidade a um fundo procedural chapado. Placa ja
+  // tem a profundidade dela, e por cima a moldura vira defeito: no tubo sao
+  // duas barras pretas de 46px coladas na borda, na pedreira sao dois
+  // triangulos escuros por cima da rocha que a propria placa ja desenha.
+  if (!placa) {
+    ctx.save();
+    ctx.translate(off(1.25), 0);
+    frente(ctx, P, idPalco, tick);
+    ctx.restore();
+  }
 
   // nevoa / clima
   ctx.fillStyle = P.nevoa;
