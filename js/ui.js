@@ -3,6 +3,7 @@
 // ============================================================================
 
 import { LARGURA, ALTURA, LUTADORES, MAPA, JOGAVEIS, PALCOS, FPS } from './data.js';
+import { FINALIZE_FRAMES } from './engine.js';
 import * as Sprites from './sprites.js';
 
 const clamp = (v, a, b) => (v < a ? a : v > b ? b : v);
@@ -74,6 +75,69 @@ export function desenharHUD(ctx, m, tick) {
   // Em versus o p2 tambem precisa saber o que sabe fazer. A tira dele fica
   // encostada na direita, espelhando a do p1, e com as teclas do p2.
   if (m.duplo) atalhos(ctx, p2, ['1', '2', '3', '0'], LARGURA - 34 - 552);
+
+  if (m.fase === 'finalize') finalize(ctx, m, tick);
+}
+
+const SIMBOLO = {
+  esq: '\u2190', dir: '\u2192', cima: '\u2191', baixo: '\u2193',
+  soco: 'SOCO', chute: 'CHUTE', habilidade: 'HAB', especial: 'ESP', bloq: 'DEF',
+};
+
+// A janela de finalizacao. A sequencia fica na tela de proposito: sao oito
+// colegas jogando no celular de alguem, e combo secreto que ninguem descobre
+// e combo que nao existe.
+function finalize(ctx, m, tick) {
+  const venc = m.vencedor === 'p1' ? m.p1 : m.p2;
+  const f = venc.def.finalizacao;
+  if (!f) return;
+  const restante = 1 - m.faseT / FINALIZE_FRAMES;
+  const pulso = 1 + Math.sin(tick * 0.22) * 0.05;
+
+  ctx.save();
+  ctx.textAlign = 'center';
+
+  // FINALIZE!
+  ctx.save();
+  ctx.translate(LARGURA / 2, 214);
+  ctx.scale(pulso, pulso);
+  ctx.font = '800 68px Impact, "Arial Black", sans-serif';
+  ctx.lineWidth = 8; ctx.strokeStyle = '#1a0000';
+  ctx.strokeText('FINALIZE!', 0, 0);
+  ctx.fillStyle = tick % 16 < 8 ? '#ff4a32' : '#ffd23f';
+  ctx.fillText('FINALIZE!', 0, 0);
+  ctx.restore();
+
+  // a sequencia, em caixas
+  const cx = LARGURA / 2;
+  const cw = 108, gap = 12;
+  const total = f.sequencia.length * cw + (f.sequencia.length - 1) * gap;
+  let x = cx - total / 2;
+  for (const tok of f.sequencia) {
+    ctx.fillStyle = 'rgba(10,12,16,0.82)';
+    ctx.fillRect(x, 246, cw, 44);
+    ctx.strokeStyle = f.cor || '#ffd23f';
+    ctx.lineWidth = 2;
+    ctx.strokeRect(x, 246, cw, 44);
+    ctx.fillStyle = f.cor || '#ffd23f';
+    const s = SIMBOLO[tok] || tok;
+    ctx.font = s.length > 2 ? '700 18px system-ui, sans-serif' : '700 30px system-ui, sans-serif';
+    ctx.fillText(s, x + cw / 2, 276);
+    x += cw + gap;
+  }
+
+  // nome da finalizacao e o relogio dos 5 segundos
+  ctx.fillStyle = 'rgba(245,238,224,0.7)';
+  ctx.font = '700 13px system-ui, sans-serif';
+  ctx.fillText(f.nome, cx, 310);
+
+  const bw = total;
+  ctx.fillStyle = 'rgba(0,0,0,0.5)';
+  ctx.fillRect(cx - bw / 2, 320, bw, 6);
+  ctx.fillStyle = restante < 0.3 ? '#ff4a32' : (f.cor || '#ffd23f');
+  ctx.fillRect(cx - bw / 2, 320, bw * Math.max(0, restante), 6);
+
+  ctx.restore();
 }
 
 function barra(ctx, x, y, w, f, espelho, cor) {

@@ -3,7 +3,7 @@
 // ============================================================================
 
 import { LARGURA, ALTURA, CHAO, ARENA, FPS, MAPA, LUTADORES, PALCOS, dificuldadeDoNo, alturaDe } from './data.js';
-import { Mundo, vazio } from './engine.js';
+import { Mundo, vazio, SEQUENCIA_GAP } from './engine.js';
 import { desenharLutador, desenharPalco, desenharProjetil, desenharArmadilha, desenharEfeito, carregarPlaca } from './render.js';
 import { desenharHUD, montarSelecao, montarMapa, montarBriefing, montarPalcos, retrato } from './ui.js';
 import * as Sprites from './sprites.js';
@@ -107,6 +107,10 @@ addEventListener('keydown', (e) => {
   const a1 = ACOES_P1[e.code];
   if (a1) acao(a1, 1);
   if (S.duplo && ACOES_P2[e.code]) acao(ACOES_P2[e.code], 2);
+
+  // tokens da sequencia de finalizacao - so na borda, que e exatamente aqui
+  registrar(1, (S.duplo ? TECLAS_P1 : TECLAS_SOZINHO)[e.code] || a1);
+  if (S.duplo) registrar(2, TECLAS_P2[e.code] || ACOES_P2[e.code]);
   if (e.code === 'Escape' && S.tela === 'luta') sairDaLuta();
 });
 addEventListener('keyup', (e) => { teclas[e.code] = false; });
@@ -120,6 +124,38 @@ function acao(a, jogador = 1) {
     : (teclas.KeyS || (!S.duplo && teclas.ArrowDown));
   if (a === 'soco' && baixo) lutador.bufferar('baixo');
   else lutador.bufferar(a);
+}
+
+// ------------------------------------------------------- finalizacao -----
+// Buffer de entradas DISCRETAS por jogador. Direcao aqui nao e o booleano
+// segurado: e a borda, o instante em que a tecla desce ou o dedo encosta. Por
+// isso `registrar` e chamado do keydown e do pointerdown, e nunca de
+// `entrada()`, que le estado continuo.
+const sequencias = { p1: [], p2: [] };
+
+function registrar(jogador, token) {
+  if (!token) return;
+  const b = sequencias['p' + jogador];
+  // Passou do intervalo? a sequencia anterior morreu.
+  if (b.length && S.tick - b[b.length - 1].t > SEQUENCIA_GAP) b.length = 0;
+  b.push({ k: token, t: S.tick });
+  if (b.length > 8) b.shift();
+  conferirFinalizacao();
+}
+
+function conferirFinalizacao() {
+  const m = S.mundo;
+  if (!m || m.fase !== 'finalize' || !m.vencedor || m.vencedor === 'empate') return;
+  const venc = m.vencedor === 'p1' ? m.p1 : m.p2;
+  const alvo = venc.def.finalizacao;
+  if (!alvo) return;
+  const b = sequencias[m.vencedor];
+  const s = alvo.sequencia;
+  if (b.length < s.length) return;
+  const fim = b.slice(-s.length);
+  if (fim.every((x, i) => x.k === s[i])) {
+    if (m.finalizar()) b.length = 0;
+  }
 }
 
 function lerTeclas(mapa) {
@@ -162,7 +198,8 @@ for (const b of painelToque.querySelectorAll('.tq')) {
     b.classList.add('presso');
     if (tecla) teclas[tecla] = true;
     else if (golpe) acao(golpe);
-    else irPara('mapa');
+    else sairDaLuta();
+    registrar(1, tecla ? TECLAS_SOZINHO[tecla] : golpe);
   });
 
   const soltar = () => {
@@ -238,6 +275,8 @@ function comecarLuta() {
 }
 
 function novoRound() {
+  sequencias.p1.length = 0;
+  sequencias.p2.length = 0;
   const n = S.duplo ? null : MAPA[S.no];
   const palco = S.duplo ? S.versusPalco : n.palco;
   const a = S.duplo ? S.versus[0] : S.personagem;
@@ -368,6 +407,18 @@ function desenhar() {
   for (const e of m.efeitos) desenharEfeito(ctx, e);
   ctx.restore();
   ctx.restore();
+
+  // Finalizacao: escurece tudo e abre um holofote em volta dos dois. O mundo
+  // ja foi desenhado; isto entra por cima e antes do HUD.
+  if (m.fase === 'fatality') {
+    const k = Math.min(1, m.fatalT / 26);
+    const cx = clamp((m.p1.x + m.p2.x) / 2 - (camX - LARGURA / 2), 0, LARGURA);
+    const foco = ctx.createRadialGradient(cx, CHAO - 150, 60, cx, CHAO - 150, 620);
+    foco.addColorStop(0, `rgba(40,0,0,${0.10 * k})`);
+    foco.addColorStop(1, `rgba(0,0,0,${0.88 * k})`);
+    ctx.fillStyle = foco;
+    ctx.fillRect(0, 0, LARGURA, ALTURA);
+  }
 
   // vinheta
   const v = ctx.createRadialGradient(LARGURA / 2, ALTURA / 2, ALTURA * 0.42, LARGURA / 2, ALTURA / 2, ALTURA * 0.95);

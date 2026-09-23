@@ -122,6 +122,36 @@ Multi-touch funciona: cada botão captura seu próprio `pointerId`.
   comprimida em torno da média (`impulsoDe()` em data.js) — com a dispersão
   crua não existe gravidade que sirva para o elenco inteiro.
 
+### Finalização (FINALIZE!)
+
+Fases do `Mundo`: `intro · luta · finalize · fatality · fim`.
+
+Quando a vida zera **no round que decide a luta** e a morte foi por KO (tempo
+esgotado não conta), em vez de encerrar o jogo abre uma janela de **5 segundos**:
+o perdedor vai para o estado `atordoado` — de pé, balançando, sem controle — e
+o HUD mostra `FINALIZE!` com a sequência e um relógio.
+
+O vencedor **continua jogando** durante a janela; é assim que ele consegue
+entrar a sequência. Se acertar, `Mundo.finalizar()` entra em `fatality`: a
+arena escurece com holofote, o golpe conecta com hitstop e tremor, o nome da
+finalização aparece na cor do personagem e o perdedor é lançado. Se a janela
+fechar sem sequência, é nocaute padrão.
+
+A sequência é lida em `js/main.js` (`registrar` / `conferirFinalizacao`) a
+partir de entradas **discretas** — a borda do `keydown` e do `pointerdown`, não
+o booleano segurado — com 60 frames de tolerância entre uma e outra. Cada
+jogador tem seu buffer, então em versus quem venceu é quem finaliza.
+
+**A sequência fica visível na tela de propósito.** São colegas jogando no
+celular de alguém: combo secreto que ninguém descobre é combo que não existe.
+
+O chefão **não tem finalização**, de propósito — IA humilhando o jogador sem
+agência nenhuma não é diversão.
+
+**Falta a arte.** `frameDe` já procura um frame `finalizacao` (seria o 12) e
+cai no `especial` enquanto ele não existe. Entrar com a pose depois é dado, não
+código.
+
 ### Chefão
 
 Armadura passiva que absorve um golpe e recarrega em ~2,4 s: golpe avulso não
@@ -156,7 +186,7 @@ Pipeline completo em [ARTE.md](ARTE.md) e [CENARIOS.md](CENARIOS.md).
 | # | Sprint | Status |
 |---|---|---|
 | 1 | Escala arcade e física de pulo | **pronta** |
-| 2 | Sistema de finalização (FINALIZE!) | a fazer |
+| 2 | Sistema de finalização (FINALIZE!) | **pronta** — falta só o frame de arte |
 | 3 | Ranking, loading e nova seleção | a fazer |
 | 4 | Visual de console portátil + tela cheia no toque | a fazer — **o sistema já existe** |
 | 5 | Habilidades novas dos 8 do elenco | a fazer |
