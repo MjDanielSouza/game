@@ -166,7 +166,7 @@ export const LUTADORES = {
   lucas: {
     id: 'lucas', nome: 'LUCAS', titulo: 'O EQUILIBRADO', arquetipo: 'All-rounder',
     bio: 'Sem fraqueza e sem exagero. Se voce nao sabe com quem jogar, jogue com ele.',
-    dica: 'Encadeie soco em chute. O contra-golpe pune quem ataca sem pensar.',
+    dica: 'Jogue o perfume no caminho dele. Com os controles trocados, ninguem bloqueia direito.',
     cor: { pele: '#c98d63', roupa: '#8c5a3c', detalhe: '#e8dcc8', acento: '#f0a04b' },
     cabeca: { tipo: 'cabelo', cor: '#2b1d16' },
     fisico: { escala: 1.0, bulk: 1.0 },
@@ -191,11 +191,16 @@ export const LUTADORES = {
       baixo: golpe({ nome: 'Rasteira', startup: 7, ativo: 4, recovery: 15, dano: 9, altura: 'baixo', stamina: 10, pose: 'baixo', alcance: { x: 22, y: -18, w: 52, h: 18 }, cancela: ['especial'] }),
       aereo: golpe({ nome: 'Joelhada Aerea', startup: 5, ativo: 8, recovery: 6, dano: 10, stamina: 8, pose: 'aereo', alcance: { x: 18, y: -34, w: 44, h: 36 } }),
       habilidade: golpe({
-        // ativo 18 sao 0,3s de janela: vira rede de seguranca em vez de
-        // leitura. Contra um chefao que ataca sem parar, era quase automatico.
-        nome: 'CONTRA-GOLPE', tipo: 'parry', startup: 3, ativo: 10, recovery: 16,
-        dano: 20, hitstun: 34, stamina: 18, cooldown: 140, ganhoSuper: 26,
-        alcance: { x: 20, y: -56, w: 50, h: 40 }, pose: 'parry', som: 'pesado',
+        // Nuvem: fica no ar e inverte os controles de quem encostar. Nao mata,
+        // desorganiza - e a unica ferramenta do jogo que ataca o INPUT do
+        // outro em vez da vida dele. Bloquear evita: e a contrapartida.
+        nome: 'PERFUME TOXICO', tipo: 'nuvem', startup: 12, ativo: 4, recovery: 22,
+        dano: 0, stamina: 14, cooldown: 190, ganhoSuper: 14, pose: 'habilidade',
+        nuvemDados: {
+          dist: 95, altura: 105, raio: 46, vida: 120, dano: 3, cor: '#b6f05a',
+          efeitos: { inverter: 180 },
+        },
+        som: 'buff',
       }),
       especial: golpe({
         nome: 'SEQUENCIA COMPLETA', startup: 8, ativo: 26, recovery: 24,
@@ -209,7 +214,7 @@ export const LUTADORES = {
   joao: {
     id: 'joao', nome: 'JOAO', titulo: 'O BRIGA DE RUA', arquetipo: 'Brawler',
     bio: 'Dano absurdo de perto. O problema e chegar perto - e a stamina acabar antes.',
-    dica: 'O Agarrao nao pode ser bloqueado. Use quando o outro travar na defesa.',
+    dica: 'A toca bate na ida e na volta. Quem foge dela para tras anda direto no segundo acerto.',
     cor: { pele: '#b97a52', roupa: '#1a1a1e', detalhe: '#c62b2b', acento: '#e0533a' },
     cabeca: { tipo: 'gorro', cor: '#c62b2b' },
     fisico: { escala: 1.06, bulk: 1.2 },
@@ -231,9 +236,15 @@ export const LUTADORES = {
       baixo: golpe({ nome: 'Chute Baixo', startup: 8, ativo: 4, recovery: 16, dano: 11, altura: 'baixo', stamina: 12, pose: 'baixo', alcance: { x: 20, y: -18, w: 46, h: 18 } }),
       aereo: golpe({ nome: 'Bomba', startup: 6, ativo: 10, recovery: 8, dano: 13, stamina: 10, pose: 'aereo', alcance: { x: 12, y: -28, w: 46, h: 40 } }),
       habilidade: golpe({
-        nome: 'AGARRAO', tipo: 'agarrao', startup: 7, ativo: 4, recovery: 26,
-        dano: 22, hitstun: 44, empurrao: 12, stamina: 17, cooldown: 170, ganhoSuper: 24,
-        pose: 'agarrao', alcance: { x: 16, y: -54, w: 40, h: 46 }, som: 'pesado',
+        // Bumerangue: bate na ida, inverte em `retorno` e bate de novo na
+        // volta. `atravessa` e o que deixa ele sobreviver ao primeiro acerto.
+        nome: 'TOCA SERRILHADA', tipo: 'projetil', startup: 13, ativo: 3, recovery: 26,
+        dano: 0, stamina: 15, cooldown: 165, ganhoSuper: 12, pose: 'habilidade',
+        projetil: {
+          vel: 6.4, dano: 9, vida: 260, raio: 15, cor: '#d8cbb2', altura: 'alto',
+          hitstun: 18, retorno: 190, atravessa: true,
+        },
+        som: 'projetil',
       }),
       especial: golpe({
         nome: 'BORDOADA', startup: 14, ativo: 6, recovery: 30,
@@ -247,7 +258,7 @@ export const LUTADORES = {
   juliano: {
     id: 'juliano', nome: 'JULIANO', titulo: 'A MARE', arquetipo: 'Rushdown',
     bio: 'O mais rapido do elenco e o mais fragil. Ou ele te atropela, ou cai em dois golpes.',
-    dica: 'Investida cancela do jab. Nunca fique parado - ele perde trocando de longe.',
+    dica: 'O TRANCO e anti-aereo: dobra o dano em quem esta no ar. Guarde para o pulo dele.',
     cor: { pele: '#c98559', roupa: '#f2e8d5', detalhe: '#2aa6a0', acento: '#f4c95d' },
     cabeca: { tipo: 'bucket', cor: '#f2e8d5' },
     fisico: { escala: 0.96, bulk: 0.88 },
@@ -269,9 +280,13 @@ export const LUTADORES = {
       baixo: golpe({ nome: 'Deslize', startup: 6, ativo: 6, recovery: 14, dano: 9, altura: 'baixo', stamina: 9, avanco: 3.0, pose: 'baixo', alcance: { x: 24, y: -16, w: 56, h: 16 } }),
       aereo: golpe({ nome: 'Pe no Peito', startup: 4, ativo: 8, recovery: 6, dano: 10, stamina: 7, pose: 'aereo', alcance: { x: 22, y: -32, w: 44, h: 34 } }),
       habilidade: golpe({
-        nome: 'INVESTIDA', startup: 6, ativo: 10, recovery: 20,
-        dano: 13, hitstun: 22, empurrao: 8, stamina: 16, cooldown: 85, ganhoSuper: 18,
-        avanco: 11.0, pose: 'investida', alcance: { x: 20, y: -52, w: 48, h: 40 }, som: 'pesado',
+        // Anti-aereo: hitbox alta e dano dobrado em quem esta no ar. E o golpe
+        // que pune pulo - no chao ele e medianico de proposito.
+        nome: 'TRANCO', startup: 6, ativo: 8, recovery: 26,
+        dano: 11, hitstun: 30, empurrao: 10, stamina: 16, cooldown: 120,
+        ganhoSuper: 16, danoAereo: 2.0, invencivel: 8, avanco: 1.2,
+        alcance: { x: 14, y: -128, w: 46, h: 132 },
+        pose: 'habilidade', som: 'pesado',
       }),
       especial: golpe({
         nome: 'MARE ALTA', startup: 7, ativo: 34, recovery: 26,
@@ -285,7 +300,7 @@ export const LUTADORES = {
   neumann: {
     id: 'neumann', nome: 'NEUMANN', titulo: 'O VETERANO', arquetipo: 'Tanque',
     bio: 'Lento, imenso e dificil de derrubar. Nao recua quando apanha. Cada golpe dele doi.',
-    dica: 'Muralha da armadura: ative e entre trocando. Ele ganha no atrito, nao na velocidade.',
+    dica: 'O agarrao dele ignora a defesa. Nao trave bloqueando: ande, pule, saia de perto.',
     cor: { pele: '#b8845e', roupa: '#33373d', detalhe: '#9aa3ad', acento: '#5d8fc4' },
     cabeca: { tipo: 'careca', cor: '#b0b0aa' },
     fisico: { escala: 1.16, bulk: 1.45 },
@@ -310,9 +325,14 @@ export const LUTADORES = {
       baixo: golpe({ nome: 'Varrida', startup: 10, ativo: 5, recovery: 20, dano: 13, altura: 'baixo', stamina: 14, pose: 'baixo', alcance: { x: 22, y: -18, w: 60, h: 18 } }),
       aereo: golpe({ nome: 'Queda Livre', startup: 7, ativo: 12, recovery: 10, dano: 15, stamina: 12, pose: 'aereo', alcance: { x: 10, y: -26, w: 52, h: 44 } }),
       habilidade: golpe({
-        nome: 'MURALHA', tipo: 'buff', startup: 8, ativo: 4, recovery: 16,
-        dano: 0, stamina: 22, cooldown: 280, ganhoSuper: 12, pose: 'muralha',
-        buff: { armadura: 3, duracao: 150 }, som: 'buff',
+        // Agarrao de dois tempos: o primeiro acerto joga para cima, o segundo
+        // pega no ar e manda para o outro lado. Por isso a hitbox e alta e o
+        // `ativo` e longo - o segundo acerto precisa alcancar quem ja subiu.
+        nome: 'HORA DO CAFE', tipo: 'agarrao', startup: 9, ativo: 26, recovery: 34,
+        dano: 9, hits: 2, hitstun: 26, empurrao: 6, stamina: 20, cooldown: 175,
+        ganhoSuper: 15, arremesso: { subida: 16, lancamento: 20 },
+        alcance: { x: 8, y: -120, w: 56, h: 130 },
+        pose: 'habilidade', som: 'pesado',
       }),
       especial: golpe({
         nome: 'FIM DE EXPEDIENTE', tipo: 'onda', startup: 16, ativo: 6, recovery: 32,
@@ -326,9 +346,9 @@ export const LUTADORES = {
 
   // -------------------------------------------------------- RAFAEL LATA ----
   rafael: {
-    id: 'rafael', nome: 'RAFAEL LATA', titulo: 'LADEIRA ABAIXO', arquetipo: 'Mobilidade',
+    id: 'rafael', nome: 'RAFAEL LATA', titulo: 'LADEIRA ABAIXO', arquetipo: 'Zoner',
     bio: 'O mais dificil de acertar. Atravessa o oponente, reposiciona e pune pelas costas.',
-    dica: 'Ladeira tem frames de invencibilidade. Atravesse o golpe e saia por tras.',
+    dica: 'O capacete volta. Depois de desviar da ida, o segundo acerto vem pelas costas dele.',
     cor: { pele: '#c08a5f', roupa: '#2d3e50', detalhe: '#f2f2f2', acento: '#ffd23f' },
     cabeca: { tipo: 'capacete', cor: '#ffd23f' },
     fisico: { escala: 0.99, bulk: 0.94 },
@@ -350,9 +370,15 @@ export const LUTADORES = {
       baixo: golpe({ nome: 'Corta-Pe', startup: 6, ativo: 4, recovery: 11, dano: 9, altura: 'baixo', stamina: 10, pose: 'baixo', alcance: { x: 22, y: -16, w: 50, h: 16 } }),
       aereo: golpe({ nome: 'Mergulho', startup: 4, ativo: 10, recovery: 7, dano: 12, stamina: 9, pose: 'aereo', alcance: { x: 20, y: -30, w: 46, h: 38 } }),
       habilidade: golpe({
-        nome: 'LADEIRA', tipo: 'dash', startup: 4, ativo: 12, recovery: 14,
-        dano: 0, stamina: 14, cooldown: 85, ganhoSuper: 20, invencivel: 16,
-        avanco: 15.0, atravessa: true, pose: 'dash', som: 'dash',
+        // O capacete vai e volta. Cobre mais espaco que um projetil comum, mas
+        // deixa o RAFAEL parado no recovery - e a troca.
+        nome: 'CAPACETE VOADOR', tipo: 'projetil', startup: 12, ativo: 3, recovery: 24,
+        dano: 0, stamina: 14, cooldown: 150, ganhoSuper: 12, pose: 'habilidade',
+        projetil: {
+          vel: 7.2, dano: 8, vida: 280, raio: 16, cor: '#c9d3dc', altura: 'alto',
+          hitstun: 16, retorno: 230, atravessa: true,
+        },
+        som: 'projetil',
       }),
       especial: golpe({
         // Multi-acerto: era o unico especial do elenco que batia uma vez so,
@@ -370,7 +396,7 @@ export const LUTADORES = {
   vinicius: {
     id: 'vinicius', nome: 'VINICIUS', titulo: 'A GEADA', arquetipo: 'Zoner',
     bio: 'Controla a distancia. Quem tenta atravessar de qualquer jeito congela no meio do caminho.',
-    dica: 'Geada deixa o oponente lento. Acertou? Recue e jogue outra.',
+    dica: 'A GEADA congela por 1,5s. Ela quase nao tira vida: o que ela compra e tempo.',
     cor: { pele: '#c68f66', roupa: '#1f2933', detalhe: '#7fb7d9', acento: '#bfe6f5' },
     cabeca: { tipo: 'gorro', cor: '#1f2933' },
     fisico: { escala: 1.02, bulk: 0.98 },
@@ -392,9 +418,14 @@ export const LUTADORES = {
       baixo: golpe({ nome: 'Rasteira Longa', startup: 8, ativo: 5, recovery: 18, dano: 9, altura: 'baixo', stamina: 11, pose: 'baixo', alcance: { x: 24, y: -16, w: 68, h: 16 } }),
       aereo: golpe({ nome: 'Pisada', startup: 6, ativo: 9, recovery: 8, dano: 11, stamina: 9, pose: 'aereo', alcance: { x: 16, y: -28, w: 44, h: 38 } }),
       habilidade: golpe({
-        nome: 'GEADA', tipo: 'projetil', startup: 11, ativo: 3, recovery: 22,
-        dano: 0, stamina: 16, cooldown: 95, ganhoSuper: 14, pose: 'projetil',
-        projetil: { vel: 8.5, dano: 10, vida: 150, raio: 16, cor: '#bfe6f5', altura: 'alto', lentidao: 75, hitstun: 18 },
+        // Dano quase nenhum: o que vale e o congelamento. Um acerto compra 1,5s
+        // de alguem parado, que e tempo de chegar perto ou de montar combo.
+        nome: 'GEADA', tipo: 'projetil', startup: 11, ativo: 3, recovery: 24,
+        dano: 0, stamina: 15, cooldown: 165, ganhoSuper: 12, pose: 'habilidade',
+        projetil: {
+          vel: 7.0, dano: 4, vida: 170, raio: 16, cor: '#8fd8ff', altura: 'alto',
+          hitstun: 10, efeitos: { congelar: 90 },
+        },
         som: 'projetil',
       }),
       especial: golpe({
@@ -410,7 +441,7 @@ export const LUTADORES = {
   costela: {
     id: 'costela', nome: 'COSTELA', titulo: 'O CEREBRO', arquetipo: 'Tecnico',
     bio: 'Nao ganha na porrada, ganha no setup. Cada armadilha no chao e uma pergunta que o outro tem que responder.',
-    dica: 'Plante armadilha e force o oponente pra cima dela. Xeque-Mate detona todas de uma vez.',
+    dica: 'A costela cai em arco e queima por 2s. Pressione enquanto o outro perde vida sozinho.',
     cor: { pele: '#c1875c', roupa: '#e0632a', detalhe: '#2b2b30', acento: '#ffd166' },
     cabeca: { tipo: 'oculos', cor: '#3a2a1f' },
     fisico: { escala: 1.0, bulk: 0.96 },
@@ -432,19 +463,29 @@ export const LUTADORES = {
       baixo: golpe({ nome: 'Tesoura', startup: 8, ativo: 5, recovery: 16, dano: 10, altura: 'baixo', stamina: 11, pose: 'baixo', alcance: { x: 22, y: -16, w: 54, h: 16 } }),
       aereo: golpe({ nome: 'Cotovelo Aereo', startup: 5, ativo: 9, recovery: 7, dano: 11, stamina: 8, pose: 'aereo', alcance: { x: 18, y: -30, w: 44, h: 36 } }),
       habilidade: golpe({
-        nome: 'ARMADILHA', tipo: 'armadilha', startup: 9, ativo: 3, recovery: 18,
-        dano: 0, stamina: 15, cooldown: 100, ganhoSuper: 12, pose: 'armadilha',
-        // Contra o chefao a armadilha e 43% do dano dele e os normais colapsam
-        // (13,8 acertos limpos num oponente comum contra 6,0 no chefao). Num
-        // oponente comum ela e so 16%, entao reforcar aqui mexe onde ele e
-        // fraco sem inflar onde ele ja e forte.
-        armadilhaDados: { dano: 17, hitstun: 42, vida: 600, raio: 26, max: 2 }, som: 'buff',
+        // Arco com gravidade propria: passa por cima de quem esta agachado e
+        // cai. Quem toma queima por 2s. A queimadura nunca mata - leva a 1.
+        nome: 'COSTELA NA BRASA', tipo: 'projetil', startup: 14, ativo: 3, recovery: 26,
+        dano: 0, stamina: 15, cooldown: 175, ganhoSuper: 13, pose: 'habilidade',
+        projetil: {
+          vel: 5.6, dano: 7, vida: 200, raio: 17, cor: '#e8853f', altura: 'alto',
+          hitstun: 16, arco: true, efeitos: { queimar: { dano: 2, frames: 120 } },
+        },
+        som: 'projetil',
       }),
       especial: golpe({
-        nome: 'XEQUE-MATE', tipo: 'detona', startup: 12, ativo: 8, recovery: 28,
-        dano: 26, hitstun: 34, empurrao: 10, custoSuper: 100, stamina: 0, armadura: 1,
-        pose: 'especial', alcance: { x: 18, y: -54, w: 52, h: 46 },
-        detonaDano: 20, som: 'super',
+        // Era XEQUE-MATE, que detonava as armadilhas. A habilidade deixou de
+        // por armadilha, entao o especial detonava o que nunca existia - ficava
+        // morto na barra cheia. Virou a mesma ideia da habilidade em barragem:
+        // tres costelas em arco, todas queimando.
+        nome: 'CHURRASCO COMPLETO', tipo: 'projetil', startup: 14, ativo: 26, recovery: 34,
+        dano: 0, hits: 3, custoSuper: 100, stamina: 0, ganhoSuper: 0,
+        pose: 'especial',
+        projetil: {
+          vel: 6.0, dano: 12, vida: 220, raio: 19, cor: '#ff9d4a', altura: 'alto',
+          hitstun: 26, arco: true, efeitos: { queimar: { dano: 3, frames: 150 } },
+        },
+        som: 'super',
       }),
     },
   },
@@ -452,9 +493,9 @@ export const LUTADORES = {
   // ======================== CHEFAO ========================================
   // -------------------------------------------------------------- DANIEL ----
   daniel: {
-    id: 'daniel', nome: 'DANIEL', titulo: 'O DIRETOR', arquetipo: 'Grappler',
+    id: 'daniel', nome: 'DANIEL', titulo: 'O DIRETOR', arquetipo: 'Sabotador',
     bio: 'Anda devagar e atravessa o seu poke. Quando ele encosta, a conversa acabou.',
-    dica: 'A REUNIAO nao e bloqueavel. Quem trava na defesa contra ele perde a barra inteira.',
+    dica: 'A INVASAO rouba barra e tranca o especial dele por 4s. Use quando a barra dele encher.',
     cor: { pele: '#8a5a3e', roupa: '#1c1c20', detalhe: '#3a3a42', acento: '#d4a24a' },
     cabeca: { tipo: 'cabelo', cor: '#6a6a68' },
     fisico: { escala: 1.08, bulk: 1.18 },
@@ -478,9 +519,14 @@ export const LUTADORES = {
       baixo: golpe({ nome: 'Rasteira Pesada', startup: 9, ativo: 4, recovery: 17, dano: 11, altura: 'baixo', stamina: 12, pose: 'baixo', alcance: { x: 20, y: -18, w: 48, h: 18 } }),
       aereo: golpe({ nome: 'Martelo', startup: 6, ativo: 9, recovery: 8, dano: 13, stamina: 9, pose: 'aereo', alcance: { x: 14, y: -26, w: 44, h: 42 } }),
       habilidade: golpe({
-        nome: 'REUNIAO', tipo: 'agarrao', startup: 7, ativo: 4, recovery: 26,
-        dano: 26, hitstun: 46, empurrao: 10, stamina: 16, cooldown: 150, ganhoSuper: 26,
-        avanco: 2.8, pose: 'agarrao', alcance: { x: 14, y: -56, w: 48, h: 48 }, som: 'pesado',
+        // Rouba barra e tranca o especial do outro por 4s. E curto de
+        // proposito: ataca o RECURSO do adversario, entao precisa de risco.
+        nome: 'INVASAO', startup: 8, ativo: 4, recovery: 22,
+        dano: 10, hitstun: 22, empurrao: 6, stamina: 16, cooldown: 200,
+        ganhoSuper: 10,
+        efeitos: { roubarSuper: 30, bloquearEspecial: 240 },
+        alcance: { x: 18, y: -74, w: 40, h: 34 },
+        pose: 'habilidade', som: 'pesado',
       }),
       especial: golpe({
         nome: 'ULTIMA PALAVRA', startup: 13, ativo: 7, recovery: 30,
@@ -557,17 +603,18 @@ export const LUTADORES = {
 // tem que subir de forma monotona. Zoner e armadilheiro vem DEPOIS do lutador
 // de mobilidade porque punem mais quem ainda nao aprendeu a defender.
 export const MAPA = [
-  // A ordem e definida pela MEDICAO, nao pelo conceito do personagem:
-  // tools/balance.mjs decide quem vem antes. Refeita depois da escala de
-  // fliperama, que mexeu em quem e dificil - o JULIANO subiu e o JOAO desceu.
+  // A ordem e definida pela MEDICAO, nao pelo conceito do personagem.
+  // Refeita na Sprint 5: trocar as oito habilidades mexeu em quem e dificil.
+  // O VINICIUS subiu (a GEADA congela mas quase nao tira vida) e o RAFAEL
+  // desceu para o no 8 (o capacete bate duas vezes por arremesso).
   { id: 'n1', lutador: 'lucas', palco: 'botanico', x: 17, y: 80, nome: 'Jardim Botanico', desc: 'Um lutador sem truque, so fundamento. Se ele te pega, foi limpo.' },
-  { id: 'n2', lutador: 'juliano', palco: 'barigui', x: 50, y: 80, nome: 'Parque Barigui', desc: 'Espaco aberto e o cara mais rapido do jogo. Boa sorte.' },
-  { id: 'n3', lutador: 'neumann', palco: 'niemeyer', x: 83, y: 80, nome: 'Museu Oscar Niemeyer', desc: 'Parede de carne. Nao adianta empurrar, tem que derrubar.' },
-  { id: 'n4', lutador: 'vinicius', palco: 'japao', x: 83, y: 50, nome: 'Praca do Japao', desc: 'Ele nao quer chegar perto. Ele quer que voce tente. Aprenda a bloquear aqui.' },
+  { id: 'n2', lutador: 'vinicius', palco: 'japao', x: 50, y: 80, nome: 'Praca do Japao', desc: 'Ele nao quer chegar perto. Ele quer que voce tente. Aprenda a bloquear aqui.' },
+  { id: 'n3', lutador: 'juliano', palco: 'barigui', x: 83, y: 80, nome: 'Parque Barigui', desc: 'Espaco aberto e o cara mais rapido do jogo. Boa sorte.' },
+  { id: 'n4', lutador: 'daniel', palco: 'torre', x: 83, y: 50, nome: 'Torre Panoramica', desc: 'Ele nao corre atras. Ele chega. E de perto voce nao bloqueia o que ele faz.' },
   { id: 'n5', lutador: 'joao', palco: 'largo', x: 50, y: 50, nome: 'Largo da Ordem', desc: 'O aquecimento. Pedra molhada e briga suja - ele agarra o que nao se move.' },
-  { id: 'n6', lutador: 'daniel', palco: 'torre', x: 17, y: 50, nome: 'Torre Panoramica', desc: 'Ele nao corre atras. Ele chega. E de perto voce nao bloqueia o que ele faz.' },
-  { id: 'n7', lutador: 'rafael', palco: 'opera', x: 17, y: 20, nome: 'Opera de Arame', desc: 'Palco de verdade. Ele usa o espaco inteiro e some.' },
-  { id: 'n8', lutador: 'costela', palco: 'tubo', x: 50, y: 20, nome: 'Estacao Tubo', desc: 'Apertado. Cada passo pode ter uma armadilha embaixo.' },
+  { id: 'n6', lutador: 'neumann', palco: 'niemeyer', x: 17, y: 50, nome: 'Museu Oscar Niemeyer', desc: 'Parede de carne. Nao adianta empurrar, tem que derrubar.' },
+  { id: 'n7', lutador: 'costela', palco: 'tubo', x: 17, y: 20, nome: 'Estacao Tubo', desc: 'Apertado. Cada passo pode ter uma armadilha embaixo.' },
+  { id: 'n8', lutador: 'rafael', palco: 'opera', x: 50, y: 20, nome: 'Opera de Arame', desc: 'Palco de verdade. Ele usa o espaco inteiro e some.' },
   { id: 'n9', lutador: 'araucaria', palco: 'pedreira', x: 83, y: 20, nome: 'Pedreira Paulo Leminski', chefao: true, desc: 'Trinta metros de rocha e algo muito velho no meio.' },
 ];
 

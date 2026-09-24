@@ -13,6 +13,12 @@ const colide = (a, b) =>
 // Ordem em que a IA e o input consideram golpes
 export const BOTOES = ['soco', 'chute', 'baixo', 'aereo', 'habilidade', 'especial'];
 
+// Alcance efetivo de um golpe corpo a corpo, ja na escala do lutador. Serve
+// para a IA nao tentar usar habilidade curta de longe: a INVASAO do DANIEL
+// tem menos da metade do alcance do TRANCO do JULIANO.
+const alcanceDe = (f, g) => (g.alcance ? (g.alcance.x + g.alcance.w) * f.escala : 0);
+
+
 // Camera vertical: o quanto ela pode descer, e a folga que a cabeca precisa
 // ter do topo da tela (o HUD ocupa ate ~90).
 const CAMERA_Y_MAX = 150;
@@ -84,6 +90,13 @@ export class Lutador {
     this.armaduraT = 0;
     this.lentidao = 0;
     this.exausto = 0;
+    // Estados aplicados por `golpe.efeitos` (ver aplicarEfeitos). Todos sao
+    // contadores de frame: zero quer dizer "nao esta sob o efeito".
+    this.congelado = 0;      // nao age nem anda
+    this.invertido = 0;      // esquerda e direita trocadas
+    this.semEspecial = 0;    // especial travado
+    this.queimando = 0;      // dano residual
+    this.queimaDano = 0;
     this.cooldowns = {};
     this.buffer = {};             // acao -> frames restantes
     this.combo = 0;
@@ -126,7 +139,7 @@ export class Lutador {
   trocar(estado) { this.estado = estado; this.t = 0; }
 
   travado() {
-    return ['ataque', 'hitstun', 'blockstun', 'ko', 'agarrado', 'atordoado'].includes(this.estado);
+    return ['ataque', 'hitstun', 'blockstun', 'ko', 'agarrado', 'atordoado', 'congelado'].includes(this.estado);
   }
 
   // Pode iniciar `id`? Livre, ou cancelando o golpe atual depois de acertar.
@@ -136,6 +149,7 @@ export class Lutador {
     if (this.estado === 'ko' || this.exausto > 0) return false;
     if ((this.cooldowns[id] || 0) > 0) return false;
     if (g.custoSuper > 0 && this.super < g.custoSuper) return false;
+    if (id === 'especial' && this.semEspecial > 0) return false;
     if (g.stamina > this.stamina) return false;
     if (id === 'aereo' && this.noChao) return false;
     if (id !== 'aereo' && !this.noChao) return false;
@@ -197,6 +211,9 @@ export class Lutador {
     const dano0 = danoOverride != null ? danoOverride : golpe.dano;
     const mult = atacante && atacante.def.chefao && atacante.fase2 ? atacante.def.fase2.dano : 1;
     let dano = (dano0 * mult) / this.def.stats.defesa;
+    // Golpe anti-aereo: quem esta no ar leva mais. E o que faz valer a pena
+    // guardar o golpe para o pulo do outro em vez de jogar no chao.
+    if (!this.noChao && golpe.danoAereo) dano *= golpe.danoAereo;
 
     // Bloqueio: precisa estar defendendo na altura certa. Agarrao ignora.
     const alturaOk =
@@ -273,8 +290,30 @@ export class Lutador {
       if (atacante.combo >= 3) mundo.combo(atacante, atacante.combo);
     }
 
+    if (golpe.efeitos) this.aplicarEfeitos(golpe.efeitos, atacante, mundo);
+
     if (this.vida <= 0) this.morrer(mundo);
     return 'acerto';
+  }
+
+  // Efeitos de estado, em dados. O motor nao sabe que existe "gelo" nem
+  // "perfume": le as chaves e aplica contadores.
+  aplicarEfeitos(ef, atacante, mundo) {
+    if (ef.congelar) {
+      this.congelado = Math.max(this.congelado, ef.congelar);
+      this.trocar('congelado');
+      this.vx = 0;
+    }
+    if (ef.inverter) this.invertido = Math.max(this.invertido, ef.inverter);
+    if (ef.bloquearEspecial) this.semEspecial = Math.max(this.semEspecial, ef.bloquearEspecial);
+    if (ef.queimar) { this.queimando = ef.queimar.frames; this.queimaDano = ef.queimar.dano; }
+    if (ef.roubarSuper && atacante) {
+      // Rouba o que o outro TEM: contra barra vazia nao inventa super do nada.
+      const leva = Math.min(this.super, ef.roubarSuper);
+      this.super -= leva;
+      atacante.super = Math.min(atacante.superMax, atacante.super + leva);
+    }
+    if (mundo) mundo.efeito('buff', this.x, this.y - this.altura * 0.6);
   }
 
   morrer(mundo) {
@@ -293,6 +332,19 @@ export class Lutador {
     for (const k in this.cooldowns) if (this.cooldowns[k] > 0) this.cooldowns[k]--;
     if (this.invencivel > 0) this.invencivel--;
     if (this.lentidao > 0) this.lentidao--;
+    if (this.invertido > 0) this.invertido--;
+    if (this.semEspecial > 0) this.semEspecial--;
+    if (this.congelado > 0) this.congelado--;
+    if (this.queimando > 0) {
+      this.queimando--;
+      // Tick a cada 12 frames, e nunca mata: queimadura leva a vida a 1, nao a
+      // zero. Morrer de dano residual sem ninguem ter encostado e frustrante.
+      if (this.queimando % 12 === 0 && this.vida > 1) {
+        this.vida = Math.max(1, this.vida - this.queimaDano);
+        this.piscar = 4;
+        if (mundo) mundo.efeito('acerto', this.x, this.y - this.altura * 0.5, 0.6);
+      }
+    }
     if (this.piscar > 0) this.piscar--;
     if (this.exausto > 0) this.exausto--;
     // Fim da armadura de um golpe. Quem tem passiva so volta a te-la se a
@@ -321,6 +373,21 @@ export class Lutador {
     }
 
     if (this.estado === 'ko') { this.fisica(); return; }
+
+    // Controles invertidos. Troca a entrada na porta: nada depois daqui
+    // precisa saber que o lutador esta sob efeito.
+    if (this.invertido > 0) ent = { ...ent, esq: ent.dir, dir: ent.esq };
+
+    // Congelado: nao anda, nao ataca, nao bloqueia. Continua levando dano.
+    if (this.congelado > 0) {
+      this.vx *= 0.6;
+      this.bloqueando = false;
+      this.agachado = false;
+      this.estado = 'congelado';
+      this.fisica();
+      return;
+    }
+    if (this.estado === 'congelado') this.trocar('idle');
 
     // Atordoado: de pe, sem controle, esperando a finalizacao ou o nocaute
     // padrao. Nao sai deste estado sozinho - quem tira e o Mundo.
@@ -449,6 +516,9 @@ export class Lutador {
       if (g.tipo === 'armadilha') {
         mundo.porArmadilha(this, g.armadilhaDados);
       }
+      if (g.tipo === 'nuvem') {
+        mundo.porNuvem(this, g.nuvemDados);
+      }
       if (g.tipo === 'detona') {
         mundo.detonarArmadilhas(this, g.detonaDano);
       }
@@ -475,7 +545,7 @@ export class Lutador {
         }
       } else if (g.tipo === 'parry') {
         // janela de parry: tratada em mundo.resolverGolpes
-      } else if (g.tipo !== 'buff' && g.tipo !== 'armadilha' && g.tipo !== 'dash' && g.dano > 0) {
+      } else if (g.tipo !== 'buff' && g.tipo !== 'armadilha' && g.tipo !== 'nuvem' && g.tipo !== 'dash' && g.dano > 0) {
         const n = g.hits || 1;
         const intervalo = Math.max(3, Math.floor(g.ativo / n));
         if (this.hitsDados < n && (t - fimStartup - 1) % intervalo === 0) {
@@ -486,9 +556,23 @@ export class Lutador {
               this.hitsDados++;
               this.acertou = true;
               if (g.tipo === 'agarrao' && r === 'acerto') {
-                op.vx = this.dir * g.empurrao * ESC * 1.4;
-                op.vy = -7;
-                op.noChao = false;
+                if (g.arremesso) {
+                  // Dois tempos: o primeiro acerto joga para cima, o segundo
+                  // pega no ar e manda para o outro lado. A hitbox precisa ser
+                  // ALTA para o segundo alcancar quem ja subiu.
+                  if (this.hitsDados <= 1) {
+                    op.vx = 0; op.vy = -g.arremesso.subida; op.noChao = false;
+                    mundo.som('pesado');
+                  } else {
+                    op.vx = this.dir * g.arremesso.lancamento * ESC;
+                    op.vy = -6; op.noChao = false;
+                    mundo.tremor = Math.max(mundo.tremor, 14);
+                  }
+                } else {
+                  op.vx = this.dir * g.empurrao * ESC * 1.4;
+                  op.vy = -7;
+                  op.noChao = false;
+                }
               }
             }
           }
@@ -518,6 +602,7 @@ export class Mundo {
     this.dificuldade = dificuldade;
     this.projeteis = [];
     this.armadilhas = [];
+    this.nuvens = [];
     this.efeitos = [];
     this.textos = [];
     this.hitstop = 0;
@@ -577,10 +662,18 @@ export class Mundo {
       x: dono.x + dir * 40 * ESC, y,
       vx: dir * p.vel * ESC, vy: (p.arco ? -3.2 - indice * 0.8 : espalha * -9) * ESC,
       arco: !!p.arco, rasteiro: !!p.rasteiro,
+      // Bumerangue: anda `retorno` px, inverte e volta. `atravessa` deixa ele
+      // sobreviver ao acerto para poder bater de novo na volta.
+      retorno: p.retorno ? p.retorno * ESC : 0,
+      atravessa: !!p.atravessa, origem: dono.x, voltando: false, jaBateu: false,
+      efeitos: p.efeitos || null,
       raio: p.raio * ESC, cor: p.cor, dano: p.dano, altura: p.altura || 'alto',
       hitstun: p.hitstun || 18, lentidao: p.lentidao || 0,
       vida: p.vida, t: 0, dono, dir,
-      golpe: { ...golpe, dano: p.dano, hitstun: p.hitstun || 18, altura: p.altura || 'alto', empurrao: 6, tipo: 'projetil', som: golpe.som },
+      // `efeitos` tem que entrar aqui: quem aplica e `receber(golpe, ...)`, e o
+      // spread de `golpe` traz os efeitos do GOLPE, nao os do PROJETIL. Sem
+      // esta linha a GEADA nao congelava e a costela nao queimava.
+      golpe: { ...golpe, dano: p.dano, hitstun: p.hitstun || 18, altura: p.altura || 'alto', empurrao: 6, tipo: 'projetil', som: golpe.som, efeitos: p.efeitos || golpe.efeitos || null },
     });
     this.som('projetil');
   }
@@ -590,6 +683,36 @@ export class Mundo {
     if (minhas.length >= d.max) this.armadilhas.splice(this.armadilhas.indexOf(minhas[0]), 1);
     this.armadilhas.push({ x: dono.x + dono.dir * 70 * ESC, y: CHAO, raio: d.raio * ESC, dano: d.dano, hitstun: d.hitstun, vida: d.vida, t: 0, dono, armada: 30 });
     this.efeito('buff', dono.x + dono.dir * 70 * ESC, CHAO - 10);
+  }
+
+  // Nuvem: area que fica parada no ar por um tempo e aplica efeito ao toque.
+  // Diferente da armadilha, que e no chao e explode.
+  porNuvem(dono, d) {
+    this.nuvens.push({
+      x: dono.x + dono.dir * (d.dist || 90) * ESC,
+      y: CHAO - (d.altura || 110) * ESC,
+      raio: d.raio * ESC,
+      vida: d.vida, t: 0, dono, jaPegou: false,
+      dano: d.dano || 0, efeitos: d.efeitos || null, cor: d.cor || '#b6f05a',
+    });
+    this.som('buff');
+  }
+
+  atualizarNuvens() {
+    for (const n of this.nuvens) {
+      n.t++;
+      const alvo = n.dono === this.p1 ? this.p2 : this.p1;
+      const cx = { x: n.x - n.raio, y: n.y - n.raio, w: n.raio * 2, h: n.raio * 2 };
+      if (!n.jaPegou && alvo.vivo && colide(cx, alvo.hurtbox)) {
+        n.jaPegou = true;      // pega uma vez so; o efeito e que dura
+        alvo.receber({
+          dano: n.dano, hitstun: 6, blockstun: 4, empurrao: 0, altura: 'medio',
+          tipo: 'nuvem', som: 'buff', ganhoSuper: 8, efeitos: n.efeitos,
+        }, n.dono, this);
+      }
+      if (n.t > n.vida) n.morta = true;
+    }
+    this.nuvens = this.nuvens.filter((n) => !n.morta);
   }
 
   detonarArmadilhas(dono, dano) {
@@ -663,6 +786,7 @@ export class Mundo {
     this.empurrarCorpos();
     this.atualizarProjeteis();
     this.atualizarArmadilhas();
+    this.atualizarNuvens();
     this.atualizarCamera();
     this.decairEfeitos();
 
@@ -691,13 +815,26 @@ export class Mundo {
         p.vy += 0.16 * ESC;
         if (p.y > CHAO - 14 * ESC) { p.morto = true; this.efeito('acerto', p.x, CHAO - 14 * ESC, 0.7); }
       }
+      // vira bumerangue
+      if (p.retorno && !p.voltando && Math.abs(p.x - p.origem) >= p.retorno) {
+        p.voltando = true;
+        p.vx = -p.vx;
+        p.jaBateu = false;          // a volta e um acerto novo
+      }
+
       const alvo = p.dono === this.p1 ? this.p2 : this.p1;
       const cx = { x: p.x - p.raio, y: p.y - p.raio, w: p.raio * 2, h: p.raio * 2 };
-      if (alvo.vivo && colide(cx, alvo.hurtbox)) {
+      if (alvo.vivo && !p.jaBateu && colide(cx, alvo.hurtbox)) {
         const r = alvo.receber(p.golpe, p.dono, this);
         if (r === 'acerto' && p.lentidao) alvo.lentidao = p.lentidao;
-        if (r !== 'errou') { p.morto = true; this.efeito('acerto', p.x, p.y); }
+        if (r !== 'errou') {
+          this.efeito('acerto', p.x, p.y);
+          if (p.atravessa) p.jaBateu = true;   // segue viagem, nao bate de novo nesta perna
+          else p.morto = true;
+        }
       }
+      // O bumerangue morre ao voltar para a mao de quem jogou.
+      if (p.voltando && Math.abs(p.x - p.dono.x) < 46 * ESC) p.morto = true;
       if (p.t > p.vida || p.x < 20 || p.x > ARENA - 20) p.morto = true;
     }
     this.projeteis = this.projeteis.filter((p) => !p.morto);
@@ -876,13 +1013,17 @@ export class Mundo {
     const hab = eu.def.golpes.habilidade;
     if (eu.podeUsar('habilidade') && Math.random() < 0.5 + agr * 0.3) {
       const bom =
+        // anti-aereo: so vale a pena com o outro no ar
+        hab.danoAereo ? (!op.noChao && dist < alcanceDe(eu, hab) * 1.2) :
         hab.tipo === 'projetil' ? dist > 150 * ESC :
         hab.tipo === 'agarrao' ? perto && op.bloqueando :
         hab.tipo === 'parry' ? opAtacando && medio :
         hab.tipo === 'buff' ? eu.armadura <= 0 :
         hab.tipo === 'armadilha' ? dist > 120 * ESC :
+        hab.tipo === 'nuvem' ? dist > 110 * ESC && dist < 380 * ESC :
         hab.tipo === 'dash' ? dist > 200 * ESC || opAtacando :
-        dist > 120 * ESC && dist < 330 * ESC;
+        // corpo a corpo: no alcance do proprio golpe, nao num numero chutado
+        dist < alcanceDe(eu, hab) * 1.05;
       if (bom) { eu.bufferar('habilidade'); this.iaPlano = e; return e; }
     }
 

@@ -328,7 +328,8 @@ export function desenharLutador(ctx, f, tick) {
 // Armadura e lentidao em coordenadas de mundo, para valerem igual no rig
 // procedural e no sprite.
 function auras(ctx, f) {
-  if (f.armadura <= 0 && f.lentidao <= 0) return;
+  if (f.armadura <= 0 && f.lentidao <= 0 && f.congelado <= 0
+      && f.queimando <= 0 && f.invertido <= 0) return;
   const cx = f.x;
   const cy = f.y - f.altura * 0.5;
   const rx = f.largura * 0.78;
@@ -345,6 +346,62 @@ function auras(ctx, f) {
     ctx.fillStyle = 'rgba(191,230,245,0.30)';
     ctx.beginPath();
     ctx.ellipse(cx, cy, rx * 0.96, ry * 1.04, 0, 0, TAU);
+    ctx.fill();
+  }
+
+  // Congelado: bloco de gelo. Facetado de proposito - circulo azul parecia a
+  // aura de lentidao e as duas nao podem se confundir.
+  if (f.congelado > 0) {
+    ctx.fillStyle = 'rgba(143,216,255,0.42)';
+    ctx.strokeStyle = 'rgba(226,246,255,0.9)';
+    ctx.lineWidth = 2;
+    ctx.beginPath();
+    for (let i = 0; i < 7; i++) {
+      const a = (i / 7) * TAU - 1.2;
+      const r = (i % 2 ? 1.12 : 0.92);
+      const px = cx + Math.cos(a) * rx * r;
+      const py = cy + Math.sin(a) * ry * r;
+      i ? ctx.lineTo(px, py) : ctx.moveTo(px, py);
+    }
+    ctx.closePath(); ctx.fill(); ctx.stroke();
+  }
+
+  // Queimando: labaredas subindo, uma por tick.
+  if (f.queimando > 0) {
+    ctx.fillStyle = 'rgba(255,140,50,0.75)';
+    for (let i = 0; i < 5; i++) {
+      const t = (f.queimando * 0.14 + i * 1.3) % 1;
+      const px = cx + Math.sin(i * 2.1 + f.queimando * 0.09) * rx * 0.7;
+      const py = f.y - t * f.altura;
+      const r = (1 - t) * 7 * f.escala * 0.5 + 2;
+      ctx.beginPath(); ctx.arc(px, py, r, 0, TAU); ctx.fill();
+    }
+  }
+
+  // Invertido: duas setas trocando de lado acima da cabeca.
+  if (f.invertido > 0) {
+    const y = f.y - f.altura - 16;
+    const osc = Math.sin(f.invertido * 0.18) * 12;
+    ctx.fillStyle = '#b6f05a';
+    ctx.font = '700 20px system-ui, sans-serif';
+    ctx.textAlign = 'center';
+    ctx.fillText('⇄', cx + osc, y);
+  }
+  ctx.restore();
+}
+
+// Nuvem parada no ar: area que aplica efeito ao toque.
+export function desenharNuvem(ctx, n, tick) {
+  const vida = 1 - n.t / n.vida;
+  ctx.save();
+  ctx.globalAlpha = 0.28 + vida * 0.3;
+  ctx.fillStyle = n.cor;
+  for (let i = 0; i < 9; i++) {
+    const a = (i / 9) * TAU + tick * 0.012;
+    const d = n.raio * (0.45 + (i % 3) * 0.2);
+    ctx.beginPath();
+    ctx.arc(n.x + Math.cos(a) * d, n.y + Math.sin(a * 1.3) * d * 0.55,
+      n.raio * 0.42, 0, TAU);
     ctx.fill();
   }
   ctx.restore();
