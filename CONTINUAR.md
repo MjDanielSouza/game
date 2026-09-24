@@ -8,22 +8,22 @@ Atualizado em 24/09/2026.
 
 ---
 
-## 1. Primeiro: merjar os três PRs abertos
+## 1. Os três PRs foram merjados
 
-Saíram todos de `main` e não dependem um do outro.
+#23 (Sprint 5), #24 (voltar ao menu) e #25 (Sprint 4) estão em `main`.
+**As 5 Sprints da especificação estão completas.**
 
-| PR | branch | o que é |
-|---|---|---|
-| [#23](https://github.com/MjDanielSouza/game/pull/23) | `sprint5/habilidades` | Sprint 5 — as 8 habilidades novas |
-| [#24](https://github.com/MjDanielSouza/game/pull/24) | `fix/voltar-ao-menu` | bug: o mapa da campanha não voltava ao título |
-| [#25](https://github.com/MjDanielSouza/game/pull/25) | `sprint4/console-toque` | Sprint 4 — visual de console + tela cheia |
+A tabela de Sprints do `STATUS_PROJETO.md` foi conciliada na mão: o #23 e o
+#25 marcavam um ao outro como pendente, e a frase "Só a Sprint 4 fica
+pendente" saiu.
 
-**Depois do merge, arrumar uma coisa só:** os #23 e #25 mexem na mesma tabela
-de Sprints do `STATUS_PROJETO.md`, cada um marcando a *outra* como pendente.
-O git resolve as linhas sozinho, mas sobra a frase **"Só a Sprint 4 fica
-pendente"** na seção *Notas que mudam o plano*, que fica falsa. Apagar.
+**Cuidado com tabela em merge.** O git casa linha a linha e come o cabeçalho:
+duas tabelas velhas de balanceamento ficaram órfãs no `README.md`, sem a linha
+`| nó | local |`, e passaram batido por dois PRs. Foram apagadas. Ao trocar uma
+tabela inteira, confira o arquivo renderizado, não só o diff.
 
-Com os três dentro, **as 5 Sprints da especificação estão completas.**
+A curva foi remedida com `node tools/balance.mjs 200` depois da Sprint 5:
+bate com a tabela publicada dentro do erro padrão e a ordem do mapa não muda.
 
 ---
 
