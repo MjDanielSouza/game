@@ -229,20 +229,34 @@ Pipeline completo em [ARTE.md](ARTE.md) e [CENARIOS.md](CENARIOS.md).
 | 1 | Escala arcade e física de pulo | **pronta** |
 | 2 | Sistema de finalização (FINALIZE!) | **pronta** — falta só o frame de arte |
 | 3 | Ranking, loading e nova seleção | **pronta** |
-| 4 | Visual de console portátil + tela cheia no toque | a fazer — **o sistema já existe** |
+| 4 | Visual de console portátil + tela cheia no toque | **pronta** |
 | 5 | Habilidades novas dos 8 do elenco | a fazer |
 
 ### Notas que mudam o plano
 
-**Sprint 4 inclui tela cheia.** Pedido depois: botão de tela cheia no mobile
-(`requestFullscreen` + `screen.orientation.lock('landscape')` quando o
-navegador deixar). Vai junto com o visual de console.
+**Como a tecla afunda.** Cada `.tq` tem um corpo de 4px (`box-shadow:
+0 4px 0`) que é a altura dela acima da carcaça. `.presso` translada
+exatamente 4px e troca o corpo por sombra interna — a tecla encosta na base.
+Os dois números têm que ser iguais: separados, o botão escorrega em vez de
+afundar.
 
-**Sprint 4 já está metade pronta.** O gamepad de toque foi entregue antes:
-D-pad à esquerda, ações à direita, multi-touch, mapeado nos mesmos booleanos.
-Falta só o **visual** — opacidade 0.5, sombreamento, afundar no `:active`.
-Não trocar Pointer Events por `touchstart` puro: a captura de ponteiro é o que
-impede a direção de ficar presa quando o polegar escorrega.
+**A opacidade é 0.5 e sobe para 1 no toque.** O polegar fica em cima da luta;
+opaco demais esconde o lutador. Ir a opaco ao apertar é o retorno de que
+pegou — no toque não existe hover para dizer isso.
+
+**O `.presso` vem do JS, não do `:active`.** `setPointerCapture` faz o botão
+segurar o ponteiro quando o polegar escorrega para fora, e nesse estado o
+`:active` do navegador é inconsistente entre aparelhos. A regra tem os dois
+seletores, mas quem manda é a classe.
+
+**Tela cheia só aparece onde funciona.** O botão fica escondido se não houver
+`requestFullscreen` — o Safari do iPhone só aceita em `<video>`, e botão morto
+é pior que botão nenhum. `screen.orientation.lock('landscape')` só é permitido
+depois de entrar em tela cheia, e só no Android; falhar ali é normal, e a tela
+`tq-gire` continua pedindo para deitar o aparelho.
+
+**Não trocar Pointer Events por `touchstart` puro:** a captura de ponteiro é o
+que impede a direção de ficar presa quando o polegar escorrega.
 
 **Sprint 5 vai derrubar o balanceamento.** A curva publicada no README foi
 medida com as habilidades atuais. Trocar as oito exige remedir com
