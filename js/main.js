@@ -188,12 +188,36 @@ function atualizarToque() {
   painelToque.classList.toggle('ativa', ehToque && S.tela === 'luta');
 }
 
+// ------------------------------------------------------------ tela cheia --
+// So aparece em aparelho de toque E onde a API existe: o Safari do iPhone nao
+// deixa `requestFullscreen` em nada que nao seja <video>, e um botao morto na
+// tela e pior que botao nenhum.
+const btnCheia = $('#btn-tela-cheia');
+const temCheia = !!document.documentElement.requestFullscreen;
+
+function atualizarCheia() {
+  btnCheia.classList.toggle('escondido', !(ehToque && temCheia));
+  btnCheia.textContent = document.fullscreenElement ? 'SAIR DA TELA CHEIA' : 'TELA CHEIA';
+}
+
+btnCheia.onclick = async () => {
+  try {
+    if (document.fullscreenElement) { await document.exitFullscreen(); return; }
+    await document.documentElement.requestFullscreen();
+    // Deitar a tela so e permitido DEPOIS de entrar em tela cheia, e so em
+    // Android. Falhar aqui e normal - a tela `tq-gire` pede para deitar na mao.
+    await screen.orientation?.lock?.('landscape');
+  } catch (err) { /* recusado pelo aparelho: o jogo continua em janela */ }
+};
+document.addEventListener('fullscreenchange', atualizarCheia);
+
 // Notebook com tela de toque responde `pointer: fine`. Entao tambem liga no
 // primeiro dedo que encostar, e ai vale para o resto da sessao.
 addEventListener('touchstart', () => {
   if (ehToque) return;
   ehToque = true;
   atualizarToque();
+  atualizarCheia();
 }, { passive: true });
 
 for (const b of painelToque.querySelectorAll('.tq')) {
@@ -607,5 +631,6 @@ $('#titulo-sub').textContent = S.personagem
 //   CK.progresso = 7            -> pula direto para o chefao (e depois irPara('mapa'))
 window.CK = S;
 
+atualizarCheia();
 irPara('titulo');
 requestAnimationFrame(loop);
