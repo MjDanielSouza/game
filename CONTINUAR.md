@@ -53,11 +53,6 @@ não código** — nenhuma linha muda. Foi adiado por custo de geração.
 sem nenhum lutador usando — era o CONTRA-GOLPE do LUCAS, trocado na Sprint 5.
 Devolver a alguém é uma linha em `js/data.js`. Ou tirar o tipo do motor.
 
-**Buraco na pontuação.** Rejogar um nó *antes* de terminar a campanha soma
-pontos de novo. Fechar direito pede guardar a melhor pontuação **por nó** em
-vez de um acumulado — é mudança de estrutura, não de fórmula, e por isso não
-entrou junto com a Sprint 3.
-
 ---
 
 ## 4. As três regras que custaram caro neste projeto
