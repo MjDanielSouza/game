@@ -186,28 +186,6 @@ export class Lutador {
     if (!this.vivo) return 'errou';
     if (this.invencivel > 0) return 'errou';
 
-    // Parry ativo: devolve o golpe em vez de recebe-lo.
-    // Fica aqui, e nao num passo separado do Mundo, porque TODO golpe entra
-    // por receber() - melee, projetil ou armadilha. Resolver fora daqui deixava
-    // o ataque conectar primeiro e cancelar o proprio parry.
-    if (this.estado === 'ataque' && this.golpe && this.golpe.tipo === 'parry' && !this.acertou) {
-      const g = this.golpe;
-      if (this.t > g.startup && this.t <= g.startup + g.ativo) {
-        this.acertou = true;
-        this.invencivel = 20;
-        this.super = Math.min(this.superMax, this.super + g.ganhoSuper);
-        mundo.hitstop = Math.max(mundo.hitstop, 12);
-        mundo.efeito('parry', this.x + this.dir * 30, this.y - this.altura * 0.6, 1.5);
-        mundo.texto('CONTRA-GOLPE!', '#ffd23f');
-        mundo.som('super');
-        if (atacante) {
-          atacante.golpe = null;
-          atacante.receber(g, this, mundo);
-        }
-        return 'errou';
-      }
-    }
-
     const dano0 = danoOverride != null ? danoOverride : golpe.dano;
     const mult = atacante && atacante.def.chefao && atacante.fase2 ? atacante.def.fase2.dano : 1;
     let dano = (dano0 * mult) / this.def.stats.defesa;
@@ -543,8 +521,6 @@ export class Lutador {
           this.hitsDados++;
           this.acertou = true;
         }
-      } else if (g.tipo === 'parry') {
-        // janela de parry: tratada em mundo.resolverGolpes
       } else if (g.tipo !== 'buff' && g.tipo !== 'armadilha' && g.tipo !== 'nuvem' && g.tipo !== 'dash' && g.dano > 0) {
         const n = g.hits || 1;
         const intervalo = Math.max(3, Math.floor(g.ativo / n));
@@ -1017,7 +993,6 @@ export class Mundo {
         hab.danoAereo ? (!op.noChao && dist < alcanceDe(eu, hab) * 1.2) :
         hab.tipo === 'projetil' ? dist > 150 * ESC :
         hab.tipo === 'agarrao' ? perto && op.bloqueando :
-        hab.tipo === 'parry' ? opAtacando && medio :
         hab.tipo === 'buff' ? eu.armadura <= 0 :
         hab.tipo === 'armadilha' ? dist > 120 * ESC :
         hab.tipo === 'nuvem' ? dist > 110 * ESC && dist < 380 * ESC :

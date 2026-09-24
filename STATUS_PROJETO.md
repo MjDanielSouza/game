@@ -117,8 +117,9 @@ Multi-touch funciona: cada botão captura seu próprio `pointerId`.
 - **Super:** barra de 100, enche apanhando, batendo, bloqueando e na armadura.
 - **Cancelamento:** cada golpe lista em `cancela[]` quais podem interrompê-lo
   depois de acertar.
-- **Parry (`tipo: 'parry'`)** resolve dentro de `receber()`, não num passo
-  separado — todo golpe entra por ali, inclusive projétil e armadilha.
+- **Todo golpe entra por `receber()`** — melee, projétil, armadilha,
+  agarrão. Reação nova a golpe se resolve ali dentro, não num passo separado
+  do `Mundo`: fora dali o ataque conecta primeiro e cancela a reação.
 - **Hitstop, tremor de tela, flash** no impacto.
 - **Escala de fliperama:** o lutador ocupa ~48% da altura da tela. Corpo,
   hurtbox, hitbox, velocidade, empurrão, avanço, projétil, raio de armadilha e
@@ -190,8 +191,12 @@ pode bater de novo na volta), `arremesso` (agarrão de dois tempos),
 aplica é `receber(golpe, ...)`. `disparar()` precisa copiá-los para o golpe
 sintético — sem isso a GEADA não congela e a costela não queima, em silêncio.
 
-**O parry ficou sem dono.** Era o CONTRA-GOLPE do LUCAS. O `tipo: 'parry'`
-continua implementado no motor, sem ninguém usando.
+**O parry foi removido.** Era o CONTRA-GOLPE do LUCAS; a Sprint 5 trocou o
+golpe e o `tipo: 'parry'` ficou sem dono — código inalcançável no motor, no
+render e no bot, que nenhum teste protegia e que o motor ainda anunciava na
+tela como `CONTRA-GOLPE!`, nome de um golpe que não existe mais. Saiu inteiro.
+Voltar a ter parry é `git revert` — o código está no histórico, e o lugar
+dele é dentro de `receber()`.
 
 ### Chefão
 

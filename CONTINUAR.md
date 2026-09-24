@@ -49,10 +49,6 @@ Nada disso está quebrado. São decisões adiadas, com o motivo.
 (índice 12) e cai no `especial` quando não acha. Adicionar a pose é **dado,
 não código** — nenhuma linha muda. Foi adiado por custo de geração.
 
-**O parry ficou sem dono.** `tipo: 'parry'` continua implementado no motor,
-sem nenhum lutador usando — era o CONTRA-GOLPE do LUCAS, trocado na Sprint 5.
-Devolver a alguém é uma linha em `js/data.js`. Ou tirar o tipo do motor.
-
 ---
 
 ## 4. As três regras que custaram caro neste projeto

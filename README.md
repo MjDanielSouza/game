@@ -120,7 +120,7 @@ Adicione uma entrada em `golpes` do lutador em `js/data.js`:
 ```js
 habilidade: golpe({
   nome: 'NOME QUE APARECE NA TELA',
-  tipo: 'melee',        // melee | projetil | agarrao | parry | buff | dash | onda | armadilha | detona
+  tipo: 'melee',        // melee | projetil | agarrao | buff | dash | onda | armadilha | detona
   startup: 9,           // frames até a hitbox nascer
   ativo: 4,             // frames com hitbox no ar
   recovery: 18,         // frames travado depois (é a janela em que se apanha)
