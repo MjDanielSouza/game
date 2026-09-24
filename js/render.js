@@ -193,10 +193,6 @@ function pose(f, tick) {
       p.bracoT = [26 + 50 * u, 64 - 48 * u];
       p.torso = -2 + 8 * u; p.dy = -1;
       break;
-    case 'parry':
-      p.bracoF = [64, 44]; p.bracoT = [40, 60];   // palma aberta, mao alta
-      p.torso = 10; p.dx = -2;
-      break;
     case 'muralha':
       p.bracoF = [72, 58]; p.bracoT = [68, 62];
       p.torso = 4; p.dy = 5 * Math.abs(u);
@@ -904,11 +900,6 @@ export function desenharEfeito(ctx, e) {
   } else if (e.tipo === 'armadura') {
     ctx.strokeStyle = '#c9a227'; ctx.lineWidth = 5 * (1 - k);
     ctx.beginPath(); ctx.arc(e.x, e.y, 24 + k * 44, 0, TAU); ctx.stroke();
-  } else if (e.tipo === 'parry') {
-    ctx.strokeStyle = '#ffd23f'; ctx.lineWidth = 6 * (1 - k);
-    ctx.beginPath(); ctx.arc(e.x, e.y, 18 + k * 66, 0, TAU); ctx.stroke();
-    ctx.globalAlpha = (1 - k) * 0.4; ctx.fillStyle = '#fff';
-    ctx.beginPath(); ctx.arc(e.x, e.y, 18 + k * 30, 0, TAU); ctx.fill();
   } else if (e.tipo === 'buff') {
     ctx.strokeStyle = '#5d8fc4'; ctx.lineWidth = 3;
     ctx.beginPath(); ctx.ellipse(e.x, e.y, 30 * (1 - k) + 12, 62 * (1 - k) + 18, 0, 0, TAU); ctx.stroke();
