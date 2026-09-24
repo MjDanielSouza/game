@@ -26,6 +26,9 @@ const RODADAS = Number(process.argv[2] || 6);
 // escala de fliperama, o empurra-corpos segura o bot a 132px do chefao e o
 // gatilho de ataque estava em 120 - ele nunca apertava um botao e o chefao
 // aparecia como "quase impossivel" quando o problema era a regua.
+// Alcance efetivo de um golpe corpo a corpo, ja na escala do lutador.
+const alcanceDe = (f, g) => (g.alcance ? (g.alcance.x + g.alcance.w) * f.escala : 0);
+
 export function botMedio(m, i) {
   const e = vazio();
   const eu = m.p1, op = m.p2;
@@ -79,12 +82,16 @@ export function botMedio(m, i) {
   if (i % 24 === 0 && eu.podeUsar('habilidade')) {
     const h = eu.def.golpes.habilidade;
     const serve =
+      // anti-aereo so no ar; fora disso o bot desperdicava o golpe do JULIANO
+      h.danoAereo ? (!op.noChao && dist < alcanceDe(eu, h) * 1.2) :
+      h.tipo === 'nuvem' ? dist > 110 * ESC && dist < 380 * ESC :
       h.tipo === 'projetil' || h.tipo === 'armadilha' ? dist > 150 * ESC :
       h.tipo === 'agarrao' ? dist < 120 * ESC :
       h.tipo === 'parry' ? opAtacando && dist < 150 * ESC :
       h.tipo === 'buff' ? eu.armadura <= 0 :
       h.tipo === 'dash' ? dist > 200 * ESC || opAtacando :
-      dist > 110 * ESC && dist < 320 * ESC;
+      // corpo a corpo: no alcance do proprio golpe, nao num numero chutado
+      dist < alcanceDe(eu, h) * 1.05;
     if (serve) { eu.bufferar('habilidade'); return e; }
   }
   return e;
