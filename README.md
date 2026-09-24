@@ -174,40 +174,6 @@ habilidades reordenou metade da campanha: o VINICIUS subiu para o nó 2 (a
 GEADA congela mas quase não tira vida) e o RAFAEL desceu para o 8 (o capacete
 bate duas vezes por arremesso).
 
----|---|---|---|
-| 1 | Jardim Botânico | LUCAS | 90% |
-| 2 | Parque Barigui | JULIANO | 85% |
-| 3 | Museu Oscar Niemeyer | NEUMANN | 79% |
-| 4 | Praça do Japão | VINICIUS | 76% |
-| 5 | Largo da Ordem | JOÃO | 60% |
-| 6 | Torre Panorâmica | DANIEL | 46% |
-| 7 | Ópera de Arame | RAFAEL LATA | 45% |
-| 8 | Estação Tubo | COSTELA | 29% |
-| 9 | Pedreira Paulo Leminski | **ARAUCÁRIA** | 18% |
-
-A 200 rounds o erro padrão fica em ~3 pontos, então os nós 6 e 7 estão
-empatados e a ordem entre eles é arbitrária.
-
-**A ordem do mapa é definida por essa medição, não pelo conceito dos
-personagens** — e por isso ela muda quando o jogo muda. A escala de fliperama
-reordenou metade da campanha: o JULIANO subiu para o nó 2 e o JOÃO desceu para
-o 5, porque corpo maior em arena do mesmo tamanho favorece quem entra e pune
-quem espera.
-
----|---|---|
-| 1 | LUCAS | ~89% |
-| 2 | JOÃO | ~92% |
-| 3 | VINICIUS | ~90% |
-| 4 | JULIANO | ~76% |
-| 5 | NEUMANN | ~69% |
-| 6 | COSTELA | ~36% |
-| 7 | RAFAEL LATA | ~24% |
-| 8 | **ARAUCÁRIA** | ~11% |
-
-A ordem do mapa foi definida por essa medição, não pelo conceito dos
-personagens. O zoner e o armadilheiro *parecem* oponentes de começo e são dos
-mais difíceis; o tanque *parece* um muro e é punível.
-
 ---
 
 ## Arte
