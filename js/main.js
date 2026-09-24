@@ -122,7 +122,7 @@ addEventListener('keydown', (e) => {
   // tokens da sequencia de finalizacao - so na borda, que e exatamente aqui
   registrar(1, (S.duplo ? TECLAS_P1 : TECLAS_SOZINHO)[e.code] || a1);
   if (S.duplo) registrar(2, TECLAS_P2[e.code] || ACOES_P2[e.code]);
-  if (e.code === 'Escape' && S.tela === 'luta') sairDaLuta();
+  if (e.code === 'Escape') voltar();
 });
 addEventListener('keyup', (e) => { teclas[e.code] = false; });
 
@@ -277,6 +277,22 @@ function sairDoVersus() { S.duplo = false; irPara('titulo'); }
 // Abandonar a luta volta ao mapa na campanha e ao menu no versus: no versus
 // nao existe mapa, e cair nele mostraria a campanha de outra pessoa.
 function sairDaLuta() { if (S.duplo) sairDoVersus(); else irPara('mapa'); }
+
+// Uma tela so sabe de onde ela veio. Sem este mapa o mapa da campanha era um
+// beco sem saida: entrava pelo CAMPANHA e as unicas saidas eram selecao e
+// briefing, que voltam para ele. Nao dava para chegar no titulo sem recarregar.
+const PAI = {
+  selecao: () => (S.duplo ? sairDoVersus() : irPara('mapa')),
+  mapa: () => irPara('titulo'),
+  palco: () => { S.escolhendo = 2; irPara('selecao'); },
+  briefing: () => irPara('mapa'),
+  carregando: () => irPara('mapa'),   // largar aqui cancela: comecarLuta confere a tela
+  luta: () => sairDaLuta(),
+  recorde: () => irPara('titulo'),
+  final: () => irPara('titulo'),
+};
+function voltar() { const f = PAI[S.tela]; if (f) f(); }
+
 
 function abrirBriefing(i) { S.no = i; irPara('briefing'); }
 
@@ -566,10 +582,11 @@ Promise.all(
 $('#btn-comecar').onclick = () => { S.duplo = false; irPara(S.personagem ? 'mapa' : 'selecao'); };
 $('#btn-versus').onclick = () => { S.duplo = true; S.escolhendo = 1; irPara('selecao'); };
 $('#btn-trocar').onclick = () => { S.duplo = false; irPara('selecao'); };
-$('#btn-selecao-volta').onclick = () => (S.duplo ? sairDoVersus() : irPara('mapa'));
+$('#btn-selecao-volta').onclick = voltar;
+$('#btn-mapa-menu').onclick = voltar;
 $('#btn-recordes').onclick = () => abrirRecordes();
-$('#btn-recorde-volta').onclick = () => irPara('titulo');
-$('#btn-palco-volta').onclick = () => { S.escolhendo = 2; irPara('selecao'); };
+$('#btn-recorde-volta').onclick = voltar;
+$('#btn-palco-volta').onclick = voltar;
 $('#btn-zerar').onclick = () => {
   if (!confirm('Apagar o progresso e voltar do zero?')) return;
   S.progresso = 0; S.personagem = null; S.pontos = 0; salvar(); irPara('selecao');

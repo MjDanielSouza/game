@@ -26,6 +26,11 @@ janela (`ajustar()` em `js/main.js`). Todo o combate é desenhado nele. As
 resultado e final são `<section class="tela">` que entram e saem pela classe
 `.ativa`. O canvas só aparece na tela `luta`.
 
+**Navegação de volta:** `PAI` em `js/main.js` diz de onde cada tela veio, e
+`voltar()` é o único caminho de saída — usado pelo `Escape` e por todos os
+botões de voltar. Sem esse mapa o `mapa` da campanha era um beco sem saída:
+suas únicas saídas (seleção e briefing) voltavam para ele.
+
 Coordenadas do mundo:
 
 | constante | valor | o que é |
