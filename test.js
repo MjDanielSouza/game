@@ -6,7 +6,7 @@ import assert from 'node:assert/strict';
 import { readFileSync } from 'node:fs';
 import { Mundo, Lutador, vazio, FINALIZE_FRAMES, FATAL_TOTAL } from './js/engine.js';
 import { LUTADORES, MAPA, PALCOS, JOGAVEIS, CHAO, FPS, ESC } from './js/data.js';
-import { pontosDoRound, BONUS, normalizarNome, lerRecordes, salvarRecorde, ehRecorde, MAX_RECORDES } from './js/pontos.js';
+import { pontosDoRound, BONUS, normalizarNome, lerRecordes, salvarRecorde, ehRecorde, MAX_RECORDES, melhorPorNo, somarMelhores } from './js/pontos.js';
 
 let ok = 0;
 const teste = (nome, fn) => {
@@ -569,6 +569,23 @@ teste('recordes: storage quebrado nao derruba o jogo', () => {
   const lixo = { getItem: () => '{nao e json', setItem: () => {} };
   assert.deepEqual(lerRecordes(lixo), []);
   assert.equal(ehRecorde(fakeStore(), 1), true, 'tabela vazia aceita qualquer pontuacao');
+});
+
+teste('pontuacao: rejogar um no substitui, nao soma', () => {
+  let m = [];
+  m = melhorPorNo(m, 0, 1000);
+  m = melhorPorNo(m, 1, 500);
+  assert.equal(somarMelhores(m), 1500);
+
+  m = melhorPorNo(m, 0, 800);            // rejogou pior: nao mexe
+  assert.equal(somarMelhores(m), 1500, 'rejogar pior nao pode somar nem baixar');
+
+  m = melhorPorNo(m, 0, 1200);           // rejogou melhor: substitui
+  assert.equal(somarMelhores(m), 1700, 'rejogar melhor substitui o do no');
+
+  // no que nunca foi jogado nao conta, e buraco no meio nao vira NaN
+  m = melhorPorNo(m, 5, 300);
+  assert.equal(somarMelhores(m), 2000);
 });
 
 console.log(`\n${ok} checagens passaram.\n`);

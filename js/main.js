@@ -6,7 +6,7 @@ import { LARGURA, ALTURA, CHAO, ARENA, FPS, MAPA, LUTADORES, PALCOS, DICAS, difi
 import { Mundo, vazio, SEQUENCIA_GAP } from './engine.js';
 import { desenharLutador, desenharPalco, desenharProjetil, desenharArmadilha, desenharNuvem, desenharEfeito, carregarPlaca } from './render.js';
 import { desenharHUD, montarSelecao, montarMapa, montarBriefing, montarPalcos, montarRecordes, retrato } from './ui.js';
-import { pontosDoRound, salvarRecorde, lerRecordes, ehRecorde } from './pontos.js';
+import { pontosDoRound, salvarRecorde, lerRecordes, ehRecorde, melhorPorNo, somarMelhores } from './pontos.js';
 import * as Sprites from './sprites.js';
 
 const $ = (s) => document.querySelector(s);
@@ -35,9 +35,16 @@ const S = {
   versusPalco: 'opera',
   // pontuacao da campanha corrente (js/pontos.js). Nao persiste: o que
   // persiste e a tabela de recordes.
-  pontos: 0,
+  melhores: [],       // melhor pontuacao POR no, indexada pelo no
+  noPontos: 0,        // o que o no corrente ja rendeu nos rounds dele
   ultimoGanho: null,
+  // TOTAL e derivado, nunca acumulado: a soma dos melhores, com o no corrente
+  // valendo o maior entre o que ele ja rendeu e o melhor que ja rendeu antes.
+  // Enquanto isto era um `+=`, rejogar um no somava de novo.
+  get pontos() { return somarMelhores(melhorPorNo(this.melhores, this.no, this.noPontos)); },
 };
+
+function zerarPontos() { S.melhores = []; S.noPontos = 0; S.ultimoGanho = null; }
 
 function salvar() {
   try { localStorage.setItem(SAVE, JSON.stringify({ p: S.personagem, g: S.progresso })); } catch (e) {}
@@ -287,7 +294,7 @@ function escolherPersonagem(id) {
     return;
   }
   S.personagem = id;
-  S.pontos = 0;            // campanha nova, pontuacao nova
+  zerarPontos();           // campanha nova, pontuacao nova
   salvar();
   irPara('mapa');
 }
@@ -339,6 +346,7 @@ function recursosDoRound(aoAndar) {
 async function comecarLuta() {
   S.placar = [0, 0];
   S.round = 1;
+  S.noPontos = 0;          // o no recomeca do zero; o melhor dele fica guardado
   novoRound();
 
   const barra = $('#load-preenche');
@@ -382,11 +390,13 @@ function fimDeRound() {
   // acabou, com a vida, o relogio e a finalizacao dele.
   if (!S.duplo) {
     S.ultimoGanho = pontosDoRound(S.mundo, dificuldadeDoNo(S.no));
-    S.pontos += S.ultimoGanho.total;
+    S.noPontos += S.ultimoGanho.total;
   }
   S.placar = S.mundo.placar.slice();
   if (S.placar[0] >= 2 || S.placar[1] >= 2) {
     if (S.duplo) { mostrarResultadoVersus(); return; }
+    // No encerrado: guarda o melhor dele. Rejogar substitui, nao soma.
+    S.melhores = melhorPorNo(S.melhores, S.no, S.noPontos);
     const ganhou = S.placar[0] >= 2;
     if (ganhou && S.no === S.progresso) { S.progresso = Math.min(MAPA.length, S.progresso + 1); salvar(); }
     if (ganhou && S.no === MAPA.length - 1) { mostrarFinal(); return; }
@@ -488,9 +498,7 @@ function pedirNome() {
     });
     // Run encerrada: a proxima campanha comeca do zero. Sem isto, terminar e
     // voltar a jogar somava em cima do total ja registrado.
-    // Nao fecha o buraco todo: repetir um no ANTES de terminar ainda acumula.
-    // Fechar de verdade pede melhor-pontuacao por no, que e outra conversa.
-    S.pontos = 0;
+    zerarPontos();
     abrirRecordes(lista, posicao);
   };
   $('#nome-ok').onclick = confirmar;
@@ -613,7 +621,7 @@ $('#btn-recorde-volta').onclick = voltar;
 $('#btn-palco-volta').onclick = voltar;
 $('#btn-zerar').onclick = () => {
   if (!confirm('Apagar o progresso e voltar do zero?')) return;
-  S.progresso = 0; S.personagem = null; S.pontos = 0; salvar(); irPara('selecao');
+  S.progresso = 0; S.personagem = null; zerarPontos(); salvar(); irPara('selecao');
 };
 $('#btn-som').onclick = (e) => {
   S.som = !S.som;

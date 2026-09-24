@@ -90,3 +90,17 @@ export function ehRecorde(store, pontos) {
   const lista = lerRecordes(store);
   return lista.length < MAX_RECORDES || pontos > lista[lista.length - 1].pontos;
 }
+
+// ------------------------------------------------------- melhor por no -----
+// A campanha guarda a MELHOR pontuacao de cada no, nao um acumulado. Com
+// acumulado, rejogar um no ja vencido somava tudo de novo e o total virava
+// medida de paciencia, nao de jogo. Substituir so quando foi melhor mantem o
+// incentivo de voltar para melhorar sem premiar a repeticao.
+export function melhorPorNo(melhores, no, pontos) {
+  const m = (melhores || []).slice();
+  m[no] = Math.max(m[no] || 0, Math.max(0, Math.round(pontos || 0)));
+  return m;
+}
+
+export const somarMelhores = (melhores) =>
+  (melhores || []).reduce((a, v) => a + (v || 0), 0);

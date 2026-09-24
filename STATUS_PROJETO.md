@@ -57,7 +57,7 @@ js/render.js      placas de palco, rig procedural, efeitos
 js/ui.js          HUD no canvas + montagem das telas em DOM
 js/sprites.js     carrega folha + máscara RLE, desenha frame
 js/main.js        cola: input, telas, progresso, áudio
-test.js           26 checagens do motor
+test.js           44 checagens do motor
 tools/balance.mjs bot médio joga a campanha inteira
 tools/pixelize.py poses brutas -> pixel art
 tools/atlas.py    poses -> folha + manifesto
@@ -216,8 +216,12 @@ Terminada a campanha, se entrou no top 10 aparece um `<input>` de 3 letras
 (`curitiba-kombat-recordes`). Storage bloqueado ou com lixo devolve tabela
 vazia em vez de quebrar.
 
-**Buraco conhecido:** repetir um nó antes de terminar a campanha soma de novo.
-Fechar pediria melhor-pontuação por nó.
+**O total é derivado, nunca acumulado.** A campanha guarda a **melhor
+pontuação de cada nó** (`melhorPorNo` / `somarMelhores`) e o TOTAL é a soma
+delas; `S.pontos` em `main.js` é um *getter*, ninguém escreve nele. Enquanto
+isso era um `+=`, repetir um nó já vencido somava de novo e o total media
+paciência, não jogo. Rejogar agora **substitui, e só se foi melhor** — voltar
+para melhorar continua valendo, repetir não.
 
 ### Tela de carregamento
 
